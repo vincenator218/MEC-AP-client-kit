@@ -1,0 +1,512 @@
+[
+ {
+  "id": 1320000,
+  "name": "Coil",
+  "flag": "Unlocks_Coil",
+  "hash": "0xF996B210",
+  "group": "movement",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320001,
+  "name": "CombatRecovery",
+  "flag": "Unlocks_CombatRecovery",
+  "hash": "0x37A952EC",
+  "group": "combat",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320002,
+  "name": "Disrupter_IncreaseRange",
+  "flag": "Unlocks_Disrupter_IncreaseRange",
+  "hash": "0xFE47B0D7",
+  "group": "gear",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320003,
+  "name": "Disruptor_Overload",
+  "flag": "Unlocks_Disruptor_Overload",
+  "hash": "0xB75C826E",
+  "group": "gear",
+  "grant_method": "persistent_entity",
+  "live_status": "untested",
+  "note": "Calling its world-object entities crashed the game once; call only unique-data entities (docs/MEMORY.md). Live effect not yet confirmed."
+ },
+ {
+  "id": 1320004,
+  "name": "Disruptor_StunHumans",
+  "flag": "Unlocks_Disruptor_StunHumans",
+  "hash": "0x2B091FD6",
+  "group": "gear",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320005,
+  "name": "Disruptor_StunMech",
+  "flag": "Unlocks_Disruptor_StunMech",
+  "hash": "0x38B355F9",
+  "group": "gear",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320006,
+  "name": "DoubleWallrun",
+  "flag": "Unlocks_DoubleWallrun",
+  "hash": "0xF139B4B3",
+  "group": "movement",
+  "grant_method": "live_entity",
+  "live_status": "tested",
+  "note": ""
+ },
+ {
+  "id": 1320007,
+  "name": "ExtendedComboVulnerability",
+  "flag": "Unlocks_ExtendedComboVulnerability",
+  "hash": "0x87156FC6",
+  "group": "combat",
+  "grant_method": "persistent_entity",
+  "live_status": "untested",
+  "note": ""
+ },
+ {
+  "id": 1320008,
+  "name": "ExtendedSlide",
+  "flag": "Unlocks_ExtendedSlide",
+  "hash": "0x427FB289",
+  "group": "movement",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320009,
+  "name": "FastClimb",
+  "flag": "Unlocks_FastClimb",
+  "hash": "0x6F18BEF0",
+  "group": "movement",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320010,
+  "name": "FlowAttack",
+  "flag": "Unlocks_FlowAttack",
+  "hash": "0x06943543",
+  "group": "combat",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320011,
+  "name": "FlowAttack_PowerAttack",
+  "flag": "Unlocks_FlowAttack_PowerAttack",
+  "hash": "0x710BF0CB",
+  "group": "combat",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320012,
+  "name": "FlowAttack_Special_PowerAttack",
+  "flag": "Unlocks_FlowAttack_Special_PowerAttack",
+  "hash": "0x17EEE7F5",
+  "group": "combat",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320013,
+  "name": "Focus",
+  "flag": "Unlocks_Focus",
+  "hash": "0x2C9CC1D5",
+  "group": "focus",
+  "grant_method": "persistent_entity",
+  "live_status": "tested",
+  "note": "Table write alone applies at the next respawn; live grant/revoke proven by calling apply on its persistent entity."
+ },
+ {
+  "id": 1320014,
+  "name": "Focus_FlowAttackFluency",
+  "flag": "Unlocks_Focus_FlowAttackFluency",
+  "hash": "0x12B6DD5E",
+  "group": "focus",
+  "grant_method": "persistent_entity",
+  "live_status": "untested",
+  "note": ""
+ },
+ {
+  "id": 1320015,
+  "name": "Focus_ReachFlow_Increase",
+  "flag": "Unlocks_Focus_ReachFlow_Increase",
+  "hash": "0xB4F7A73E",
+  "group": "focus",
+  "grant_method": "persistent_entity",
+  "live_status": "untested",
+  "note": ""
+ },
+ {
+  "id": 1320016,
+  "name": "Focus_ReachFlow_IncreaseExtra",
+  "flag": "Unlocks_Focus_ReachFlow_IncreaseExtra",
+  "hash": "0x80E2C6E4",
+  "group": "focus",
+  "grant_method": "persistent_entity",
+  "live_status": "untested",
+  "note": ""
+ },
+ {
+  "id": 1320017,
+  "name": "Glove",
+  "flag": "Unlocks_Glove",
+  "hash": "0x2CB07F0E",
+  "group": "gear",
+  "grant_method": "persistent_entity",
+  "live_status": "untested",
+  "note": ""
+ },
+ {
+  "id": 1320018,
+  "name": "HandToHandCombat",
+  "flag": "Unlocks_HandToHandCombat",
+  "hash": "0x6EE99C14",
+  "group": "combat",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320019,
+  "name": "ImpactAttack_PowerAttack",
+  "flag": "Unlocks_ImpactAttack_PowerAttack",
+  "hash": "0xB794DAFB",
+  "group": "combat",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320020,
+  "name": "ImpactAttack_Special_PowerAttack",
+  "flag": "Unlocks_ImpactAttack_Special_PowerAttack",
+  "hash": "0x6AF13485",
+  "group": "combat",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320021,
+  "name": "IncreasedHealth0",
+  "flag": "Unlocks_IncreasedHealth0",
+  "hash": "0x848D8855",
+  "group": "gear (stamina tier)",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320022,
+  "name": "IncreasedHealth1",
+  "flag": "Unlocks_IncreasedHealth1",
+  "hash": "0x848D8854",
+  "group": "gear (stamina tier)",
+  "grant_method": "live_entity",
+  "live_status": "tested",
+  "note": ""
+ },
+ {
+  "id": 1320023,
+  "name": "IncreasedHealth2",
+  "flag": "Unlocks_IncreasedHealth2",
+  "hash": "0x848D8857",
+  "group": "gear (stamina tier)",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": "Granted together with tiers 1/3/4 in testing."
+ },
+ {
+  "id": 1320024,
+  "name": "IncreasedHealth3",
+  "flag": "Unlocks_IncreasedHealth3",
+  "hash": "0x848D8856",
+  "group": "gear (stamina tier)",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": "Not bought in a normal playthrough, but has a live entity; granted (together with tiers 1-4) in testing: +1 stamina bar per tier."
+ },
+ {
+  "id": 1320025,
+  "name": "IncreasedHealth4",
+  "flag": "Unlocks_IncreasedHealth4",
+  "hash": "0x848D8851",
+  "group": "gear (stamina tier)",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": "Not bought in a normal playthrough, but has a live entity; granted (together with tiers 1-4) in testing: +1 stamina bar per tier."
+ },
+ {
+  "id": 1320026,
+  "name": "LowerHealthEnforcer",
+  "flag": "Unlocks_LowerHealthEnforcer",
+  "hash": "0x071FEB22",
+  "group": "combat",
+  "grant_method": "persistent_entity",
+  "live_status": "untested",
+  "note": ""
+ },
+ {
+  "id": 1320027,
+  "name": "LowerHealthProtector",
+  "flag": "Unlocks_LowerHealthProtector",
+  "hash": "0xC0B346D0",
+  "group": "combat",
+  "grant_method": "persistent_entity",
+  "live_status": "untested",
+  "note": ""
+ },
+ {
+  "id": 1320028,
+  "name": "LowerHealthSentinel",
+  "flag": "Unlocks_LowerHealthSentinel",
+  "hash": "0x243C4904",
+  "group": "combat",
+  "grant_method": "persistent_entity",
+  "live_status": "untested",
+  "note": ""
+ },
+ {
+  "id": 1320029,
+  "name": "LowerHealthShockProtector",
+  "flag": "Unlocks_LowerHealthShockProtector",
+  "hash": "0x56E000EC",
+  "group": "combat",
+  "grant_method": "persistent_entity",
+  "live_status": "untested",
+  "note": ""
+ },
+ {
+  "id": 1320030,
+  "name": "MoveEnemyAttack",
+  "flag": "Unlocks_MoveEnemyAttack",
+  "hash": "0x525F777A",
+  "group": "combat",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320031,
+  "name": "MoveEnemyBack",
+  "flag": "Unlocks_MoveEnemyBack",
+  "hash": "0x67800619",
+  "group": "combat",
+  "grant_method": "live_entity",
+  "live_status": "tested",
+  "note": "Switch Place"
+ },
+ {
+  "id": 1320032,
+  "name": "PositionalAdvantage",
+  "flag": "Unlocks_PositionalAdvantage",
+  "hash": "0xEC427EC6",
+  "group": "combat",
+  "grant_method": "persistent_entity",
+  "live_status": "untested",
+  "note": ""
+ },
+ {
+  "id": 1320033,
+  "name": "QuickTurn",
+  "flag": "Unlocks_QuickTurn",
+  "hash": "0x732EB4A1",
+  "group": "movement",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320034,
+  "name": "Shift",
+  "flag": "Unlocks_Shift",
+  "hash": "0x2B48D119",
+  "group": "movement",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320035,
+  "name": "SkillWindowSkillRoll",
+  "flag": "Unlocks_SkillWindowSkillRoll",
+  "hash": "0x92135F48",
+  "group": "movement",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": ""
+ },
+ {
+  "id": 1320100,
+  "name": "MagRopeSwing",
+  "flag": "CriticalPathProgression_HasCollectedMagRopeSwing",
+  "hash": "0xE77600AB",
+  "group": "gear (MAG Rope)",
+  "grant_method": "live_entity",
+  "live_status": "tested",
+  "note": "Revoked and granted live in testing."
+ },
+ {
+  "id": 1320101,
+  "name": "MagRopePullUp",
+  "flag": "CriticalPathProgression_HasCollectedMagRopePullUp",
+  "hash": "0xE17601CF",
+  "group": "gear (MAG Rope)",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": "Live entity present; same mechanism as Swing."
+ },
+ {
+  "id": 1320102,
+  "name": "MagRopePullDown",
+  "flag": "CriticalPathProgression_HasCollectedMagRopePullDown",
+  "hash": "0x16F58B58",
+  "group": "gear (MAG Rope)",
+  "grant_method": "live_entity",
+  "live_status": "expected",
+  "note": "Live entity present; same mechanism as Swing."
+ },
+ {
+  "id": 1320103,
+  "name": "MagRopeLineConnector",
+  "flag": "CriticalPathProgression_HasCollectedMagRopeLineConnector",
+  "hash": "0xD68DA442",
+  "group": "gear (MAG Rope)",
+  "grant_method": "unknown",
+  "live_status": "untested",
+  "note": "No check entity found in a full scan; may be unused. Not recommended as an item yet."
+ },
+ {
+  "id": 1320200,
+  "name": "Side Mission Unlock - An Ear to the Ground",
+  "flag": "SilverCompleted_An Ear to the Ground",
+  "hash": "0x46B3EE1E",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
+ },
+ {
+  "id": 1320201,
+  "name": "Side Mission Unlock - Birdman's Delivery",
+  "flag": "SilverCompleted_Birdman's Delivery",
+  "hash": "0xACB87237",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
+ },
+ {
+  "id": 1320202,
+  "name": "Side Mission Unlock - Break And Entry",
+  "flag": "SilverCompleted_Break And Entry",
+  "hash": "0xF3FD4240",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
+ },
+ {
+  "id": 1320203,
+  "name": "Side Mission Unlock - Caught in the Web",
+  "flag": "SilverCompleted_Caught in the Web",
+  "hash": "0x8AFF1902",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
+ },
+ {
+  "id": 1320204,
+  "name": "Side Mission Unlock - Complete Coverage",
+  "flag": "SilverCompleted_Complete Coverage",
+  "hash": "0xF2AB7D67",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
+ },
+ {
+  "id": 1320205,
+  "name": "Side Mission Unlock - Drone Works",
+  "flag": "SilverCompleted_Drone Works",
+  "hash": "0x02966440",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
+ },
+ {
+  "id": 1320206,
+  "name": "Side Mission Unlock - Exit Strategy",
+  "flag": "SilverCompleted_Exit Strategy",
+  "hash": "0xFB8B721B",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
+ },
+ {
+  "id": 1320207,
+  "name": "Side Mission Unlock - Finger on the Pulse",
+  "flag": "SilverCompleted_Finger on the Pulse",
+  "hash": "0x896C9E36",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
+ },
+ {
+  "id": 1320208,
+  "name": "Side Mission Unlock - The Meta Grid",
+  "flag": "SilverCompleted_The Meta Grid",
+  "hash": "0x2483D2FC",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
+ },
+ {
+  "id": 1320209,
+  "name": "Side Mission Unlock - Top of the World",
+  "flag": "SilverCompleted_Top of the World",
+  "hash": "0xFB1C79F9",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "tested",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
+ },
+ {
+  "id": 1320210,
+  "name": "Side Mission Unlock - Two Pigeons With One Stone",
+  "flag": "SilverCompleted_Two Pigeons With One Stone",
+  "hash": "0x09F7D060",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
+ }
+]
