@@ -725,46 +725,46 @@ id,name,category,district,area,default,flag,hash,detection,note
 1315209,Billboard - The View 01,Billboard Hack,The View,,True,HackableBillboards_tvbb01,0x3F703F30,value == 1,
 1315210,Billboard - The View 02,Billboard Hack,The View,,True,HackableBillboards_tvbb02,0x3F703F33,value == 1,
 1315211,Billboard - The View 03,Billboard Hack,The View,,True,HackableBillboards_tvbb03,0x3F703F32,value == 1,
-1316000,Opportunity - Anchor Ph4 #01,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh4 01,0xD49DACF5,value == 1 (also sets '<name>_CompletedTime'),
-1316001,Opportunity - Anchor Ph4 #02,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh4 02,0xD49DACF6,value == 1 (also sets '<name>_CompletedTime'),
-1316002,Opportunity - Anchor Ph4 #03,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh4 03,0xD49DACF7,value == 1 (also sets '<name>_CompletedTime'),
-1316003,Opportunity - Anchor Ph4 #04,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh4 04,0xD49DACF0,value == 1 (also sets '<name>_CompletedTime'),
-1316004,Opportunity - Anchor Ph4 #05,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh4 05,0xD49DACF1,value == 1 (also sets '<name>_CompletedTime'),
-1316005,Opportunity - Anchor Ph4 #06,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh4 06,0xD49DACF2,value == 1 (also sets '<name>_CompletedTime'),
-1316006,Opportunity - Anchor Ph4 #07,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh4 07,0xD49DACF3,value == 1 (also sets '<name>_CompletedTime'),
-1316007,Opportunity - Anchor Ph4 #08,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh4 08,0xD49DACFC,value == 1 (also sets '<name>_CompletedTime'),
-1316008,Opportunity - Anchor Ph5 #01,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh5 01,0xD49D28D4,value == 1 (also sets '<name>_CompletedTime'),
-1316009,Opportunity - Anchor Ph5 #02,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh5 02,0xD49D28D7,value == 1 (also sets '<name>_CompletedTime'),
-1316010,Opportunity - Anchor Ph5 #03,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh5 03,0xD49D28D6,value == 1 (also sets '<name>_CompletedTime'),
-1316011,Opportunity - Anchor Ph5 #04,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh5 04,0xD49D28D1,value == 1 (also sets '<name>_CompletedTime'),
-1316012,Opportunity - Anchor Ph5 #05,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh5 05,0xD49D28D0,value == 1 (also sets '<name>_CompletedTime'),
-1316013,Opportunity - Anchor Ph5 #06,Opportunity Mission,Anchor,,True,MiscCompleted_OW Opp AncPh5 06,0xD49D28D3,value == 1 (also sets '<name>_CompletedTime'),
-1316014,Opportunity - Rezoning Ph6 #01,Opportunity Mission,Rezoning,,True,MiscCompleted_OW Opp CtPh6 01,0x08B3012C,value == 1 (also sets '<name>_CompletedTime'),Ct assumed = Construction/Rezoning (unverified)
-1316015,Opportunity - Rezoning Ph6 #02,Opportunity Mission,Rezoning,,True,MiscCompleted_OW Opp CtPh6 02,0x08B3012F,value == 1 (also sets '<name>_CompletedTime'),Ct assumed = Construction/Rezoning (unverified)
-1316016,Opportunity - Rezoning Ph6 #03,Opportunity Mission,Rezoning,,True,MiscCompleted_OW Opp CtPh6 03,0x08B3012E,value == 1 (also sets '<name>_CompletedTime'),Ct assumed = Construction/Rezoning (unverified)
-1316017,Opportunity - Rezoning Ph6 #04,Opportunity Mission,Rezoning,,True,MiscCompleted_OW Opp CtPh6 04,0x08B30129,value == 1 (also sets '<name>_CompletedTime'),Ct assumed = Construction/Rezoning (unverified)
-1316018,Opportunity - Rezoning Ph6 #05,Opportunity Mission,Rezoning,,True,MiscCompleted_OW Opp CtPh6 05,0x08B30128,value == 1 (also sets '<name>_CompletedTime'),Ct assumed = Construction/Rezoning (unverified)
-1316019,Opportunity - Rezoning Ph6 #06,Opportunity Mission,Rezoning,,True,MiscCompleted_OW Opp CtPh6 06,0x08B3012B,value == 1 (also sets '<name>_CompletedTime'),Ct assumed = Construction/Rezoning (unverified)
-1316020,Opportunity - Downtown Ph2 #01,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh2 01,0xB1DE750F,value == 1 (also sets '<name>_CompletedTime'),
-1316021,Opportunity - Downtown Ph2 #02,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh2 02,0xB1DE750C,value == 1 (also sets '<name>_CompletedTime'),
-1316022,Opportunity - Downtown Ph2 #03,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh2 03,0xB1DE750D,value == 1 (also sets '<name>_CompletedTime'),
-1316023,Opportunity - Downtown Ph2 #04,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh2 04,0xB1DE750A,value == 1 (also sets '<name>_CompletedTime'),
-1316024,Opportunity - Downtown Ph2 #05,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh2 05,0xB1DE750B,value == 1 (also sets '<name>_CompletedTime'),
-1316025,Opportunity - Downtown Ph2 #06,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh2 06,0xB1DE7508,value == 1 (also sets '<name>_CompletedTime'),
-1316026,Opportunity - Downtown Ph3 #01,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh3 01,0xB1E011EE,value == 1 (also sets '<name>_CompletedTime'),
-1316027,Opportunity - Downtown Ph3 #02,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh3 02,0xB1E011ED,value == 1 (also sets '<name>_CompletedTime'),
-1316028,Opportunity - Downtown Ph3 #03,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh3 03,0xB1E011EC,value == 1 (also sets '<name>_CompletedTime'),
-1316029,Opportunity - Downtown Ph3 #04,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh3 04,0xB1E011EB,value == 1 (also sets '<name>_CompletedTime'),
-1316030,Opportunity - Downtown Ph3 #05,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh3 05,0xB1E011EA,value == 1 (also sets '<name>_CompletedTime'),
-1316031,Opportunity - Downtown Ph3 #06,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh3 06,0xB1E011E9,value == 1 (also sets '<name>_CompletedTime'),
-1316032,Opportunity - Downtown Ph3 #07,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh3 07,0xB1E011E8,value == 1 (also sets '<name>_CompletedTime'),
-1316033,Opportunity - Downtown Ph3 #08,Opportunity Mission,Downtown,,True,MiscCompleted_OW Opp DtPh3 08,0xB1E011E7,value == 1 (also sets '<name>_CompletedTime'),
-1316034,Opportunity - The View Ph7 #01,Opportunity Mission,The View,,True,MiscCompleted_OW Opp VwPh7 01,0x50BB71BB,value == 1 (also sets '<name>_CompletedTime'),
-1316035,Opportunity - The View Ph7 #02,Opportunity Mission,The View,,True,MiscCompleted_OW Opp VwPh7 02,0x50BB71B8,value == 1 (also sets '<name>_CompletedTime'),
-1316036,Opportunity - The View Ph7 #03,Opportunity Mission,The View,,True,MiscCompleted_OW Opp VwPh7 03,0x50BB71B9,value == 1 (also sets '<name>_CompletedTime'),
-1316037,Opportunity - The View Ph7 #04,Opportunity Mission,The View,,True,MiscCompleted_OW Opp VwPh7 04,0x50BB71BE,value == 1 (also sets '<name>_CompletedTime'),
-1316038,Opportunity - The View Ph7 #05,Opportunity Mission,The View,,True,MiscCompleted_OW Opp VwPh7 05,0x50BB71BF,value == 1 (also sets '<name>_CompletedTime'),
-1316039,Opportunity - The View Ph7 #06,Opportunity Mission,The View,,True,MiscCompleted_OW Opp VwPh7 06,0x50BB71BC,value == 1 (also sets '<name>_CompletedTime'),
+1316000,Opportunity - Anchor Ph4 #01,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh4 01,0xD49DACF5,value == 1 (also sets '<name>_CompletedTime'),
+1316001,Opportunity - Anchor Ph4 #02,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh4 02,0xD49DACF6,value == 1 (also sets '<name>_CompletedTime'),
+1316002,Opportunity - Anchor Ph4 #03,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh4 03,0xD49DACF7,value == 1 (also sets '<name>_CompletedTime'),
+1316003,Opportunity - Anchor Ph4 #04,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh4 04,0xD49DACF0,value == 1 (also sets '<name>_CompletedTime'),
+1316004,Opportunity - Anchor Ph4 #05,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh4 05,0xD49DACF1,value == 1 (also sets '<name>_CompletedTime'),
+1316005,Opportunity - Anchor Ph4 #06,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh4 06,0xD49DACF2,value == 1 (also sets '<name>_CompletedTime'),
+1316006,Opportunity - Anchor Ph4 #07,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh4 07,0xD49DACF3,value == 1 (also sets '<name>_CompletedTime'),
+1316007,Opportunity - Anchor Ph4 #08,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh4 08,0xD49DACFC,value == 1 (also sets '<name>_CompletedTime'),
+1316008,Opportunity - Anchor Ph5 #01,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh5 01,0xD49D28D4,value == 1 (also sets '<name>_CompletedTime'),
+1316009,Opportunity - Anchor Ph5 #02,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh5 02,0xD49D28D7,value == 1 (also sets '<name>_CompletedTime'),
+1316010,Opportunity - Anchor Ph5 #03,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh5 03,0xD49D28D6,value == 1 (also sets '<name>_CompletedTime'),
+1316011,Opportunity - Anchor Ph5 #04,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh5 04,0xD49D28D1,value == 1 (also sets '<name>_CompletedTime'),
+1316012,Opportunity - Anchor Ph5 #05,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh5 05,0xD49D28D0,value == 1 (also sets '<name>_CompletedTime'),
+1316013,Opportunity - Anchor Ph5 #06,Opportunity,Anchor,,True,MiscCompleted_OW Opp AncPh5 06,0xD49D28D3,value == 1 (also sets '<name>_CompletedTime'),
+1316014,Opportunity - Rezoning Ph6 #01,Opportunity,Rezoning,,True,MiscCompleted_OW Opp CtPh6 01,0x08B3012C,value == 1 (also sets '<name>_CompletedTime'),Ct assumed = Construction/Rezoning (unverified)
+1316015,Opportunity - Rezoning Ph6 #02,Opportunity,Rezoning,,True,MiscCompleted_OW Opp CtPh6 02,0x08B3012F,value == 1 (also sets '<name>_CompletedTime'),Ct assumed = Construction/Rezoning (unverified)
+1316016,Opportunity - Rezoning Ph6 #03,Opportunity,Rezoning,,True,MiscCompleted_OW Opp CtPh6 03,0x08B3012E,value == 1 (also sets '<name>_CompletedTime'),Ct assumed = Construction/Rezoning (unverified)
+1316017,Opportunity - Rezoning Ph6 #04,Opportunity,Rezoning,,True,MiscCompleted_OW Opp CtPh6 04,0x08B30129,value == 1 (also sets '<name>_CompletedTime'),Ct assumed = Construction/Rezoning (unverified)
+1316018,Opportunity - Rezoning Ph6 #05,Opportunity,Rezoning,,True,MiscCompleted_OW Opp CtPh6 05,0x08B30128,value == 1 (also sets '<name>_CompletedTime'),Ct assumed = Construction/Rezoning (unverified)
+1316019,Opportunity - Rezoning Ph6 #06,Opportunity,Rezoning,,True,MiscCompleted_OW Opp CtPh6 06,0x08B3012B,value == 1 (also sets '<name>_CompletedTime'),Ct assumed = Construction/Rezoning (unverified)
+1316020,Opportunity - Downtown Ph2 #01,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh2 01,0xB1DE750F,value == 1 (also sets '<name>_CompletedTime'),
+1316021,Opportunity - Downtown Ph2 #02,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh2 02,0xB1DE750C,value == 1 (also sets '<name>_CompletedTime'),
+1316022,Opportunity - Downtown Ph2 #03,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh2 03,0xB1DE750D,value == 1 (also sets '<name>_CompletedTime'),
+1316023,Opportunity - Downtown Ph2 #04,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh2 04,0xB1DE750A,value == 1 (also sets '<name>_CompletedTime'),
+1316024,Opportunity - Downtown Ph2 #05,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh2 05,0xB1DE750B,value == 1 (also sets '<name>_CompletedTime'),
+1316025,Opportunity - Downtown Ph2 #06,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh2 06,0xB1DE7508,value == 1 (also sets '<name>_CompletedTime'),
+1316026,Opportunity - Downtown Ph3 #01,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh3 01,0xB1E011EE,value == 1 (also sets '<name>_CompletedTime'),
+1316027,Opportunity - Downtown Ph3 #02,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh3 02,0xB1E011ED,value == 1 (also sets '<name>_CompletedTime'),
+1316028,Opportunity - Downtown Ph3 #03,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh3 03,0xB1E011EC,value == 1 (also sets '<name>_CompletedTime'),
+1316029,Opportunity - Downtown Ph3 #04,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh3 04,0xB1E011EB,value == 1 (also sets '<name>_CompletedTime'),
+1316030,Opportunity - Downtown Ph3 #05,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh3 05,0xB1E011EA,value == 1 (also sets '<name>_CompletedTime'),
+1316031,Opportunity - Downtown Ph3 #06,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh3 06,0xB1E011E9,value == 1 (also sets '<name>_CompletedTime'),
+1316032,Opportunity - Downtown Ph3 #07,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh3 07,0xB1E011E8,value == 1 (also sets '<name>_CompletedTime'),
+1316033,Opportunity - Downtown Ph3 #08,Opportunity,Downtown,,True,MiscCompleted_OW Opp DtPh3 08,0xB1E011E7,value == 1 (also sets '<name>_CompletedTime'),
+1316034,Opportunity - The View Ph7 #01,Opportunity,The View,,True,MiscCompleted_OW Opp VwPh7 01,0x50BB71BB,value == 1 (also sets '<name>_CompletedTime'),
+1316035,Opportunity - The View Ph7 #02,Opportunity,The View,,True,MiscCompleted_OW Opp VwPh7 02,0x50BB71B8,value == 1 (also sets '<name>_CompletedTime'),
+1316036,Opportunity - The View Ph7 #03,Opportunity,The View,,True,MiscCompleted_OW Opp VwPh7 03,0x50BB71B9,value == 1 (also sets '<name>_CompletedTime'),
+1316037,Opportunity - The View Ph7 #04,Opportunity,The View,,True,MiscCompleted_OW Opp VwPh7 04,0x50BB71BE,value == 1 (also sets '<name>_CompletedTime'),
+1316038,Opportunity - The View Ph7 #05,Opportunity,The View,,True,MiscCompleted_OW Opp VwPh7 05,0x50BB71BF,value == 1 (also sets '<name>_CompletedTime'),
+1316039,Opportunity - The View Ph7 #06,Opportunity,The View,,True,MiscCompleted_OW Opp VwPh7 06,0x50BB71BC,value == 1 (also sets '<name>_CompletedTime'),
 1317000,Side Mission - An Ear to the Ground,Side Mission,,,True,An Ear to the Ground_CompletedTime,0x6E0CF2BC,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),unlock/replay flag: SilverCompleted_An Ear to the Ground
 1317001,Side Mission - Birdman's Delivery,Side Mission,,,True,Birdman's Delivery_CompletedTime,0xD6879B15,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),unlock/replay flag: SilverCompleted_Birdman's Delivery
 1317002,Side Mission - Break And Entry,Side Mission,,,True,Break And Entry_CompletedTime,0xFBD17842,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),unlock/replay flag: SilverCompleted_Break And Entry
@@ -776,24 +776,24 @@ id,name,category,district,area,default,flag,hash,detection,note
 1317008,Side Mission - The Meta Grid,Side Mission,,,True,The Meta Grid_CompletedTime,0xBCBB773E,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),unlock/replay flag: SilverCompleted_The Meta Grid
 1317009,Side Mission - Top of the World,Side Mission,,,True,Top of the World_CompletedTime,0x0792DC9B,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),unlock/replay flag: SilverCompleted_Top of the World
 1317010,Side Mission - Two Pigeons With One Stone,Side Mission,,,True,Two Pigeons With One Stone_CompletedTime,0xA0BCE842,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),unlock/replay flag: SilverCompleted_Two Pigeons With One Stone
-1318000,Delivery - Phase 2 #1,Delivery,,,True,OWPh2Delivery01_CompletedTime,0xAAFC606D,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh2Delivery01
-1318001,Delivery - Phase 2 #2,Delivery,,,True,OWPh2Delivery02_CompletedTime,0xC589F02E,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh2Delivery02
-1318002,Delivery - Phase 2 #3,Delivery,,,True,OWPh2Delivery03_CompletedTime,0x0F01CC6F,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh2Delivery03
-1318003,Delivery - Phase 3 #1,Delivery,,,True,OWPh3Delivery01_CompletedTime,0xFBBDC0EC,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh3Delivery01
-1318004,Delivery - Phase 3 #2,Delivery,,,True,OWPh3Delivery02_CompletedTime,0x4F78222F,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh3Delivery02
-1318005,Delivery - Phase 3 #3,Delivery,,,True,OWPh3Delivery03_CompletedTime,0xB10568EE,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh3Delivery03
-1318006,Delivery - Phase 4 #1,Delivery,,,True,OWPh4Delivery01_CompletedTime,0xF73753EB,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh4Delivery01
-1318007,Delivery - Phase 4 #2,Delivery,,,True,OWPh4Delivery02_CompletedTime,0x09806AA8,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh4Delivery02
-1318008,Delivery - Phase 4 #3,Delivery,,,True,OWPh4Delivery03_CompletedTime,0x9331E7E9,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh4Delivery03
-1318009,Delivery - Phase 5 #1,Delivery,,,True,OWPh5Delivery01_CompletedTime,0x993AF06A,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh5Delivery01
-1318010,Delivery - Phase 5 #2,Delivery,,,True,OWPh5Delivery02_CompletedTime,0x422C60A9,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh5Delivery02
-1318011,Delivery - Phase 5 #3,Delivery,,,True,OWPh5Delivery03_CompletedTime,0xE3F34868,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh5Delivery03
-1318012,Delivery - Phase 6 #1,Delivery,,,True,OWPh6Delivery01_CompletedTime,0x05734169,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh6Delivery01
-1318013,Delivery - Phase 6 #2,Delivery,,,True,OWPh6Delivery02_CompletedTime,0x2000D12A,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh6Delivery02
-1318014,Delivery - Phase 6 #3,Delivery,,,True,OWPh6Delivery03_CompletedTime,0x6978AD6B,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh6Delivery03
-1318015,Delivery - Phase 7 #1,Delivery,,,True,OWPh7Delivery01_CompletedTime,0x5634A1E8,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh7Delivery01
-1318016,Delivery - Phase 7 #2,Delivery,,,True,OWPh7Delivery02_CompletedTime,0xA9EF032B,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh7Delivery02
-1318017,Delivery - Phase 7 #3,Delivery,,,True,OWPh7Delivery03_CompletedTime,0x0B7C49EA,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh7Delivery03
+1318000,Opportunity - Delivery Ph2 #1,Opportunity (Delivery),,,True,OWPh2Delivery01_CompletedTime,0xAAFC606D,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh2Delivery01
+1318001,Opportunity - Delivery Ph2 #2,Opportunity (Delivery),,,True,OWPh2Delivery02_CompletedTime,0xC589F02E,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh2Delivery02
+1318002,Opportunity - Delivery Ph2 #3,Opportunity (Delivery),,,True,OWPh2Delivery03_CompletedTime,0x0F01CC6F,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh2Delivery03
+1318003,Opportunity - Delivery Ph3 #1,Opportunity (Delivery),,,True,OWPh3Delivery01_CompletedTime,0xFBBDC0EC,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh3Delivery01
+1318004,Opportunity - Delivery Ph3 #2,Opportunity (Delivery),,,True,OWPh3Delivery02_CompletedTime,0x4F78222F,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh3Delivery02
+1318005,Opportunity - Delivery Ph3 #3,Opportunity (Delivery),,,True,OWPh3Delivery03_CompletedTime,0xB10568EE,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh3Delivery03
+1318006,Opportunity - Delivery Ph4 #1,Opportunity (Delivery),,,True,OWPh4Delivery01_CompletedTime,0xF73753EB,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh4Delivery01
+1318007,Opportunity - Delivery Ph4 #2,Opportunity (Delivery),,,True,OWPh4Delivery02_CompletedTime,0x09806AA8,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh4Delivery02
+1318008,Opportunity - Delivery Ph4 #3,Opportunity (Delivery),,,True,OWPh4Delivery03_CompletedTime,0x9331E7E9,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh4Delivery03
+1318009,Opportunity - Delivery Ph5 #1,Opportunity (Delivery),,,True,OWPh5Delivery01_CompletedTime,0x993AF06A,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh5Delivery01
+1318010,Opportunity - Delivery Ph5 #2,Opportunity (Delivery),,,True,OWPh5Delivery02_CompletedTime,0x422C60A9,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh5Delivery02
+1318011,Opportunity - Delivery Ph5 #3,Opportunity (Delivery),,,True,OWPh5Delivery03_CompletedTime,0xE3F34868,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh5Delivery03
+1318012,Opportunity - Delivery Ph6 #1,Opportunity (Delivery),,,True,OWPh6Delivery01_CompletedTime,0x05734169,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh6Delivery01
+1318013,Opportunity - Delivery Ph6 #2,Opportunity (Delivery),,,True,OWPh6Delivery02_CompletedTime,0x2000D12A,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh6Delivery02
+1318014,Opportunity - Delivery Ph6 #3,Opportunity (Delivery),,,True,OWPh6Delivery03_CompletedTime,0x6978AD6B,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh6Delivery03
+1318015,Opportunity - Delivery Ph7 #1,Opportunity (Delivery),,,True,OWPh7Delivery01_CompletedTime,0x5634A1E8,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh7Delivery01
+1318016,Opportunity - Delivery Ph7 #2,Opportunity (Delivery),,,True,OWPh7Delivery02_CompletedTime,0xA9EF032B,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh7Delivery02
+1318017,Opportunity - Delivery Ph7 #3,Opportunity (Delivery),,,True,OWPh7Delivery03_CompletedTime,0x0B7C49EA,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),also BronzeCompleted_OWPh7Delivery03
 1318100,Activity - OPPDT01Delivery,Misc Activity,,,False,OPPDT01Delivery_CompletedTime,0x74E6FF00,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),in-game name/where unknown; verify before enabling
 1318101,Activity - OPPDT02_Delivery,Misc Activity,,,False,OPPDT02_Delivery_CompletedTime,0xE60547DC,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),in-game name/where unknown; verify before enabling
 1318102,Activity - OPPANC01Delivery,Misc Activity,,,False,OPPANC01Delivery_CompletedTime,0x4619241C,'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it),in-game name/where unknown; verify before enabling

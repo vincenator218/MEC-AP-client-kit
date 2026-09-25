@@ -8714,7 +8714,7 @@
  {
   "id": 1316000,
   "name": "Opportunity - Anchor Ph4 #01",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8726,7 +8726,7 @@
  {
   "id": 1316001,
   "name": "Opportunity - Anchor Ph4 #02",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8738,7 +8738,7 @@
  {
   "id": 1316002,
   "name": "Opportunity - Anchor Ph4 #03",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8750,7 +8750,7 @@
  {
   "id": 1316003,
   "name": "Opportunity - Anchor Ph4 #04",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8762,7 +8762,7 @@
  {
   "id": 1316004,
   "name": "Opportunity - Anchor Ph4 #05",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8774,7 +8774,7 @@
  {
   "id": 1316005,
   "name": "Opportunity - Anchor Ph4 #06",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8786,7 +8786,7 @@
  {
   "id": 1316006,
   "name": "Opportunity - Anchor Ph4 #07",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8798,7 +8798,7 @@
  {
   "id": 1316007,
   "name": "Opportunity - Anchor Ph4 #08",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8810,7 +8810,7 @@
  {
   "id": 1316008,
   "name": "Opportunity - Anchor Ph5 #01",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8822,7 +8822,7 @@
  {
   "id": 1316009,
   "name": "Opportunity - Anchor Ph5 #02",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8834,7 +8834,7 @@
  {
   "id": 1316010,
   "name": "Opportunity - Anchor Ph5 #03",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8846,7 +8846,7 @@
  {
   "id": 1316011,
   "name": "Opportunity - Anchor Ph5 #04",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8858,7 +8858,7 @@
  {
   "id": 1316012,
   "name": "Opportunity - Anchor Ph5 #05",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8870,7 +8870,7 @@
  {
   "id": 1316013,
   "name": "Opportunity - Anchor Ph5 #06",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Anchor",
   "area": "",
   "default": true,
@@ -8882,7 +8882,7 @@
  {
   "id": 1316014,
   "name": "Opportunity - Rezoning Ph6 #01",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Rezoning",
   "area": "",
   "default": true,
@@ -8894,7 +8894,7 @@
  {
   "id": 1316015,
   "name": "Opportunity - Rezoning Ph6 #02",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Rezoning",
   "area": "",
   "default": true,
@@ -8906,7 +8906,7 @@
  {
   "id": 1316016,
   "name": "Opportunity - Rezoning Ph6 #03",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Rezoning",
   "area": "",
   "default": true,
@@ -8918,7 +8918,7 @@
  {
   "id": 1316017,
   "name": "Opportunity - Rezoning Ph6 #04",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Rezoning",
   "area": "",
   "default": true,
@@ -8930,7 +8930,7 @@
  {
   "id": 1316018,
   "name": "Opportunity - Rezoning Ph6 #05",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Rezoning",
   "area": "",
   "default": true,
@@ -8942,7 +8942,7 @@
  {
   "id": 1316019,
   "name": "Opportunity - Rezoning Ph6 #06",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Rezoning",
   "area": "",
   "default": true,
@@ -8954,7 +8954,7 @@
  {
   "id": 1316020,
   "name": "Opportunity - Downtown Ph2 #01",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -8966,7 +8966,7 @@
  {
   "id": 1316021,
   "name": "Opportunity - Downtown Ph2 #02",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -8978,7 +8978,7 @@
  {
   "id": 1316022,
   "name": "Opportunity - Downtown Ph2 #03",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -8990,7 +8990,7 @@
  {
   "id": 1316023,
   "name": "Opportunity - Downtown Ph2 #04",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -9002,7 +9002,7 @@
  {
   "id": 1316024,
   "name": "Opportunity - Downtown Ph2 #05",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -9014,7 +9014,7 @@
  {
   "id": 1316025,
   "name": "Opportunity - Downtown Ph2 #06",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -9026,7 +9026,7 @@
  {
   "id": 1316026,
   "name": "Opportunity - Downtown Ph3 #01",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -9038,7 +9038,7 @@
  {
   "id": 1316027,
   "name": "Opportunity - Downtown Ph3 #02",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -9050,7 +9050,7 @@
  {
   "id": 1316028,
   "name": "Opportunity - Downtown Ph3 #03",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -9062,7 +9062,7 @@
  {
   "id": 1316029,
   "name": "Opportunity - Downtown Ph3 #04",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -9074,7 +9074,7 @@
  {
   "id": 1316030,
   "name": "Opportunity - Downtown Ph3 #05",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -9086,7 +9086,7 @@
  {
   "id": 1316031,
   "name": "Opportunity - Downtown Ph3 #06",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -9098,7 +9098,7 @@
  {
   "id": 1316032,
   "name": "Opportunity - Downtown Ph3 #07",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -9110,7 +9110,7 @@
  {
   "id": 1316033,
   "name": "Opportunity - Downtown Ph3 #08",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "Downtown",
   "area": "",
   "default": true,
@@ -9122,7 +9122,7 @@
  {
   "id": 1316034,
   "name": "Opportunity - The View Ph7 #01",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "The View",
   "area": "",
   "default": true,
@@ -9134,7 +9134,7 @@
  {
   "id": 1316035,
   "name": "Opportunity - The View Ph7 #02",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "The View",
   "area": "",
   "default": true,
@@ -9146,7 +9146,7 @@
  {
   "id": 1316036,
   "name": "Opportunity - The View Ph7 #03",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "The View",
   "area": "",
   "default": true,
@@ -9158,7 +9158,7 @@
  {
   "id": 1316037,
   "name": "Opportunity - The View Ph7 #04",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "The View",
   "area": "",
   "default": true,
@@ -9170,7 +9170,7 @@
  {
   "id": 1316038,
   "name": "Opportunity - The View Ph7 #05",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "The View",
   "area": "",
   "default": true,
@@ -9182,7 +9182,7 @@
  {
   "id": 1316039,
   "name": "Opportunity - The View Ph7 #06",
-  "category": "Opportunity Mission",
+  "category": "Opportunity",
   "district": "The View",
   "area": "",
   "default": true,
@@ -9325,8 +9325,8 @@
  },
  {
   "id": 1318000,
-  "name": "Delivery - Phase 2 #1",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph2 #1",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9337,8 +9337,8 @@
  },
  {
   "id": 1318001,
-  "name": "Delivery - Phase 2 #2",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph2 #2",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9349,8 +9349,8 @@
  },
  {
   "id": 1318002,
-  "name": "Delivery - Phase 2 #3",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph2 #3",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9361,8 +9361,8 @@
  },
  {
   "id": 1318003,
-  "name": "Delivery - Phase 3 #1",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph3 #1",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9373,8 +9373,8 @@
  },
  {
   "id": 1318004,
-  "name": "Delivery - Phase 3 #2",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph3 #2",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9385,8 +9385,8 @@
  },
  {
   "id": 1318005,
-  "name": "Delivery - Phase 3 #3",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph3 #3",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9397,8 +9397,8 @@
  },
  {
   "id": 1318006,
-  "name": "Delivery - Phase 4 #1",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph4 #1",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9409,8 +9409,8 @@
  },
  {
   "id": 1318007,
-  "name": "Delivery - Phase 4 #2",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph4 #2",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9421,8 +9421,8 @@
  },
  {
   "id": 1318008,
-  "name": "Delivery - Phase 4 #3",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph4 #3",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9433,8 +9433,8 @@
  },
  {
   "id": 1318009,
-  "name": "Delivery - Phase 5 #1",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph5 #1",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9445,8 +9445,8 @@
  },
  {
   "id": 1318010,
-  "name": "Delivery - Phase 5 #2",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph5 #2",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9457,8 +9457,8 @@
  },
  {
   "id": 1318011,
-  "name": "Delivery - Phase 5 #3",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph5 #3",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9469,8 +9469,8 @@
  },
  {
   "id": 1318012,
-  "name": "Delivery - Phase 6 #1",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph6 #1",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9481,8 +9481,8 @@
  },
  {
   "id": 1318013,
-  "name": "Delivery - Phase 6 #2",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph6 #2",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9493,8 +9493,8 @@
  },
  {
   "id": 1318014,
-  "name": "Delivery - Phase 6 #3",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph6 #3",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9505,8 +9505,8 @@
  },
  {
   "id": 1318015,
-  "name": "Delivery - Phase 7 #1",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph7 #1",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9517,8 +9517,8 @@
  },
  {
   "id": 1318016,
-  "name": "Delivery - Phase 7 #2",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph7 #2",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,
@@ -9529,8 +9529,8 @@
  },
  {
   "id": 1318017,
-  "name": "Delivery - Phase 7 #3",
-  "category": "Delivery",
+  "name": "Opportunity - Delivery Ph7 #3",
+  "category": "Opportunity (Delivery)",
   "district": "",
   "area": "",
   "default": true,

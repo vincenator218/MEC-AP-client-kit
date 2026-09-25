@@ -111,13 +111,13 @@ def main():
             add(5200, "Billboard Hack", f"Billboard - {d} {int(m.group(2)):02d}", n, d, "",
                 "value == 1", True)
 
-    # ---- Opportunity missions (40) ---------------------------------------
+    # ---- Opportunities (40): "OPPORTUNITY" on the in-game marker -----------
     OPP = {"Anc": "Anchor", "Dt": "Downtown", "Ct": "Rezoning", "Vw": "The View"}
     for n in names:
         m = re.match(r"MiscCompleted_OW Opp (Anc|Dt|Ct|Vw)Ph(\d) (\d\d)$", n)
         if m:
             d = OPP[m.group(1)]
-            add(6000, "Opportunity Mission", f"Opportunity - {d} Ph{m.group(2)} #{m.group(3)}", n, d, "",
+            add(6000, "Opportunity", f"Opportunity - {d} Ph{m.group(2)} #{m.group(3)}", n, d, "",
                 "value == 1 (also sets '<name>_CompletedTime')", True,
                 "Ct assumed = Construction/Rezoning (unverified)" if m.group(1) == "Ct" else "")
 
@@ -131,11 +131,11 @@ def main():
         add(7000, "Side Mission", f"Side Mission - {m}", f"{m}_CompletedTime", "", "",
             MISSION_RULE, True, f"unlock/replay flag: SilverCompleted_{m}")
 
-    # ---- Deliveries (Bronze, 18) ----------------------------------------
+    # ---- Deliveries (Bronze, 18): shown in game as delivery Opportunities ----
     for ph in range(2, 8):
         for k in range(1, 4):
             m = f"OWPh{ph}Delivery0{k}"
-            add(8000, "Delivery", f"Delivery - Phase {ph} #{k}", f"{m}_CompletedTime", "", "",
+            add(8000, "Opportunity (Delivery)", f"Opportunity - Delivery Ph{ph} #{k}", f"{m}_CompletedTime", "", "",
                 MISSION_RULE, True, f"also BronzeCompleted_{m}")
 
     # ---- Other Bronze (tutorial / intro opportunity content) -------------

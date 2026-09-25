@@ -24,6 +24,10 @@
 10. Side missions: confirm a **live**-unlocked mission loads and plays correctly, and whether a
     death or fast travel also refreshes the replay menu.
 11. Filler: is granting `XP` safe and useful?
+11b. **District unlocks as items?** `CriticalPathProgression_HasUnlockedDowntownSouth`,
+    `HasUnlockedTransitionConDt`, `HasEnteredAnchorForFirstTime` and
+    `NomadMissionsUnlocked` look like map/area gates (the underground included).
+    If they behave like other flags, each is a big item. Untested.
 12. Skill-tree purchases set the same flags. Decide how the client treats abilities the
     player buys.
 

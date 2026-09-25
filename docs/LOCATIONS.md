@@ -16,8 +16,8 @@ counts as checked when:
 | rule | used by |
 |---|---|
 | value ≥ 1 | collectibles (GridLeak, Electronic Part, Recording, Document, Secret Bag) |
-| value == 1 | Security Hub, Grid Node, Billboard Hack, Opportunity Mission |
-| `<mission>_CompletedTime` goes from 0 to non-zero | Side Mission, Delivery, other missions |
+| value == 1 | Security Hub, Grid Node, Billboard Hack, Opportunity |
+| `<mission>_CompletedTime` goes from 0 to non-zero | Side Mission, delivery Opportunity, other missions |
 
 Missions are detected through `_CompletedTime`, **not** through `SilverCompleted_` /
 `BronzeCompleted_`. The client writes `SilverCompleted_<m>` to unlock a side mission
@@ -42,9 +42,9 @@ Verified:
 | +5000 | Security Hub | 6 | `SecurityHubsCompleted_SecHub<X>` |
 | +5100 | Grid Node | 3 | `GridNodes_{Rezoning,Dt,View}Completed` |
 | +5200 | Billboard Hack | 12 | `HackableBillboards_<x>NN` |
-| +6000 | Opportunity Mission | 40 | `MiscCompleted_OW Opp <Dist>Ph<N> NN` |
+| +6000 | Opportunity | 40 | `MiscCompleted_OW Opp <Dist>Ph<N> NN` |
 | +7000 | Side Mission | 11 | `<Mission>_CompletedTime` |
-| +8000 | Delivery | 18 | `OWPh<2-7>Delivery0<1-3>_CompletedTime` |
+| +8000 | Opportunity (Delivery) | 18 | `OWPh<2-7>Delivery0<1-3>_CompletedTime` |
 
 Zone codes:
 
@@ -87,6 +87,9 @@ Zone codes:
    numbers. Useful hints would need world positions from the level data.
 2. `Ct` in the opportunity names (CtPh6) is assumed to be Rezoning. Unverified.
 3. Spot-check one zone code per district against the in-game map.
+   The in-game marker calls these activities **OPPORTUNITY**, and deliveries are one
+   kind of opportunity, which is why both blocks are named that way. Rezoning
+   couldn't be checked on a fresh save: its district may not be on the map yet.
 4. **Balance:** 792 locations against about 50 items needs filler, or fewer default
    locations. A natural option set is a toggle per collectible category, plus side missions,
    opportunities, deliveries, hubs, nodes and billboards.
