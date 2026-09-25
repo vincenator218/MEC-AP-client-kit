@@ -28,7 +28,7 @@ its name. The same values are written to the save file by the game's autosave.
 | `docs/SAVE_FILE.md` | Offline save editing, for building a starting save or as a fallback. |
 | `docs/OPEN_QUESTIONS.md` | What still needs work before a release. |
 | `data/locations.json` / `.csv` | Every location: id, name, category, district, default, flag, hash, detection rule. |
-| `data/items.json` | Every item: id, flag, hash, grant method, test status. |
+| `data/items.json` | All 109 items: id, flag, hash, grant method, test status. |
 | `data/flag_names.json` | All 2376 progression flag names and their hashes. |
 | `tools/build_checks.py` | Regenerates `data/locations.*` from `flag_names.json`. |
 | `tools/save/` | `read_save.py`, `set_flag.py`, `clear_all_unlocks.py` and `save_checksum.py` (PROF_SAVE tools). |
@@ -46,6 +46,7 @@ its name. The same values are written to the save file by the game's autosave.
 | Ability applied immediately (persistent entity) | tested on Focus |
 | Any ability, write only | applies at the next death or checkpoint restart |
 | Side mission unlock | write `SilverCompleted_<mission>`; shows up in the replay menu at the next load (checkpoint restart tested) |
+| Opportunity / delivery unlock | write the activity's completion flag; it shows up in the Runs menu at the next load, with its completion time still 0 (tested on one opportunity) |
 | Grants survive: fresh load, death, mission start, fast travel, checkpoint restart | tested |
 | Game-thread hook for the apply call | **not done**. The prototype calls from a foreign thread, and that crashed the game twice in testing |
 

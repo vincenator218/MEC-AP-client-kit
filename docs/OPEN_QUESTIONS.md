@@ -24,6 +24,10 @@
 10. Side missions: confirm a **live**-unlocked mission loads and plays correctly, and whether a
     death or fast travel also refreshes the replay menu.
 11. Filler: is granting `XP` safe and useful?
+11a. **Opportunity unlocks work** (tested on one): the completion flag puts the activity in
+    the menu at the next load, like a side mission. `_Available` is not the gate: the map
+    ignores it and a reload restores it from the save. Still to check: that a
+    menu-unlocked opportunity actually plays, and the same on a delivery.
 11b. **District unlocks as items?** `CriticalPathProgression_HasUnlockedDowntownSouth`,
     `HasUnlockedTransitionConDt`, `HasEnteredAnchorForFirstTime` and
     `NomadMissionsUnlocked` look like map/area gates (the underground included).

@@ -508,5 +508,585 @@
   "grant_method": "table_write_reload",
   "live_status": "expected",
   "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
+ },
+ {
+  "id": 1320300,
+  "name": "Opportunity Unlock - Anchor Ph4 #01",
+  "flag": "MiscCompleted_OW Opp AncPh4 01",
+  "hash": "0xD49DACF5",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320301,
+  "name": "Opportunity Unlock - Anchor Ph4 #02",
+  "flag": "MiscCompleted_OW Opp AncPh4 02",
+  "hash": "0xD49DACF6",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320302,
+  "name": "Opportunity Unlock - Anchor Ph4 #03",
+  "flag": "MiscCompleted_OW Opp AncPh4 03",
+  "hash": "0xD49DACF7",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320303,
+  "name": "Opportunity Unlock - Anchor Ph4 #04",
+  "flag": "MiscCompleted_OW Opp AncPh4 04",
+  "hash": "0xD49DACF0",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320304,
+  "name": "Opportunity Unlock - Anchor Ph4 #05",
+  "flag": "MiscCompleted_OW Opp AncPh4 05",
+  "hash": "0xD49DACF1",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320305,
+  "name": "Opportunity Unlock - Anchor Ph4 #06",
+  "flag": "MiscCompleted_OW Opp AncPh4 06",
+  "hash": "0xD49DACF2",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320306,
+  "name": "Opportunity Unlock - Anchor Ph4 #07",
+  "flag": "MiscCompleted_OW Opp AncPh4 07",
+  "hash": "0xD49DACF3",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320307,
+  "name": "Opportunity Unlock - Anchor Ph4 #08",
+  "flag": "MiscCompleted_OW Opp AncPh4 08",
+  "hash": "0xD49DACFC",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320308,
+  "name": "Opportunity Unlock - Anchor Ph5 #01",
+  "flag": "MiscCompleted_OW Opp AncPh5 01",
+  "hash": "0xD49D28D4",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320309,
+  "name": "Opportunity Unlock - Anchor Ph5 #02",
+  "flag": "MiscCompleted_OW Opp AncPh5 02",
+  "hash": "0xD49D28D7",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320310,
+  "name": "Opportunity Unlock - Anchor Ph5 #03",
+  "flag": "MiscCompleted_OW Opp AncPh5 03",
+  "hash": "0xD49D28D6",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320311,
+  "name": "Opportunity Unlock - Anchor Ph5 #04",
+  "flag": "MiscCompleted_OW Opp AncPh5 04",
+  "hash": "0xD49D28D1",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320312,
+  "name": "Opportunity Unlock - Anchor Ph5 #05",
+  "flag": "MiscCompleted_OW Opp AncPh5 05",
+  "hash": "0xD49D28D0",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320313,
+  "name": "Opportunity Unlock - Anchor Ph5 #06",
+  "flag": "MiscCompleted_OW Opp AncPh5 06",
+  "hash": "0xD49D28D3",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320314,
+  "name": "Opportunity Unlock - Rezoning Ph6 #01",
+  "flag": "MiscCompleted_OW Opp CtPh6 01",
+  "hash": "0x08B3012C",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320315,
+  "name": "Opportunity Unlock - Rezoning Ph6 #02",
+  "flag": "MiscCompleted_OW Opp CtPh6 02",
+  "hash": "0x08B3012F",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320316,
+  "name": "Opportunity Unlock - Rezoning Ph6 #03",
+  "flag": "MiscCompleted_OW Opp CtPh6 03",
+  "hash": "0x08B3012E",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320317,
+  "name": "Opportunity Unlock - Rezoning Ph6 #04",
+  "flag": "MiscCompleted_OW Opp CtPh6 04",
+  "hash": "0x08B30129",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320318,
+  "name": "Opportunity Unlock - Rezoning Ph6 #05",
+  "flag": "MiscCompleted_OW Opp CtPh6 05",
+  "hash": "0x08B30128",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320319,
+  "name": "Opportunity Unlock - Rezoning Ph6 #06",
+  "flag": "MiscCompleted_OW Opp CtPh6 06",
+  "hash": "0x08B3012B",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320320,
+  "name": "Opportunity Unlock - Downtown Ph2 #01",
+  "flag": "MiscCompleted_OW Opp DtPh2 01",
+  "hash": "0xB1DE750F",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320321,
+  "name": "Opportunity Unlock - Downtown Ph2 #02",
+  "flag": "MiscCompleted_OW Opp DtPh2 02",
+  "hash": "0xB1DE750C",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320322,
+  "name": "Opportunity Unlock - Downtown Ph2 #03",
+  "flag": "MiscCompleted_OW Opp DtPh2 03",
+  "hash": "0xB1DE750D",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320323,
+  "name": "Opportunity Unlock - Downtown Ph2 #04",
+  "flag": "MiscCompleted_OW Opp DtPh2 04",
+  "hash": "0xB1DE750A",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "tested",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320324,
+  "name": "Opportunity Unlock - Downtown Ph2 #05",
+  "flag": "MiscCompleted_OW Opp DtPh2 05",
+  "hash": "0xB1DE750B",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320325,
+  "name": "Opportunity Unlock - Downtown Ph2 #06",
+  "flag": "MiscCompleted_OW Opp DtPh2 06",
+  "hash": "0xB1DE7508",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320326,
+  "name": "Opportunity Unlock - Downtown Ph3 #01",
+  "flag": "MiscCompleted_OW Opp DtPh3 01",
+  "hash": "0xB1E011EE",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320327,
+  "name": "Opportunity Unlock - Downtown Ph3 #02",
+  "flag": "MiscCompleted_OW Opp DtPh3 02",
+  "hash": "0xB1E011ED",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320328,
+  "name": "Opportunity Unlock - Downtown Ph3 #03",
+  "flag": "MiscCompleted_OW Opp DtPh3 03",
+  "hash": "0xB1E011EC",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320329,
+  "name": "Opportunity Unlock - Downtown Ph3 #04",
+  "flag": "MiscCompleted_OW Opp DtPh3 04",
+  "hash": "0xB1E011EB",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320330,
+  "name": "Opportunity Unlock - Downtown Ph3 #05",
+  "flag": "MiscCompleted_OW Opp DtPh3 05",
+  "hash": "0xB1E011EA",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320331,
+  "name": "Opportunity Unlock - Downtown Ph3 #06",
+  "flag": "MiscCompleted_OW Opp DtPh3 06",
+  "hash": "0xB1E011E9",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320332,
+  "name": "Opportunity Unlock - Downtown Ph3 #07",
+  "flag": "MiscCompleted_OW Opp DtPh3 07",
+  "hash": "0xB1E011E8",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320333,
+  "name": "Opportunity Unlock - Downtown Ph3 #08",
+  "flag": "MiscCompleted_OW Opp DtPh3 08",
+  "hash": "0xB1E011E7",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320334,
+  "name": "Opportunity Unlock - The View Ph7 #01",
+  "flag": "MiscCompleted_OW Opp VwPh7 01",
+  "hash": "0x50BB71BB",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320335,
+  "name": "Opportunity Unlock - The View Ph7 #02",
+  "flag": "MiscCompleted_OW Opp VwPh7 02",
+  "hash": "0x50BB71B8",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320336,
+  "name": "Opportunity Unlock - The View Ph7 #03",
+  "flag": "MiscCompleted_OW Opp VwPh7 03",
+  "hash": "0x50BB71B9",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320337,
+  "name": "Opportunity Unlock - The View Ph7 #04",
+  "flag": "MiscCompleted_OW Opp VwPh7 04",
+  "hash": "0x50BB71BE",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320338,
+  "name": "Opportunity Unlock - The View Ph7 #05",
+  "flag": "MiscCompleted_OW Opp VwPh7 05",
+  "hash": "0x50BB71BF",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320339,
+  "name": "Opportunity Unlock - The View Ph7 #06",
+  "flag": "MiscCompleted_OW Opp VwPh7 06",
+  "hash": "0x50BB71BC",
+  "group": "opportunity",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it."
+ },
+ {
+  "id": 1320400,
+  "name": "Opportunity Unlock - Delivery Ph2 #1",
+  "flag": "BronzeCompleted_OWPh2Delivery01",
+  "hash": "0xAE8D25F6",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320401,
+  "name": "Opportunity Unlock - Delivery Ph2 #2",
+  "flag": "BronzeCompleted_OWPh2Delivery02",
+  "hash": "0xAE8D25F5",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320402,
+  "name": "Opportunity Unlock - Delivery Ph2 #3",
+  "flag": "BronzeCompleted_OWPh2Delivery03",
+  "hash": "0xAE8D25F4",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320403,
+  "name": "Opportunity Unlock - Delivery Ph3 #1",
+  "flag": "BronzeCompleted_OWPh3Delivery01",
+  "hash": "0x415A60B7",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320404,
+  "name": "Opportunity Unlock - Delivery Ph3 #2",
+  "flag": "BronzeCompleted_OWPh3Delivery02",
+  "hash": "0x415A60B4",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320405,
+  "name": "Opportunity Unlock - Delivery Ph3 #3",
+  "flag": "BronzeCompleted_OWPh3Delivery03",
+  "hash": "0x415A60B5",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320406,
+  "name": "Opportunity Unlock - Delivery Ph4 #1",
+  "flag": "BronzeCompleted_OWPh4Delivery01",
+  "hash": "0x04DE1A70",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320407,
+  "name": "Opportunity Unlock - Delivery Ph4 #2",
+  "flag": "BronzeCompleted_OWPh4Delivery02",
+  "hash": "0x04DE1A73",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320408,
+  "name": "Opportunity Unlock - Delivery Ph4 #3",
+  "flag": "BronzeCompleted_OWPh4Delivery03",
+  "hash": "0x04DE1A72",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320409,
+  "name": "Opportunity Unlock - Delivery Ph5 #1",
+  "flag": "BronzeCompleted_OWPh5Delivery01",
+  "hash": "0x97AB5531",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320410,
+  "name": "Opportunity Unlock - Delivery Ph5 #2",
+  "flag": "BronzeCompleted_OWPh5Delivery02",
+  "hash": "0x97AB5532",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320411,
+  "name": "Opportunity Unlock - Delivery Ph5 #3",
+  "flag": "BronzeCompleted_OWPh5Delivery03",
+  "hash": "0x97AB5533",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320412,
+  "name": "Opportunity Unlock - Delivery Ph6 #1",
+  "flag": "BronzeCompleted_OWPh6Delivery01",
+  "hash": "0xF798D3F2",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320413,
+  "name": "Opportunity Unlock - Delivery Ph6 #2",
+  "flag": "BronzeCompleted_OWPh6Delivery02",
+  "hash": "0xF798D3F1",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320414,
+  "name": "Opportunity Unlock - Delivery Ph6 #3",
+  "flag": "BronzeCompleted_OWPh6Delivery03",
+  "hash": "0xF798D3F0",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320415,
+  "name": "Opportunity Unlock - Delivery Ph7 #1",
+  "flag": "BronzeCompleted_OWPh7Delivery01",
+  "hash": "0x8A660EB3",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320416,
+  "name": "Opportunity Unlock - Delivery Ph7 #2",
+  "flag": "BronzeCompleted_OWPh7Delivery02",
+  "hash": "0x8A660EB0",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
+ },
+ {
+  "id": 1320417,
+  "name": "Opportunity Unlock - Delivery Ph7 #3",
+  "flag": "BronzeCompleted_OWPh7Delivery03",
+  "hash": "0x8A660EB1",
+  "group": "opportunity (delivery)",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Same mechanism as the opportunities; not tested on a delivery specifically."
  }
 ]

@@ -1,6 +1,6 @@
 # Items
 
-The full list is in `data/items.json` (51 items). Proposed item IDs start at
+The full list is in `data/items.json` (109 items). Proposed item IDs start at
 **1320000**. Location IDs are 1310000–1319999, so the two ranges don't overlap.
 
 ## Grant methods
@@ -100,6 +100,79 @@ going from 0 to non-zero is the matching location check (see `LOCATIONS.md`).
 
 Not yet verified: that a live-unlocked mission loads and plays correctly (a save-edit
 unlock did), and whether a death or fast travel also refreshes the menu.
+
+## Opportunity unlocks (open-world activities)
+
+The in-game marker calls these **OPPORTUNITY**; deliveries are one kind. Writing an
+activity's completion flag (`MiscCompleted_<name>` / `BronzeCompleted_<name>`) puts it in
+the Runs/Opportunities menu at the next load, **without** touching its
+`_CompletedTime`. Tested on `OW Opp DtPh2 04`: written live, it appeared in the menu after a
+checkpoint restart with no completion time.
+
+The client never writes `_CompletedTime`, so that value going from 0 to a real time is
+the matching location check (see `LOCATIONS.md`). `_Available` is not involved: the map
+ignores it and a reload restores it from the save.
+
+| id | item | flag | hash | grant | status | note |
+|---|---|---|---|---|---|---|
+| 1320300 | Opportunity Unlock - Anchor Ph4 #01 | `MiscCompleted_OW Opp AncPh4 01` | `0xD49DACF5` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320301 | Opportunity Unlock - Anchor Ph4 #02 | `MiscCompleted_OW Opp AncPh4 02` | `0xD49DACF6` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320302 | Opportunity Unlock - Anchor Ph4 #03 | `MiscCompleted_OW Opp AncPh4 03` | `0xD49DACF7` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320303 | Opportunity Unlock - Anchor Ph4 #04 | `MiscCompleted_OW Opp AncPh4 04` | `0xD49DACF0` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320304 | Opportunity Unlock - Anchor Ph4 #05 | `MiscCompleted_OW Opp AncPh4 05` | `0xD49DACF1` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320305 | Opportunity Unlock - Anchor Ph4 #06 | `MiscCompleted_OW Opp AncPh4 06` | `0xD49DACF2` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320306 | Opportunity Unlock - Anchor Ph4 #07 | `MiscCompleted_OW Opp AncPh4 07` | `0xD49DACF3` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320307 | Opportunity Unlock - Anchor Ph4 #08 | `MiscCompleted_OW Opp AncPh4 08` | `0xD49DACFC` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320308 | Opportunity Unlock - Anchor Ph5 #01 | `MiscCompleted_OW Opp AncPh5 01` | `0xD49D28D4` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320309 | Opportunity Unlock - Anchor Ph5 #02 | `MiscCompleted_OW Opp AncPh5 02` | `0xD49D28D7` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320310 | Opportunity Unlock - Anchor Ph5 #03 | `MiscCompleted_OW Opp AncPh5 03` | `0xD49D28D6` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320311 | Opportunity Unlock - Anchor Ph5 #04 | `MiscCompleted_OW Opp AncPh5 04` | `0xD49D28D1` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320312 | Opportunity Unlock - Anchor Ph5 #05 | `MiscCompleted_OW Opp AncPh5 05` | `0xD49D28D0` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320313 | Opportunity Unlock - Anchor Ph5 #06 | `MiscCompleted_OW Opp AncPh5 06` | `0xD49D28D3` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320314 | Opportunity Unlock - Rezoning Ph6 #01 | `MiscCompleted_OW Opp CtPh6 01` | `0x08B3012C` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320315 | Opportunity Unlock - Rezoning Ph6 #02 | `MiscCompleted_OW Opp CtPh6 02` | `0x08B3012F` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320316 | Opportunity Unlock - Rezoning Ph6 #03 | `MiscCompleted_OW Opp CtPh6 03` | `0x08B3012E` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320317 | Opportunity Unlock - Rezoning Ph6 #04 | `MiscCompleted_OW Opp CtPh6 04` | `0x08B30129` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320318 | Opportunity Unlock - Rezoning Ph6 #05 | `MiscCompleted_OW Opp CtPh6 05` | `0x08B30128` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320319 | Opportunity Unlock - Rezoning Ph6 #06 | `MiscCompleted_OW Opp CtPh6 06` | `0x08B3012B` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320320 | Opportunity Unlock - Downtown Ph2 #01 | `MiscCompleted_OW Opp DtPh2 01` | `0xB1DE750F` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320321 | Opportunity Unlock - Downtown Ph2 #02 | `MiscCompleted_OW Opp DtPh2 02` | `0xB1DE750C` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320322 | Opportunity Unlock - Downtown Ph2 #03 | `MiscCompleted_OW Opp DtPh2 03` | `0xB1DE750D` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320323 | Opportunity Unlock - Downtown Ph2 #04 | `MiscCompleted_OW Opp DtPh2 04` | `0xB1DE750A` | table_write_reload | tested | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320324 | Opportunity Unlock - Downtown Ph2 #05 | `MiscCompleted_OW Opp DtPh2 05` | `0xB1DE750B` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320325 | Opportunity Unlock - Downtown Ph2 #06 | `MiscCompleted_OW Opp DtPh2 06` | `0xB1DE7508` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320326 | Opportunity Unlock - Downtown Ph3 #01 | `MiscCompleted_OW Opp DtPh3 01` | `0xB1E011EE` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320327 | Opportunity Unlock - Downtown Ph3 #02 | `MiscCompleted_OW Opp DtPh3 02` | `0xB1E011ED` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320328 | Opportunity Unlock - Downtown Ph3 #03 | `MiscCompleted_OW Opp DtPh3 03` | `0xB1E011EC` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320329 | Opportunity Unlock - Downtown Ph3 #04 | `MiscCompleted_OW Opp DtPh3 04` | `0xB1E011EB` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320330 | Opportunity Unlock - Downtown Ph3 #05 | `MiscCompleted_OW Opp DtPh3 05` | `0xB1E011EA` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320331 | Opportunity Unlock - Downtown Ph3 #06 | `MiscCompleted_OW Opp DtPh3 06` | `0xB1E011E9` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320332 | Opportunity Unlock - Downtown Ph3 #07 | `MiscCompleted_OW Opp DtPh3 07` | `0xB1E011E8` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320333 | Opportunity Unlock - Downtown Ph3 #08 | `MiscCompleted_OW Opp DtPh3 08` | `0xB1E011E7` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320334 | Opportunity Unlock - The View Ph7 #01 | `MiscCompleted_OW Opp VwPh7 01` | `0x50BB71BB` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320335 | Opportunity Unlock - The View Ph7 #02 | `MiscCompleted_OW Opp VwPh7 02` | `0x50BB71B8` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320336 | Opportunity Unlock - The View Ph7 #03 | `MiscCompleted_OW Opp VwPh7 03` | `0x50BB71B9` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320337 | Opportunity Unlock - The View Ph7 #04 | `MiscCompleted_OW Opp VwPh7 04` | `0x50BB71BE` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320338 | Opportunity Unlock - The View Ph7 #05 | `MiscCompleted_OW Opp VwPh7 05` | `0x50BB71BF` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320339 | Opportunity Unlock - The View Ph7 #06 | `MiscCompleted_OW Opp VwPh7 06` | `0x50BB71BC` | table_write_reload | expected | Appears in the Runs/Opportunities menu at the next load (checkpoint restart proven). Its _CompletedTime stays 0 until the player really finishes it. |
+| 1320400 | Opportunity Unlock - Delivery Ph2 #1 | `BronzeCompleted_OWPh2Delivery01` | `0xAE8D25F6` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320401 | Opportunity Unlock - Delivery Ph2 #2 | `BronzeCompleted_OWPh2Delivery02` | `0xAE8D25F5` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320402 | Opportunity Unlock - Delivery Ph2 #3 | `BronzeCompleted_OWPh2Delivery03` | `0xAE8D25F4` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320403 | Opportunity Unlock - Delivery Ph3 #1 | `BronzeCompleted_OWPh3Delivery01` | `0x415A60B7` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320404 | Opportunity Unlock - Delivery Ph3 #2 | `BronzeCompleted_OWPh3Delivery02` | `0x415A60B4` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320405 | Opportunity Unlock - Delivery Ph3 #3 | `BronzeCompleted_OWPh3Delivery03` | `0x415A60B5` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320406 | Opportunity Unlock - Delivery Ph4 #1 | `BronzeCompleted_OWPh4Delivery01` | `0x04DE1A70` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320407 | Opportunity Unlock - Delivery Ph4 #2 | `BronzeCompleted_OWPh4Delivery02` | `0x04DE1A73` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320408 | Opportunity Unlock - Delivery Ph4 #3 | `BronzeCompleted_OWPh4Delivery03` | `0x04DE1A72` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320409 | Opportunity Unlock - Delivery Ph5 #1 | `BronzeCompleted_OWPh5Delivery01` | `0x97AB5531` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320410 | Opportunity Unlock - Delivery Ph5 #2 | `BronzeCompleted_OWPh5Delivery02` | `0x97AB5532` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320411 | Opportunity Unlock - Delivery Ph5 #3 | `BronzeCompleted_OWPh5Delivery03` | `0x97AB5533` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320412 | Opportunity Unlock - Delivery Ph6 #1 | `BronzeCompleted_OWPh6Delivery01` | `0xF798D3F2` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320413 | Opportunity Unlock - Delivery Ph6 #2 | `BronzeCompleted_OWPh6Delivery02` | `0xF798D3F1` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320414 | Opportunity Unlock - Delivery Ph6 #3 | `BronzeCompleted_OWPh6Delivery03` | `0xF798D3F0` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320415 | Opportunity Unlock - Delivery Ph7 #1 | `BronzeCompleted_OWPh7Delivery01` | `0x8A660EB3` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320416 | Opportunity Unlock - Delivery Ph7 #2 | `BronzeCompleted_OWPh7Delivery02` | `0x8A660EB0` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
+| 1320417 | Opportunity Unlock - Delivery Ph7 #3 | `BronzeCompleted_OWPh7Delivery03` | `0x8A660EB1` | table_write_reload | expected | Same mechanism as the opportunities; not tested on a delivery specifically. |
 
 ## Not items
 
