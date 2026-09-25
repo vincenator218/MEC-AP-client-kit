@@ -106,8 +106,9 @@ unlock did), and whether a death or fast travel also refreshes the menu.
 The in-game marker calls these **OPPORTUNITY**; deliveries are one kind. Writing an
 activity's completion flag (`MiscCompleted_<name>` / `BronzeCompleted_<name>`) puts it in
 the Runs/Opportunities menu at the next load, **without** touching its
-`_CompletedTime`. Tested on `OW Opp DtPh2 04`: written live, it appeared in the menu after a
-checkpoint restart with no completion time.
+`_CompletedTime`. Tested end to end on `OW Opp DtPh2 04`: written live, it appeared in the menu after a
+checkpoint restart with no completion time, it played from the menu, and the real
+completion time was saved.
 
 The client never writes `_CompletedTime`, so that value going from 0 to a real time is
 the matching location check (see `LOCATIONS.md`). `_Available` is not involved: the map
