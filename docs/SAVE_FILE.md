@@ -45,6 +45,7 @@ N x { u32 hash, u32 value }      hash = djb2a(flag name), same as the live table
 ## Tools (`tools/save/`)
 
 ```
+python make_seed_save.py PROF_SAVE --out PROF_SAVE_seed    # build a starting save
 python read_save.py PROF_SAVE --grep Unlocks_
 python read_save.py PROF_SAVE --name "SilverCompleted_Drone Works"
 python set_flag.py PROF_SAVE --set "SilverCompleted_Drone Works=1" --out PROF_SAVE.new
@@ -53,7 +54,36 @@ python clear_all_unlocks.py PROF_SAVE --out PROF_SAVE.new
 
 `read_save.py` resolves names through `data/flag_names.json`.
 
-## Building a starting save (tested pieces)
+## Building a starting save
+
+`make_seed_save.py` takes a **story-complete** save and clears everything a
+randomizer hands out or checks off. It only changes values of records that already
+exist, so the file size never changes, and it recomputes both checksums.
+
+| cleared | kept |
+|---|---|
+| every `Unlocks_*` ability | `GoldCompleted_*` and those missions' own times/timers |
+| MAG Rope uses (`--keep-magrope` to skip) | every other `CriticalPathProgression_*` (district unlocks, story state) |
+| `XP_Gained` / `XP_Used` (`--keep-xp` to skip) | anything not listed as a location or completion |
+| every location flag, plus the mission-collectible and codex counters (`--default-locations-only`, `--keep-codex` to narrow) | `Collectables_Total*` capacities |
+| every `SilverCompleted_` / `BronzeCompleted_` / `MiscCompleted_` and its `_CompletedTime` / timestamps | |
+
+Example run on a story-complete community save: **593 values cleared**, story intact
+(37 `GoldCompleted_` and their times), 0 abilities, 0 XP, no rope, every collectible and
+activity reset. Verified in-game: all menus and counters read empty, the city is open.
+
+Two things stay by design: **Grid Node Anchor** is a story mission, so it remains in the
+Side Missions list, and the Runs tab is empty while the runs still exist in the world.
+
+Traversal from this seed was checked in-game: you can leave the starting area **without
+the MAG Rope**, and fast travel reaches **every hideout**. So the rope is safe to
+randomize, and world logic doesn't need to model district routing.
+
+Note what a story-complete seed means for design: the whole city is open, so
+**abilities are the only real gate**. Side-mission and opportunity unlock items
+control the replay menu, not whether the activity exists in the world.
+
+## Earlier tested pieces
 
 - `clear_all_unlocks.py` sets every owned `Unlocks_*` flag to 0. Tested: the save loads and
   plays through real missions, and no ability is re-granted from mission state.
