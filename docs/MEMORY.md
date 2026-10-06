@@ -10,6 +10,7 @@ does this).
 | `FLAG_TABLE` | `+0x257C9D8` | pointer to the progression flag hash table |
 | `ENTITY_VTABLE` | `+0x1C7B168` | vtable of the flag-check entity class |
 | `APPLY` | `+0x3A75790` | `void apply(Entity* e, int value, bool force)` |
+| `EXCL_TYPEINFO` | `+0x2878C00` | type info for `PamMovementExclusionEntityData` (§5) |
 
 ## 1. Flag names and hashes
 
@@ -124,6 +125,74 @@ Only the stamina bar updated live in testing. Other HUD elements, such as the Fo
 may appear only after a respawn even when the ability is active. The skill-tree
 menu does not refresh from any of this (cosmetic).
 
+## 5. Movement exclusion volumes (the traversal items)
+
+Five traversal moves have **no progression flag at all**. They are gated by a world
+object instead, and that object is far easier to drive than the ability `apply` call:
+granting or revoking is a single byte, it takes effect immediately, and it needs no
+game-thread hook.
+
+The class is `PamMovementExclusionEntityData`. One instance, masked, is enough — the
+level's other ~60 volumes can be left alone.
+
+| field | offset | meaning |
+|---|---|---|
+| `HalfExtents` | `0x80` | `Vec3`; the volume's half-size |
+| `Enabled` | `0x90` | `bool` |
+| `ExcludeVault` | `0xA0` | springboard / vault family |
+| `ExcludeHeaveUp` | `0xA1` | climb up over a ledge |
+| `ExcludeHang` | `0xA2` | hang from a ledge |
+| `ExcludeWallrun` | `0xA3` | wallrun, vertical and horizontal |
+| `ExcludeMagrope` | `0xA4` | MAG rope |
+
+`1` blocks the move, `0` allows it. All five are independent, each verified in game one
+at a time.
+
+### Finding an instance
+
+```
+default_obj = [EXCL_TYPEINFO + 0x20]      # the class's default object
+vtable      = [default_obj]               # every instance shares this vtable
+instances   = scan writable memory, 8-byte aligned, for pointers to vtable
+```
+
+Discard `default_obj` itself and any hit inside the module's own address range — the type
+tables contain the same pointer. `TYPEINFO + 0x18` is the parent class's type info, so the
+same recipe works for any class in a generated SDK.
+
+**Implementation trap.** `ReadProcessMemory` returns FALSE if *any* page in the requested
+range is unreadable, but it still reports how many bytes it managed. Treating a short read
+as a total failure and skipping the whole chunk silently loses megabytes of heap: a first
+version of `tools/client/mec_memory.py` scanned in 4 MB chunks that way and found **3**
+volumes where Cheat Engine found **61**. Use the byte count it gives you, and on a short
+read advance past the page that stopped you rather than past the whole chunk.
+
+### Applying
+
+Pick one instance whose `[addr+0]` still equals the vtable, then write
+`HalfExtents = (20000, 20000, 20000)`, `Enabled = 1`, and the five bools.
+
+- **20000 works; 50000 is silently ignored.** The threshold was not measured, so treat
+  anything above 20000 as unvalidated. 20000 is far larger than the city.
+- The effect survives death and fast travel, and applies with no reload.
+- **Volumes stream in and out.** Re-assert every second or two, and when `[addr+0]` stops
+  matching the vtable, the volume is gone: pick another valid instance and re-apply,
+  re-scanning if none is left.
+
+### Cleaning up
+
+Do not key your bookkeeping by address — the level recycles them, so a remembered
+"original" can end up applied to an unrelated volume. Identify your own volumes by
+signature instead: **authored extents are tiny** (the largest of 61 was 38.2), so any
+extent over 100 is yours. To release, zero the five bools; the level restores its real
+values the next time it streams that volume in.
+
+Nothing here is a progression flag, so **nothing is persisted to the save** and a game
+restart is always a clean slate.
+
+Not covered by any of the five: **pipes and ladders**. "No climb" does not mean "no
+vertical traversal", and world logic must not assume it does.
+
 ## 4. Safety rules (learned the hard way)
 
 - **Threading.** The prototype calls `apply` through Cheat Engine's `executeCodeEx`,
@@ -136,3 +205,6 @@ menu does not refresh from any of this (cosmetic).
   test windows short and re-check the save after each session.
 - **Re-validate an entity before calling it**: check that the vtable, `[e+0x80]` and the `0x2000` bit still match.
 - Writes are idempotent. On connect or reload, a client can simply re-apply every received item.
+- **Report state, not intent.** Three separate bugs in this project were a write path that
+  counted its own successes and reported done while the game disagreed (FINDINGS §79, §84d,
+  §86). Read the value back and compare it to what you asked for.

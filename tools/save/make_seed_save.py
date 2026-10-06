@@ -5,7 +5,9 @@ starting save.
 
 What it does, by default:
   * every `Unlocks_*` ability flag -> 0            (abilities become AP items)
-  * MAG Rope uses -> 0                             (--keep-magrope to skip)
+  * MAG Rope uses are KEPT by default (--clear-magrope to zero them). The rope is
+    gated at runtime by the exclusion volume's ExcludeMagrope byte now, not by the
+    save -- see docs/MEMORY.md §5. Clearing it here would double-gate it.
   * XP_Gained / XP_Used -> 0                       (--keep-xp to skip)
   * every location flag in data/locations.json -> 0 (use
     --default-locations-only for just the default-on ones), the mission-collectible
@@ -22,7 +24,7 @@ file size never changes. Both CRC32 checksums are recomputed.
 
 Usage:
     python make_seed_save.py PROF_SAVE --out PROF_SAVE_seed
-    python make_seed_save.py PROF_SAVE --out seed.sav --keep-magrope --keep-xp
+    python make_seed_save.py PROF_SAVE --out seed.sav --clear-magrope --keep-xp
     python make_seed_save.py PROF_SAVE --out seed.sav --default-locations-only
     python make_seed_save.py PROF_SAVE --out seed.sav --dry-run
 
@@ -74,7 +76,9 @@ def targets(args):
         if n.startswith("Unlocks_"):
             add(n, "ability")
 
-    if not args.keep_magrope:
+    # The rope is kept by default: the client gates it live via ExcludeMagrope
+    # (MEMORY.md §5), so clearing it in the save would gate it twice.
+    if args.clear_magrope:
         for n in MAGROPE:
             add(n, "magrope")
     if not args.keep_xp:
@@ -119,7 +123,9 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("save_file")
     ap.add_argument("--out", required=True)
-    ap.add_argument("--keep-magrope", action="store_true", help="leave the grapple owned")
+    ap.add_argument("--clear-magrope", action="store_true",
+                    help="also zero the MAG Rope flags (default: keep the rope owned, "
+                         "because the client gates it live via ExcludeMagrope)")
     ap.add_argument("--keep-xp", action="store_true", help="leave XP as it is")
     ap.add_argument("--default-locations-only", action="store_true",
                     help="only clear locations that are on by default (leaves mission collectibles as they are)")

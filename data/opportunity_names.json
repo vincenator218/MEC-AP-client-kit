@@ -1,0 +1,162 @@
+{
+ "OW Opp DtPh2 02": {
+  "name": "The Vial",
+  "type": "Fragile Delivery"
+ },
+ "OW Opp DtPh2 03": {
+  "name": "Memento",
+  "type": "Fragile Delivery"
+ },
+ "OW Opp DtPh3 05": {
+  "name": "Tree of Life",
+  "type": "Fragile Delivery"
+ },
+ "OW Opp DtPh3 08": {
+  "name": "A Particular Taste",
+  "type": "Fragile Delivery"
+ },
+ "OW Opp AncPh4 08": {
+  "name": "The Spice Must Flow",
+  "type": "Fragile Delivery"
+ },
+ "OW Opp DtPh3 07": {
+  "name": "She Loves Me, She Loves Me Not",
+  "type": "Fragile Delivery"
+ },
+ "OW Opp AncPh4 05": {
+  "name": "Von Oben",
+  "type": "Fragile Delivery"
+ },
+ "OW Opp CtPh6 02": {
+  "name": "Just Add a Slice of Lime",
+  "type": "Fragile Delivery"
+ },
+ "OW Opp CtPh6 01": {
+  "name": "Contraband Tunes",
+  "type": "Fragile Delivery"
+ },
+ "OW Opp CtPh6 03": {
+  "name": "The Heart of a Fighter",
+  "type": "Fragile Delivery"
+ },
+ "OW Opp VwPh7 04": {
+  "name": "The Lie",
+  "type": "Fragile Delivery"
+ },
+ "OW Opp VwPh7 03": {
+  "name": "Aurorian Cuisine",
+  "type": "Fragile Delivery"
+ },
+ "OW Opp DtPh2 04": {
+  "name": "Stay Out of Sight",
+  "type": "Covert Delivery"
+ },
+ "OW Opp DtPh2 06": {
+  "name": "Run, Just Run",
+  "type": "Covert Delivery"
+ },
+ "OW Opp DtPh3 02": {
+  "name": "You Can Run, Can You Hide?",
+  "type": "Covert Delivery"
+ },
+ "OW Opp DtPh3 04": {
+  "name": "Cameras and Drones",
+  "type": "Covert Delivery"
+ },
+ "OW Opp AncPh4 01": {
+  "name": "Dogen's Latest Thing",
+  "type": "Covert Delivery"
+ },
+ "OW Opp AncPh4 02": {
+  "name": "An Impatient Man",
+  "type": "Covert Delivery"
+ },
+ "OW Opp AncPh5 03": {
+  "name": "You Know the Drill",
+  "type": "Covert Delivery"
+ },
+ "OW Opp AncPh5 04": {
+  "name": "Don't Get Dogen Angry",
+  "type": "Covert Delivery"
+ },
+ "OW Opp CtPh6 04": {
+  "name": "Pronto, OK?",
+  "type": "Covert Delivery"
+ },
+ "OW Opp VwPh7 05": {
+  "name": "The Associate's Side Deal",
+  "type": "Covert Delivery"
+ },
+ "OW Opp VwPh7 01": {
+  "name": "Game Over, Runner. Game Over.",
+  "type": "Covert Delivery"
+ },
+ "OW Opp VwPh7 02": {
+  "name": "The Greylands in No Time",
+  "type": "Covert Delivery"
+ },
+ "OW Opp DtPh3 01": {
+  "name": "The Raposa Datagrab",
+  "type": "Diversion"
+ },
+ "OW Opp DtPh3 03": {
+  "name": "Under Surveillance",
+  "type": "Diversion"
+ },
+ "OW Opp AncPh4 06": {
+  "name": "Bugging WFYO",
+  "type": "Diversion"
+ },
+ "OW Opp AncPh5 01": {
+  "name": "Patterns",
+  "type": "Diversion"
+ },
+ "OW Opp AncPh5 02": {
+  "name": "A Small Job for Dogen",
+  "type": "Diversion"
+ },
+ "OW Opp CtPh6 05": {
+  "name": "The Henchmen Meetup",
+  "type": "Diversion"
+ },
+ "OW Opp CtPh6 06": {
+  "name": "A Lecture for an Exec",
+  "type": "Diversion"
+ },
+ "OW Opp VwPh7 06": {
+  "name": "Black November Supplies",
+  "type": "Diversion"
+ },
+ "OW Opp AncPh4 03": {
+  "name": null,
+  "type": "intervention (not in the Runs menu)"
+ },
+ "OW Opp AncPh4 04": {
+  "name": null,
+  "type": "intervention (not in the Runs menu)"
+ },
+ "OW Opp AncPh4 07": {
+  "name": null,
+  "type": "intervention (not in the Runs menu)"
+ },
+ "OW Opp AncPh5 05": {
+  "name": null,
+  "type": "intervention (not in the Runs menu)"
+ },
+ "OW Opp AncPh5 06": {
+  "name": null,
+  "type": "intervention (not in the Runs menu)"
+ },
+ "OW Opp DtPh2 01": {
+  "name": null,
+  "type": "intervention (not in the Runs menu)"
+ },
+ "OW Opp DtPh2 05": {
+  "name": null,
+  "type": "intervention (not in the Runs menu)"
+ },
+ "OW Opp DtPh3 06": {
+  "name": null,
+  "type": "intervention (not in the Runs menu)"
+ }
+}

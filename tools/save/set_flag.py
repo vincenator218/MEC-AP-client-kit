@@ -114,7 +114,11 @@ def main():
     inserted_count = 0
 
     for key, vstart, vallen in sections_sorted:
-        blob = data[vstart:vstart + vallen]
+        # One bytearray copy per section, patched and then written back once.
+        # Patching `data` in place and afterwards rebuilding the section from a
+        # copy of the blob taken *before* those patches silently threw them away
+        # -- that was the "69 in one section, 50 in the other" bug.
+        blob = bytearray(data[vstart:vstart + vallen])
         count = struct.unpack_from("<I", blob, 144)[0]
 
         existing_positions = {}
@@ -128,9 +132,9 @@ def main():
             if h in existing_positions:
                 i = existing_positions[h]
                 off = 148 + i * 8
-                old = struct.unpack_from("<I", data, vstart + off + 4)[0]
+                old = struct.unpack_from("<I", blob, off + 4)[0]
                 if old != val:
-                    struct.pack_into("<I", data, vstart + off + 4, val)
+                    struct.pack_into("<I", blob, off + 4, val)
                     print(f"  {key}: patched {name!r} in place, {old} -> {val}")
                     patched_count += 1
                 else:
@@ -138,16 +142,16 @@ def main():
             else:
                 to_insert.append((h, val, name))
 
-        if not to_insert:
-            continue
-
-        insert_bytes = b"".join(struct.pack("<II", h, v) for h, v, _ in to_insert)
-        new_count = count + len(to_insert)
-        header = blob[:144]
-        old_records_region = blob[148:148 + count * 8]
-        trailing = blob[148 + count * 8:]
-        new_blob = header + struct.pack("<I", new_count) + old_records_region + insert_bytes + trailing
-        grew_by = len(new_blob) - len(blob)
+        if to_insert:
+            insert_bytes = b"".join(struct.pack("<II", h, v) for h, v, _ in to_insert)
+            new_count = count + len(to_insert)
+            header = blob[:144]
+            old_records_region = blob[148:148 + count * 8]
+            trailing = blob[148 + count * 8:]
+            new_blob = header + struct.pack("<I", new_count) + old_records_region + insert_bytes + trailing
+        else:
+            new_blob = bytes(blob)
+        grew_by = len(new_blob) - vallen
 
         data[vstart:vstart + vallen] = new_blob
         struct.pack_into("<I", data, vstart - 4, len(new_blob))  # vallen field sits right before vstart

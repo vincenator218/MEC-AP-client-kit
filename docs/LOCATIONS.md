@@ -46,6 +46,20 @@ Verified:
 | +7000 | Side Mission | 11 | `<Mission>_CompletedTime` |
 | +8000 | Opportunity (Delivery) | 18 | `OWPh<2-7>Delivery0<1-3>_CompletedTime` |
 
+### Opportunity names
+
+The 40 `MiscCompleted_OW Opp …` activities are the world's **OPPORTUNITY** markers.
+**32 of them appear in the Runs tab of the replay menu and their in-game names are
+known** (decoded in game by writing a unique `_CompletedTime` to each and reading the
+menu back -- FINDINGS §78). `locations.json` uses those names, with the type
+(fragile delivery / covert delivery / diversion) in the `note` column;
+`data/opportunity_names.json` is the raw map.
+
+The remaining 8 are **interventions**: they exist in the world but never get a Runs
+entry, so they keep an internal label. The 18 `OWPh<N>Delivery<NN>` deliveries are
+**countdown** runs -- no time is recorded and they are not listed in the menu either --
+but all 26 still write their completion flags, so they are ordinary checks.
+
 Zone codes:
 
 | code | zone | district |

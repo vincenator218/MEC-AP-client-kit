@@ -45,7 +45,8 @@ N x { u32 hash, u32 value }      hash = djb2a(flag name), same as the live table
 ## Tools (`tools/save/`)
 
 ```
-python make_seed_save.py PROF_SAVE --out PROF_SAVE_seed    # build a starting save
+python make_seed_save.py PROF_SAVE --out PROF_SAVE_seed       # build a starting save (keeps the rope)
+python make_testing_save.py PROF_SAVE_seed --out PROF_SAVE_testing   # build a playtest save
 python read_save.py PROF_SAVE --grep Unlocks_
 python read_save.py PROF_SAVE --name "SilverCompleted_Drone Works"
 python set_flag.py PROF_SAVE --set "SilverCompleted_Drone Works=1" --out PROF_SAVE.new
@@ -63,12 +64,12 @@ exist, so the file size never changes, and it recomputes both checksums.
 | cleared | kept |
 |---|---|
 | every `Unlocks_*` ability | `GoldCompleted_*` and those missions' own times/timers |
-| MAG Rope uses (`--keep-magrope` to skip) | every other `CriticalPathProgression_*` (district unlocks, story state) |
+| *(the MAG Rope is now **kept** — `--clear-magrope` to zero it; the client gates the rope live via `ExcludeMagrope`, see `MEMORY.md` §5)* | the MAG Rope flags, and every other `CriticalPathProgression_*` (district unlocks, story state) |
 | `XP_Gained` / `XP_Used` (`--keep-xp` to skip) | anything not listed as a location or completion |
 | every location flag, plus the mission-collectible and codex counters (`--default-locations-only`, `--keep-codex` to narrow) | `Collectables_Total*` capacities |
 | every `SilverCompleted_` / `BronzeCompleted_` / `MiscCompleted_` and its `_CompletedTime` / timestamps | |
 
-Example run on a story-complete community save: **593 values cleared**, story intact
+Example run on a story-complete community save (before the rope default changed): **593 values cleared**, story intact
 (37 `GoldCompleted_` and their times), 0 abilities, 0 XP, no rope, every collectible and
 activity reset. Verified in-game: all menus and counters read empty, the city is open.
 
@@ -89,5 +90,32 @@ control the replay menu, not whether the activity exists in the world.
   plays through real missions, and no ability is re-granted from mission state.
 - `SilverCompleted_<mission> = 1` puts a side mission in the replay menu. With a save edit,
   the mission loaded and played correctly, and a real completion overwrote the values.
+- **`set_flag.py` had a silent bug**, fixed: it patched existing records directly in the
+  file buffer and then rebuilt the section from a copy of the blob taken *before* those
+  patches, so in a section that also needed insertions every in-place patch was thrown
+  away. That is why an earlier run wrote 69 flags into one section and only 50 into the
+  other. Both writers now patch one bytearray copy per section and write it back once.
 - Story missions form a strict linear chain. Skipping ahead in the main story is not
   supported. The intended design starts from a save with the story already finished.
+
+## Building a playtest save (crowdsourcing ability logic)
+
+`make_testing_save.py` builds the save to hand to other players when you want to learn
+**which ability each activity actually requires**:
+
+- every `SilverCompleted_` / `BronzeCompleted_` / `MiscCompleted_` -> 1, so every side
+  mission, opportunity and delivery is selectable from its menu
+- all their `_CompletedTime` / timestamps -> 0, so nothing reads as done and a real run
+  still records a real time
+- every `Unlocks_*` -> 0 and all four MAG Rope flags -> 0: no movement, no combat, no
+  gear, just the starting 4 stamina bars
+- `XP_Gained` -> `--xp` (default 500000), `XP_Used` -> 0, so the tester can buy whatever
+  ability unblocked them and report it
+- story state untouched: 37 `GoldCompleted_` and the rest of `CriticalPathProgression_*`,
+  so the city is open and fast travel works
+
+Unlike `make_seed_save.py`, this one **inserts** records that don't exist yet (and trims
+the matching number of zero bytes from the end), because a cleared seed has no record for
+most completion flags. Built from the AP seed save, that was 35 patches and 673 inserts
+across the two sections, file size unchanged, both checksums recomputed and verified
+stable on a re-read.

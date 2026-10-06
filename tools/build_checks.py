@@ -44,6 +44,15 @@ def djb2a(s):
     return h
 
 
+def opp_names():
+    """internal 'OW Opp <D>Ph<N> NN' -> in-game name, mapped in-game (see FINDINGS)."""
+    p = os.path.join(os.path.dirname(os.path.abspath(GT)), "opportunity_names.json")
+    try:
+        return json.load(open(p, encoding="utf-8"))
+    except FileNotFoundError:
+        return {}
+
+
 def main():
     src = json.load(open(GT, encoding="utf-8"))
     names = sorted(src.keys() if isinstance(src, dict) and "flags" not in src else {f["name"] for f in src["flags"]})
@@ -56,6 +65,7 @@ def main():
                          hash=f"0x{djb2a(flag):08X}", district=district, area=area,
                          detection=rule, default=default, note=note))
 
+    OPP_NAMES = opp_names()
     COLLECT = "record present with value >= 1 (any ProgressionManagerData section)"
 
     # ---- GridLeaks (324) -------------------------------------------------
@@ -117,9 +127,11 @@ def main():
         m = re.match(r"MiscCompleted_OW Opp (Anc|Dt|Ct|Vw)Ph(\d) (\d\d)$", n)
         if m:
             d = OPP[m.group(1)]
-            add(6000, "Opportunity", f"Opportunity - {d} Ph{m.group(2)} #{m.group(3)}", n, d, "",
+            info = OPP_NAMES.get(n[len("MiscCompleted_"):], {})
+            label = info.get("name") or f"{d} Ph{m.group(2)} #{m.group(3)}"
+            add(6000, "Opportunity", f"Opportunity - {label}", n, d, "",
                 "value == 1 (also sets '<name>_CompletedTime')", True,
-                "Ct assumed = Construction/Rezoning (unverified)" if m.group(1) == "Ct" else "")
+                info.get("type", ""))
 
     MISSION_RULE = "'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it)"
 
