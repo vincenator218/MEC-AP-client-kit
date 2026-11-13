@@ -9213,7 +9213,7 @@
   "flag": "Birdman's Delivery_CompletedTime",
   "hash": "0xD6879B15",
   "detection": "'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it)",
-  "note": "unlock/replay flag: SilverCompleted_Birdman's Delivery"
+  "note": "unlock/replay flag: SilverCompleted_Birdman's Delivery -- but it has NO entry in the Side Missions menu, so it is a check only"
  },
  {
   "id": 1317002,
@@ -9321,7 +9321,19 @@
   "flag": "Two Pigeons With One Stone_CompletedTime",
   "hash": "0xA0BCE842",
   "detection": "'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it)",
-  "note": "unlock/replay flag: SilverCompleted_Two Pigeons With One Stone"
+  "note": "unlock/replay flag: SilverCompleted_Two Pigeons With One Stone -- the menu shows PIGEONS DOWN - ERATO and - THALIA; which flag is which is unverified"
+ },
+ {
+  "id": 1317011,
+  "name": "Side Mission - Two Pigeons With One Stone Chase",
+  "category": "Side Mission",
+  "district": "",
+  "area": "",
+  "default": true,
+  "flag": "Two Pigeons With One Stone Chase_CompletedTime",
+  "hash": "0xDB8B6D9E",
+  "detection": "'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it)",
+  "note": "unlock/replay flag: SilverCompleted_Two Pigeons With One Stone Chase -- the menu shows PIGEONS DOWN - ERATO and - THALIA; which flag is which is unverified"
  },
  {
   "id": 1318000,

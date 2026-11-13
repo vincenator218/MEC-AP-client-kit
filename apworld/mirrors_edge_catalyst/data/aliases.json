@@ -1,0 +1,17 @@
+{
+  "_about": "Other names the requirements file may use for an item. Keys are matched case-insensitively. A value may end in :N to mean N copies. Flag names (Unlocks_Coil, ExcludeVault, ...) are aliases automatically.",
+  "Wallrun": "Progressive Wallrun:1",
+  "Double Wallrun": "Progressive Wallrun:2",
+  "DoubleWallrun": "Progressive Wallrun:2",
+  "Unlocks_DoubleWallrun": "Progressive Wallrun:2",
+  "Vault": "Springboard",
+  "Springboard / Vault": "Springboard",
+  "Mantle": "Climb Up",
+  "Climb Up (mantle)": "Climb Up",
+  "Heave Up": "Climb Up",
+  "Hang": "Ledge Hang",
+  "Magrope": "MAG Rope",
+  "Mag Rope": "MAG Rope",
+  "Grapple": "MAG Rope",
+  "Switch Place": "MoveEnemyBack"
+}

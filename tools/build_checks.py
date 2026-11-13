@@ -136,12 +136,31 @@ def main():
     MISSION_RULE = "'<mission>_CompletedTime' changes from 0 to non-zero (the client never writes it)"
 
     # ---- Side missions (Silver) -----------------------------------------
+    # Verified against the in-game Side Missions menu (FINDINGS 87). There are 20
+    # SilverCompleted_ flags; 14 have a menu entry, and the menu's 15th is the
+    # story grid node (GoldCompleted_Grid Node Anchor).
+    #   * the 5 "... Briefing" flags have no menu entry
+    #   * "Birdman's Delivery" has no menu entry either -- it is a repeatable
+    #     delivery (see OppDeliveryMissions_BirdmanCounter), so it is a check but
+    #     NOT an unlock item
+    #   * "Two Pigeons With One Stone Chase" IS a menu entry (the menu shows two
+    #     PIGEONS DOWN rows) and was wrongly filtered out as a sub-part
+    #   * the 3 Silver grid nodes are menu entries too; their *checks* are the
+    #     GridNodes_*Completed flags added above, so here they only get items
     SIDE = ["An Ear to the Ground", "Birdman's Delivery", "Break And Entry", "Caught in the Web",
             "Complete Coverage", "Drone Works", "Exit Strategy", "Finger on the Pulse",
-            "The Meta Grid", "Top of the World", "Two Pigeons With One Stone"]
+            "The Meta Grid", "Top of the World", "Two Pigeons With One Stone",
+            "Two Pigeons With One Stone Chase"]
+    NO_MENU_ENTRY = {"Birdman's Delivery"}
+    PIGEONS = {"Two Pigeons With One Stone", "Two Pigeons With One Stone Chase"}
     for m in SIDE:
+        note = f"unlock/replay flag: SilverCompleted_{m}"
+        if m in NO_MENU_ENTRY:
+            note += " -- but it has NO entry in the Side Missions menu, so it is a check only"
+        if m in PIGEONS:
+            note += " -- the menu shows PIGEONS DOWN - ERATO and - THALIA; which flag is which is unverified"
         add(7000, "Side Mission", f"Side Mission - {m}", f"{m}_CompletedTime", "", "",
-            MISSION_RULE, True, f"unlock/replay flag: SilverCompleted_{m}")
+            MISSION_RULE, True, note)
 
     # ---- Deliveries (Bronze, 18): shown in game as delivery Opportunities ----
     for ph in range(2, 8):

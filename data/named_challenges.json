@@ -1,0 +1,477 @@
+{
+ "_about": "Named challenges read from game memory (PamServerNamedChallengeEntity, vtable 0x141C7EC70, +0x80 -> data: +0x10 Sid, +0x58 stat code, +0x98 ContentId), read-only, 2026-11-12, Steam build. Dashes: all 22, the in-game count; the same 22 were loaded in two districts, so they appear to load city-wide. Billboards: only the ones loaded near the player in two scans, NOT the full list. Deliveries and grid nodes never appeared in a scan. ContentId is stable across a game restart (tested on Concrete Canyon). district is parsed from the stat code. Display names: all 22 dashes localized in game by mecmp (localized = the game text, name = the dash list spelling). See docs/DLL.md section 11. star_thresholds_cs: time limits for 1/2/3 stars in hundredths of a second, and cancel_after_cs (PamNamedChallengeData +0x18..+0x24, read live 2026-11-12). Dashes have no UnlockFlag and no generated progression flag; billboards have one (progression_flag). ap_index: the dash's position in the in-game dash list (0 = Birdman's Dash); the Archipelago location ids are 1330000 + 10 * ap_index + tier (0 finish, 1-3 stars), so never renumber it.",
+ "display_names_in_game": [
+  "Birdman's Dash",
+  "High Roller Avenue",
+  "Backstreet Bluff",
+  "Feature Creep",
+  "Concrete Canyon",
+  "A Handy Shortcut",
+  "Nomad's Run",
+  "Donkey in an Oven",
+  "The Allcom Shuffle",
+  "Take me to the Gridnode",
+  "Consumer Mayhem",
+  "Quite a View",
+  "Heading Home",
+  "Noah's Run",
+  "Don't Fall Down",
+  "Too Close to the Sun",
+  "Caleb's Run",
+  "The Scenic Route",
+  "Rezoning Dash",
+  "Under Construction",
+  "Out in the Open",
+  "Old Tunnels"
+ ],
+ "challenges": [
+  {
+   "content_id": "39fdedf6",
+   "kind": "billboard",
+   "sid": "ID_BILLBOARD_VW02",
+   "stat_code": "ch_hbb_tvbb02_tstamp",
+   "district": null,
+   "name": null,
+   "name_source": null,
+   "progression_flag": "HackableBillboards_tvbb02"
+  },
+  {
+   "content_id": "90b071d7",
+   "kind": "billboard",
+   "sid": "ID_BILLBOARD_VW03",
+   "stat_code": "ch_hbb_tvbb03_tstamp",
+   "district": null,
+   "name": null,
+   "name_source": null,
+   "progression_flag": "HackableBillboards_tvbb03"
+  },
+  {
+   "content_id": "f3f14077",
+   "kind": "billboard",
+   "sid": "ID_BILLBOARD_DT01",
+   "stat_code": "ch_hbb_dt1_tstamp",
+   "district": "Downtown",
+   "name": null,
+   "name_source": null
+  },
+  {
+   "content_id": "016a0454",
+   "kind": "billboard",
+   "sid": "ID_BILLBOARD_DT02",
+   "stat_code": "ch_hbb_dt2_tstamp",
+   "district": "Downtown",
+   "name": null,
+   "name_source": null
+  },
+  {
+   "content_id": "d09f8d92",
+   "kind": "billboard",
+   "sid": "ID_BILLBOARD_DT04",
+   "stat_code": "ch_hbb_dt4_tstamp",
+   "district": "Downtown",
+   "name": null,
+   "name_source": null
+  },
+  {
+   "content_id": "9b720c5f",
+   "kind": "billboard",
+   "sid": "ID_BILLBOARD_REZ01",
+   "stat_code": "ch_hbb_rz01_tstamp",
+   "district": "Rezoning",
+   "name": null,
+   "name_source": null
+  },
+  {
+   "content_id": "19afadbc",
+   "kind": "billboard",
+   "sid": "ID_BILLBOARD_REZ02",
+   "stat_code": "ch_hbb_rz02_tstamp",
+   "district": "Rezoning",
+   "name": null,
+   "name_source": null
+  },
+  {
+   "content_id": "2f3b58a1",
+   "kind": "billboard",
+   "sid": "ID_NC_HACKABLE_SCREEN_RZ_04",
+   "stat_code": "ch_hbb_rz04sh_tstamp",
+   "district": "Rezoning",
+   "name": null,
+   "name_source": null
+  },
+  {
+   "content_id": "3711854d",
+   "kind": "dash",
+   "sid": "ID_NC_ANCHOR01",
+   "stat_code": "ch_rrt_anc1_time",
+   "district": "Anchor",
+   "name": "The Allcom Shuffle",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "THE ALLCOM SHUFFLE",
+   "star_thresholds_cs": {
+    "1": 4400,
+    "2": 4100,
+    "3": 1400
+   },
+   "cancel_after_cs": 8400,
+   "ap_index": 8
+  },
+  {
+   "content_id": "398bf72e",
+   "kind": "dash",
+   "sid": "ID_NC_ANCHOR02",
+   "stat_code": "ch_rrt_anc2_time",
+   "district": "Anchor",
+   "name": "Take me to the Gridnode",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "TAKE ME TO THE GRIDNODE",
+   "star_thresholds_cs": {
+    "1": 5100,
+    "2": 4350,
+    "3": 2350
+   },
+   "cancel_after_cs": 10000,
+   "ap_index": 9
+  },
+  {
+   "content_id": "3bbdf68f",
+   "kind": "dash",
+   "sid": "ID_NC_ANCHOR03",
+   "stat_code": "ch_rrt_anc3_time",
+   "district": "Anchor",
+   "name": "Consumer Mayhem",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "CONSUMER MAYHEM",
+   "star_thresholds_cs": {
+    "1": 5800,
+    "2": 5100,
+    "3": 3750
+   },
+   "cancel_after_cs": 14000,
+   "ap_index": 10
+  },
+  {
+   "content_id": "2c174568",
+   "kind": "dash",
+   "sid": "ID_NC_ANCHOR04",
+   "stat_code": "ch_rrt_anc4_time",
+   "district": "Anchor",
+   "name": "Quite a View",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "QUITE A VIEW",
+   "star_thresholds_cs": {
+    "1": 8000,
+    "2": 4750,
+    "3": 3600
+   },
+   "cancel_after_cs": 11000,
+   "ap_index": 11
+  },
+  {
+   "content_id": "2e4944c9",
+   "kind": "dash",
+   "sid": "ID_NC_ANCHOR05",
+   "stat_code": "ch_rrt_anc5_time",
+   "district": "Anchor",
+   "name": "Heading Home",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "HEADING HOME",
+   "star_thresholds_cs": {
+    "1": 22000,
+    "2": 19000,
+    "3": 12900
+   },
+   "cancel_after_cs": 50000,
+   "ap_index": 12
+  },
+  {
+   "content_id": "30c3b6aa",
+   "kind": "dash",
+   "sid": "ID_NC_ANCHOR06",
+   "stat_code": "ch_rrt_anc6_time",
+   "district": "Anchor",
+   "name": "Donkey in an Oven",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "DONKEY IN AN OVEN",
+   "star_thresholds_cs": {
+    "1": 3300,
+    "2": 2900,
+    "3": 2400
+   },
+   "cancel_after_cs": 10000,
+   "ap_index": 7
+  },
+  {
+   "content_id": "6a3369ee",
+   "kind": "dash",
+   "sid": "ID_NC_BIRDMANS_ROUTE",
+   "stat_code": "ch_rrt_bm1_time",
+   "district": "Birdman's Route",
+   "name": "Birdman's Dash",
+   "name_source": "confirmed: mecmp localized this Sid in game as BIRDMAN'S ROUTE (mecmp.log, 2026-11-12); the in-game dash list calls it Birdman's Dash",
+   "localized": "BIRDMAN'S ROUTE",
+   "star_thresholds_cs": {
+    "1": 5600,
+    "2": 4800,
+    "3": 4000
+   },
+   "cancel_after_cs": 17500,
+   "ap_index": 0
+  },
+  {
+   "content_id": "3bd1e931",
+   "kind": "dash",
+   "sid": "ID_NC_DOWNTOWN01",
+   "stat_code": "ch_rrt_dt1_time",
+   "district": "Downtown",
+   "name": "High Roller Avenue",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "HIGH ROLLER AVENUE",
+   "star_thresholds_cs": {
+    "1": 6000,
+    "2": 5200,
+    "3": 4500
+   },
+   "cancel_after_cs": 12000,
+   "ap_index": 1
+  },
+  {
+   "content_id": "353ff992",
+   "kind": "dash",
+   "sid": "ID_NC_DOWNTOWNCANYON",
+   "stat_code": "ch_rrt_dt2_time",
+   "district": "Downtown",
+   "name": "Concrete Canyon",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "CONCRETE CANYON",
+   "star_thresholds_cs": {
+    "1": 4600,
+    "2": 3800,
+    "3": 3250
+   },
+   "cancel_after_cs": 10000,
+   "ap_index": 4
+  },
+  {
+   "content_id": "407e5b73",
+   "kind": "dash",
+   "sid": "ID_NC_NOMADSRUN",
+   "stat_code": "ch_rrt_dt3_time",
+   "district": "Downtown",
+   "name": "Nomad's Run",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "NOMAD'S RUN",
+   "star_thresholds_cs": {
+    "1": 4200,
+    "2": 3400,
+    "3": 1900
+   },
+   "cancel_after_cs": 9000,
+   "ap_index": 6
+  },
+  {
+   "content_id": "4b788ad4",
+   "kind": "dash",
+   "sid": "ID_NC_DOWNTOWN04",
+   "stat_code": "ch_rrt_dt4_time",
+   "district": "Downtown",
+   "name": "Backstreet Bluff",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "BACKSTREET BLUFF",
+   "star_thresholds_cs": {
+    "1": 6200,
+    "2": 5200,
+    "3": 4400
+   },
+   "cancel_after_cs": 12000,
+   "ap_index": 2
+  },
+  {
+   "content_id": "449a29b5",
+   "kind": "dash",
+   "sid": "ID_NC_DOWNTOWNSWING",
+   "stat_code": "ch_rrt_dt5_time",
+   "district": "Downtown",
+   "name": "A Handy Shortcut",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "A HANDY SHORTCUT",
+   "star_thresholds_cs": {
+    "1": 6400,
+    "2": 5800,
+    "3": 4600
+   },
+   "cancel_after_cs": 12000,
+   "ap_index": 5
+  },
+  {
+   "content_id": "3e083a16",
+   "kind": "dash",
+   "sid": "ID_NC_DOWNTOWN6",
+   "stat_code": "ch_rrt_dt6_time",
+   "district": "Downtown",
+   "name": "Feature Creep",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "FEATURE CREEP",
+   "star_thresholds_cs": {
+    "1": 4400,
+    "2": 3800,
+    "3": 3400
+   },
+   "cancel_after_cs": 10500,
+   "ap_index": 3
+  },
+  {
+   "content_id": "3210f369",
+   "kind": "dash",
+   "sid": "ID_NC_CONSTR01",
+   "stat_code": "ch_rrt_rz1_time",
+   "district": "Rezoning",
+   "name": "Out in the Open",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "OUT IN THE OPEN",
+   "star_thresholds_cs": {
+    "1": 3350,
+    "2": 3000,
+    "3": 2850
+   },
+   "cancel_after_cs": 10000,
+   "ap_index": 20
+  },
+  {
+   "content_id": "2b7f24ca",
+   "kind": "dash",
+   "sid": "ID_NC_TUNNELS01",
+   "stat_code": "ch_rrt_rz2_time",
+   "district": "Rezoning",
+   "name": "Old Tunnels",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "OLD TUNNELS",
+   "star_thresholds_cs": {
+    "1": 5700,
+    "2": 4500,
+    "3": 4050
+   },
+   "cancel_after_cs": 12000,
+   "ap_index": 21
+  },
+  {
+   "content_id": "24a0a2ab",
+   "kind": "dash",
+   "sid": "ID_NC_CONSTR02",
+   "stat_code": "ch_rrt_rz3_time",
+   "district": "Rezoning",
+   "name": "Under Construction",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "UNDER CONSTRUCTION",
+   "star_thresholds_cs": {
+    "1": 2650,
+    "2": 2300,
+    "3": 2100
+   },
+   "cancel_after_cs": 10000,
+   "ap_index": 19
+  },
+  {
+   "content_id": "2f9af30c",
+   "kind": "dash",
+   "sid": "ID_NC_CONSTR03",
+   "stat_code": "ch_rrt_rz4_time",
+   "district": "Rezoning",
+   "name": "Rezoning Dash",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "REZONING DASH",
+   "star_thresholds_cs": {
+    "1": 2800,
+    "2": 2500,
+    "3": 2150
+   },
+   "cancel_after_cs": 8500,
+   "ap_index": 18
+  },
+  {
+   "content_id": "dc1be436",
+   "kind": "dash",
+   "sid": "ID_NC_THEVIEW04",
+   "stat_code": "ch_rrt_tv04_time",
+   "district": "The View",
+   "name": "Don't Fall Down",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "DON'T FALL DOWN",
+   "star_thresholds_cs": {
+    "1": 11800,
+    "2": 8600,
+    "3": 5700
+   },
+   "cancel_after_cs": 20000,
+   "ap_index": 14
+  },
+  {
+   "content_id": "de4de397",
+   "kind": "dash",
+   "sid": "ID_NC_THEVIEW05",
+   "stat_code": "ch_rrt_tv05_time",
+   "district": "The View",
+   "name": "The Scenic Route",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "THE SCENIC ROUTE",
+   "star_thresholds_cs": {
+    "1": 14200,
+    "2": 10600,
+    "3": 9600
+   },
+   "cancel_after_cs": 30000,
+   "ap_index": 17
+  },
+  {
+   "content_id": "34964aa3",
+   "kind": "dash",
+   "sid": "ID_NC_THEVIEW01",
+   "stat_code": "ch_rrt_tv1_time",
+   "district": "The View",
+   "name": "Too Close to the Sun",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "TOO CLOSE TO THE SUN",
+   "star_thresholds_cs": {
+    "1": 6800,
+    "2": 5900,
+    "3": 5500
+   },
+   "cancel_after_cs": 14000,
+   "ap_index": 15
+  },
+  {
+   "content_id": "36c85a80",
+   "kind": "dash",
+   "sid": "ID_NC_THEVIEW02",
+   "stat_code": "ch_rrt_tv2_time",
+   "district": "The View",
+   "name": "Caleb's Run",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "CALEB'S RUN",
+   "star_thresholds_cs": {
+    "1": 4600,
+    "2": 3800,
+    "3": 3500
+   },
+   "cancel_after_cs": 12000,
+   "ap_index": 16
+  },
+  {
+   "content_id": "42069b61",
+   "kind": "dash",
+   "sid": "ID_NC_THEVIEW03",
+   "stat_code": "ch_rrt_tv3_time",
+   "district": "The View",
+   "name": "Noah's Run",
+   "name_source": "confirmed: mecmp localized this Sid in game (mecmp.log, 2026-11-12)",
+   "localized": "NOAH'S RUN",
+   "star_thresholds_cs": {
+    "1": 9500,
+    "2": 7400,
+    "3": 6450
+   },
+   "cancel_after_cs": 20000,
+   "ap_index": 13
+  }
+ ]
+}

@@ -1,0 +1,65 @@
+#pragma once
+// Every game address this DLL uses, as image VAs at base 0x140000000.
+//
+// All of them are in data/dll_addresses.json with the MECMP source line they were read from.
+// The slots and TypeInfo were checked against our build on 2026-11-12 by
+// tools/client/verify_dll_addresses.py (read-only, 24/24 strong checks). The functions and
+// globals only got a weak check; build_check.cpp checks them again before anything is touched.
+
+#include <cstddef>
+#include <cstdint>
+
+namespace mecap::addr {
+
+// --- build check: TypeInfo (found by name in the engine's TypeInfo list) -----------------------
+constexpr uintptr_t TypeInfoListHead = 0x14215D028; // first TypeInfo; next at +0x08
+constexpr uintptr_t TI_PamReplayPlayerComponentData = 0x14286B890;
+constexpr uintptr_t TI_ServerCharacterEntity = 0x1427FE1E0;
+constexpr uintptr_t TI_ObjectBlueprint = 0x1427E7EB0;
+
+// --- hooks: one vtable slot each, and the function it holds on this build -----------------------
+// ServerGameWorld vtable +0x28, postUpdate: once per tick on the server game thread.
+constexpr uintptr_t Slot_ServerWorldPostUpdate = 0x141B42D28;
+constexpr uintptr_t Fn_ServerWorldPostUpdate = 0x143341EE0;
+// Client replay updater vtable (0x141C49190) +0x10, updateAll: per frame on the client thread.
+constexpr uintptr_t Slot_ClientReplayUpdateAll = 0x141C491A0;
+constexpr uintptr_t Fn_ClientReplayUpdateAll = 0x14394DA40;
+
+// --- the message system -------------------------------------------------------------------------
+// MessageManager_registerListener(manager, category, listener, 0xff). Its first bytes, read on
+// 2026-11-12: 48 8B 09 EB 0B (mov rcx,[rcx]; jmp +0x0B), a short thunk.
+constexpr uintptr_t Fn_RegisterListener = 0x142A3AD40;
+constexpr unsigned char kRegisterListenerHead[] = {0x48, 0x8B, 0x09, 0xEB, 0x0B};
+constexpr uintptr_t ClientGameContext = 0x142401CB0; // *ptr + 0x10 = client message manager
+constexpr uintptr_t ServerGameContext = 0x14253D670; // *ptr + 0x10 = server message manager
+constexpr size_t Context_MessageManager = 0x10;
+
+// --- messages (header: +0x08 category, +0x0C type; type = djb2a of the class name) --------------
+constexpr size_t Msg_Category = 0x08, Msg_Type = 0x0C;
+constexpr uint32_t kCategorySocialPlay = 0x54776FC6;     // PamSocialPlay*Message
+constexpr uint32_t kTypeNamedChallengeFinished = 0xD71D027F;
+constexpr uint32_t kTypeNamedChallengeStarted = 0xC164590C;
+constexpr uint32_t kTypeNamedChallengeCancelled = 0x9A9A27C6;
+constexpr uint32_t kTypeNamedChallengeActivated = 0xB7633230;
+// NamedChallengeFinished fields (MECMP runs.cpp; seen in game 2026-11-12, docs/DLL.md §11a)
+constexpr size_t Fin_ContentId = 0x48, Fin_Set = 0x4C, Fin_Delta = 0x50, Fin_HadRecord = 0x54,
+                 Fin_Record = 0x58, Fin_NewRecord = 0x60;
+constexpr size_t Msg_ContentId = 0x48; // Started, Cancelled, Activated: the same field
+
+// --- applying an ability (docs/MEMORY.md §2-§3; our own research, not MECMP) -------------------
+// The progression flag table: *FlagTable = table; +0x20 buckets, +0x28 bucket count; a node has
+// +0x00 hash, +0x10 a pointer to the flag's definition object (entities cache that pointer at
+// their +0x80; the definition holds the hash again at +0x10), +0x18 i32 value, +0x28 next.
+constexpr uintptr_t FlagTable = 0x14257C9D8;
+constexpr size_t Table_Buckets = 0x20, Table_Count = 0x28;
+constexpr size_t Node_Hash = 0x00, Node_Identity = 0x10, Node_Value = 0x18, Node_Next = 0x28;
+// PamServerProgressionFlagEntity: its vtable, and slot 0 (getType) is `lea rax,[TypeInfo]; ret`.
+// The class name was read through slot 0 on 2026-11-12; the TypeInfo was at this address.
+constexpr uintptr_t VT_ProgressionFlagEntity = 0x141C7B168;
+constexpr uintptr_t TI_PamServerProgressionFlagEntity = 0x1428641A0;
+constexpr size_t Ent_Flags = 0x18, Ent_Data = 0x28, Ent_LastValue = 0x78, Ent_Identity = 0x80;
+constexpr uint32_t kEntEnabled = 0x8, kEntLive = 0x2000;
+// void apply(entity, int value, bool force); always force = 0 (MEMORY.md §3).
+constexpr uintptr_t Fn_Apply = 0x143A75790;
+
+} // namespace mecap::addr

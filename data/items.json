@@ -420,16 +420,6 @@
   "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
  },
  {
-  "id": 1320201,
-  "name": "Side Mission Unlock - Birdman's Delivery",
-  "flag": "SilverCompleted_Birdman's Delivery",
-  "hash": "0xACB87237",
-  "group": "side mission",
-  "grant_method": "table_write_reload",
-  "live_status": "expected",
-  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
- },
- {
   "id": 1320202,
   "name": "Side Mission Unlock - Break And Entry",
   "flag": "SilverCompleted_Break And Entry",
@@ -518,6 +508,46 @@
   "grant_method": "table_write_reload",
   "live_status": "expected",
   "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven)."
+ },
+ {
+  "id": 1320211,
+  "name": "Side Mission Unlock - Two Pigeons With One Stone Chase",
+  "flag": "SilverCompleted_Two Pigeons With One Stone Chase",
+  "hash": "0x4743CD3C",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven). the second PIGEONS DOWN row in the menu; which of the two is ERATO and which is THALIA is unverified"
+ },
+ {
+  "id": 1320212,
+  "name": "Side Mission Unlock - Grid Node Downtown",
+  "flag": "SilverCompleted_Grid Node Downtown",
+  "hash": "0x25C29D08",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven). shown in the menu as GRIDNODE: DOWNTOWN"
+ },
+ {
+  "id": 1320213,
+  "name": "Side Mission Unlock - Grid Node Construction",
+  "flag": "SilverCompleted_Grid Node Construction",
+  "hash": "0x83B05565",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven). shown in the menu as GRIDNODE: REZONING"
+ },
+ {
+  "id": 1320214,
+  "name": "Side Mission Unlock - Grid Node The View",
+  "flag": "SilverCompleted_Grid Node The View",
+  "hash": "0x39C724AC",
+  "group": "side mission",
+  "grant_method": "table_write_reload",
+  "live_status": "expected",
+  "note": "Appears in Missions > Side Missions at the next load (checkpoint restart proven). shown in the menu as GRIDNODE: THE VIEW"
  },
  {
   "id": 1320300,

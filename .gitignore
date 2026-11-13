@@ -3,3 +3,4 @@ __pycache__/
 # never commit real saves
 PROF_SAVE*
 *.sav
+build/
