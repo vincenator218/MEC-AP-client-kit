@@ -1,9 +1,18 @@
 # Open questions / work before a release
 
 ## Client engineering
-1. **Game-thread execution of `apply`.** This is required. Calls from a foreign thread
-   (Cheat Engine `executeCodeEx`) crashed the game twice. The plan: an injected DLL hooks a
-   per-frame game function and applies queued grants from there. No hook point has been chosen yet.
+1. **Game-thread execution of `apply`.** Calls from a foreign thread (Cheat Engine
+   `executeCodeEx`) crashed the game twice. Two candidate hook points are known from MECMP
+   (FINDINGS §88): the `ServerGameWorld` tick (slot `0x141B42D28`) and the client replay
+   updater (`0x141C491A0`). They need an injected DLL. On 2026-11-12 both slots held the expected
+   originals on our build, and so did all 24 strong checks (`tools/client/verify_dll_addresses.py`,
+   read-only). Nothing has been hooked or called yet. Everything needed to start, including the
+   apply queue, is in [`DLL.md`](DLL.md) §5. Still open there: which thread owns the flag-check
+   entities.
+1a. **Event-driven checks instead of polling, and dashes as locations.** A message listener hears
+   every finished named challenge (dash, delivery, grid node, billboard, MetaGrid) with its
+   ContentId and time. Needs the DLL. Untested. See [`DLL.md`](DLL.md) §6 for the messages and
+   §11 for what must be settled before dashes can be locations.
 2. **Entity lookup cost.** The prototype AOB-scans all writable memory per grant. A client
    should find entities once, keep them, and re-validate them (vtable, `[e+0x80]`, `0x2000` bit)
    before each call. It re-scans only when validation fails, because deaths and checkpoint restarts
@@ -67,7 +76,9 @@
     any of the five. Resolve the overlap with the existing `Unlocks_DoubleWallrun` item.
 
 ## Locations
-13. Real names or positions for collectibles, for hints.
+13. Real names or positions for collectibles, for hints. **Likely solved cheaply**: the game's
+    own `localize` (`0x1436A8D40`) turns a Sid into display text. Needs in-process code. Grade it
+    against an `ID_OPP_*_LABEL` Sid from §78 first ([`DLL.md`](DLL.md) §7).
 14. ~~Verify `Ct` = Rezoning~~ — **confirmed** (§78: the localization SIDs spell it `RZ`,
     and the Rezoning opportunities showed under Rezoning in game). Still spot-check the
     finer zone codes (`RzRdz`, `DtTd`, …).

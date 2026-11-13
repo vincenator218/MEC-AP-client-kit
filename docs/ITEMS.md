@@ -1,6 +1,6 @@
 # Items
 
-The full list is in `data/items.json` (84 items). Proposed item IDs start at
+The full list is in `data/items.json` (87 items). Proposed item IDs start at
 **1320000**. Location IDs are 1310000–1319999, so the two ranges don't overlap.
 
 ## Grant methods
@@ -114,23 +114,42 @@ Notes that matter for logic:
 
 ## Side mission unlocks
 
-Writing `SilverCompleted_<mission> = 1` puts the mission in **Missions → Side Missions**
-at the next load. The client never writes `<mission>_CompletedTime`, so that value
-going from 0 to non-zero is the matching location check (see `LOCATIONS.md`).
+Writing `SilverCompleted_<mission>` puts the mission in **Missions > Side Missions** at the
+next load. Proven end to end on `Drone Works` by save edit, and live on one mission with a
+checkpoint restart (FINDINGS §74).
+
+**The menu was read in game and has 15 entries** (FINDINGS §87), which pins down exactly
+which flags are items:
+
+- There are **20** `SilverCompleted_` flags. The five `... Briefing` ones have no menu entry.
+- **`Birdman's Delivery` has no menu entry either** — it is a repeatable delivery Birdman
+  gives you (see `OppDeliveryMissions_BirdmanCounter`), not a replayable mission. It is still
+  a **check**, but an unlock item for it would do nothing, so it is not in the pool.
+- **`Two Pigeons With One Stone Chase` is a real entry**, not a sub-part: the menu shows two
+  `PIGEONS DOWN` rows. Which one is ERATO and which is THALIA is unverified.
+- The three **grid nodes** are menu entries, so they are items here. Their *checks* are the
+  `GridNodes_*Completed` flags in `LOCATIONS.md`, not these. The menu's fourth grid node,
+  `GRIDNODE RUN`, is `GoldCompleted_Grid Node Anchor` — a story mission, so not an item.
+
+That leaves 20 − 5 briefings − Birdman = **14 items**, and 14 + the story grid node = the 15
+rows on screen.
 
 | id | item | flag | hash | grant | status | note |
 |---|---|---|---|---|---|---|
-| 1320200 | Side Mission Unlock - An Ear to the Ground | `SilverCompleted_An Ear to the Ground` | `0x46B3EE1E` | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
-| 1320201 | Side Mission Unlock - Birdman's Delivery | `SilverCompleted_Birdman's Delivery` | `0xACB87237` | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
-| 1320202 | Side Mission Unlock - Break And Entry | `SilverCompleted_Break And Entry` | `0xF3FD4240` | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
-| 1320203 | Side Mission Unlock - Caught in the Web | `SilverCompleted_Caught in the Web` | `0x8AFF1902` | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
-| 1320204 | Side Mission Unlock - Complete Coverage | `SilverCompleted_Complete Coverage` | `0xF2AB7D67` | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
-| 1320205 | Side Mission Unlock - Drone Works | `SilverCompleted_Drone Works` | `0x02966440` | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
-| 1320206 | Side Mission Unlock - Exit Strategy | `SilverCompleted_Exit Strategy` | `0xFB8B721B` | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
-| 1320207 | Side Mission Unlock - Finger on the Pulse | `SilverCompleted_Finger on the Pulse` | `0x896C9E36` | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
-| 1320208 | Side Mission Unlock - The Meta Grid | `SilverCompleted_The Meta Grid` | `0x2483D2FC` | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
-| 1320209 | Side Mission Unlock - Top of the World | `SilverCompleted_Top of the World` | `0xFB1C79F9` | table_write_reload | tested | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
-| 1320210 | Side Mission Unlock - Two Pigeons With One Stone | `SilverCompleted_Two Pigeons With One Stone` | `0x09F7D060` | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
+| 1320200 | Side Mission Unlock - An Ear to the Ground | `SilverCompleted_An Ear to the Ground` | 0x46B3EE1E | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
+| 1320202 | Side Mission Unlock - Break And Entry | `SilverCompleted_Break And Entry` | 0xF3FD4240 | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
+| 1320203 | Side Mission Unlock - Caught in the Web | `SilverCompleted_Caught in the Web` | 0x8AFF1902 | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
+| 1320204 | Side Mission Unlock - Complete Coverage | `SilverCompleted_Complete Coverage` | 0xF2AB7D67 | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
+| 1320205 | Side Mission Unlock - Drone Works | `SilverCompleted_Drone Works` | 0x02966440 | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
+| 1320206 | Side Mission Unlock - Exit Strategy | `SilverCompleted_Exit Strategy` | 0xFB8B721B | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
+| 1320207 | Side Mission Unlock - Finger on the Pulse | `SilverCompleted_Finger on the Pulse` | 0x896C9E36 | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
+| 1320208 | Side Mission Unlock - The Meta Grid | `SilverCompleted_The Meta Grid` | 0x2483D2FC | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
+| 1320209 | Side Mission Unlock - Top of the World | `SilverCompleted_Top of the World` | 0xFB1C79F9 | table_write_reload | tested | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
+| 1320210 | Side Mission Unlock - Two Pigeons With One Stone | `SilverCompleted_Two Pigeons With One Stone` | 0x09F7D060 | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). |
+| 1320211 | Side Mission Unlock - Two Pigeons With One Stone Chase | `SilverCompleted_Two Pigeons With One Stone Chase` | 0x4743CD3C | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). the second PIGEONS DOWN row in the menu; which of the two is ERATO and which is THALIA is unverified |
+| 1320212 | Side Mission Unlock - Grid Node Downtown | `SilverCompleted_Grid Node Downtown` | 0x25C29D08 | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). shown in the menu as GRIDNODE: DOWNTOWN |
+| 1320213 | Side Mission Unlock - Grid Node Construction | `SilverCompleted_Grid Node Construction` | 0x83B05565 | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). shown in the menu as GRIDNODE: REZONING |
+| 1320214 | Side Mission Unlock - Grid Node The View | `SilverCompleted_Grid Node The View` | 0x39C724AC | table_write_reload | expected | Appears in Missions > Side Missions at the next load (checkpoint restart proven). shown in the menu as GRIDNODE: THE VIEW |
 
 Not yet verified: that a live-unlocked mission loads and plays correctly (a save-edit
 unlock did), and whether a death or fast travel also refreshes the menu.

@@ -1,0 +1,8 @@
+location,requires,source,notes
+# One row per location (or per category). Lines whose location starts with # are ignored.,,,
+# location: a location name or id from data/locations.json (any of them, including single GridLeaks),,,
+#   or category:<Category> for a default, or * for a default on everything.,,,
+# requires: item names joined with & or , (AND) and | (OR), parentheses allowed; Item:N for N copies.,,,
+#   Quote a name containing a comma. 'nothing' = no requirement. No row at all also means no requirement.,,,
+# Item names: data/items.json names, Progressive Wallrun, or an alias from data/aliases.json.,,,
+# No ability requirements are known yet: the crowdsourced worksheet has not come back.,,,

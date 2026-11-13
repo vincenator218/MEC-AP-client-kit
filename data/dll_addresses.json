@@ -1,0 +1,457 @@
+{
+ "_about": "Addresses for an injected DLL, as image VAs at the PC image base 0x140000000 (rva = va - 0x140000000). origin 'mecmp' entries are read from mecmp's source ; on 2026-11-12 every slot, code and typeinfo entry (24) matched our build (verified: true). Function, global and vtable entries got only a weak check (inside the image) and stay unverified; check them with tools/client/verify_dll_addresses.py. origin 'mec-ap' entries are this kit's own, verified in game (docs/MEMORY.md). See docs/DLL.md.",
+ "image_base": "0x140000000",
+ "mecmp": {
+  "repo": "https://github.com/CodeNameMeteor/mecmp",
+  "commit": "7195f4527fecdb64e9d06057e06889eee41d5073",
+  "version": "0.9.0",
+  "license": "MIT"
+ },
+ "entries": [
+  {
+   "name": "ServerGameWorld::postUpdate (per-tick hook)",
+   "kind": "slot",
+   "use": "tick hook on the server game thread: drain the apply queue here",
+   "va": "0x141B42D28",
+   "expected": "0x143341EE0",
+   "source": "src/game/engine.h:106 (slot), src/game/engine.h:107 (expected)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "ClientReplayUpdater::updateAll",
+   "kind": "slot",
+   "use": "per-frame hook on the client thread (mecmp registers its client listener here)",
+   "va": "0x141C491A0",
+   "expected": "0x14394DA40",
+   "source": "src/game/engine.h:76 (slot), src/game/engine.h:78 (expected)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "PamServerNamedChallengeEntity creator",
+   "kind": "slot",
+   "use": "see each named challenge (dash, delivery, grid node...) as it is created",
+   "va": "0x141C7EE00",
+   "expected": "0x143A834B0",
+   "source": "src/game/engine.h:31 (slot), src/game/engine.h:32 (expected)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "PamServerChallengeMarkerEntity creator",
+   "kind": "slot",
+   "use": "see player-made time trials as they are created",
+   "va": "0x141C7E9F0",
+   "expected": "0x143A83460",
+   "source": "src/game/engine.h:34 (slot), src/game/engine.h:35 (expected)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "PamUISystem update",
+   "kind": "slot",
+   "use": "know when a game menu is open (menus pause the simulation)",
+   "va": "0x141CB64F0",
+   "expected": "0x143B16C50",
+   "source": "src/game/engine.h:22 (slot), src/game/engine.h:23 (expected)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "PamServerCharacterEntity::applyCustomization",
+   "kind": "slot",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x141C3FFF0",
+   "expected": "0x14336CF00",
+   "source": "src/game/engine.h:114 (slot), src/game/fingerprint.cpp:15 (expected)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "PamServerCharacterEntity::getComponent",
+   "kind": "slot",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x141C3FDB8",
+   "expected": "0x1431C6EB0",
+   "source": "src/game/engine.h:114 (slot), src/game/fingerprint.cpp:16 (expected)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "PamClientCharacterEntity::setVisible",
+   "kind": "slot",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x141C3CB38",
+   "expected": "0x143229480",
+   "source": "src/game/engine.h:113 (slot), src/game/fingerprint.cpp:17 (expected)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "PamClientCharacterEntity::getComponent",
+   "kind": "slot",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x141C3C868",
+   "expected": "0x1431C6EB0",
+   "source": "src/game/engine.h:113 (slot), src/game/fingerprint.cpp:16 (expected)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "PamServerCharacterSpawnEntity::spawn",
+   "kind": "slot",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x141C4B458",
+   "expected": "0x143390830",
+   "source": "src/game/engine.h:110 (slot), src/game/fingerprint.cpp:18 (expected)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "ServerCharacterSpawnEntity::spawn",
+   "kind": "slot",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x141B4E198",
+   "expected": "0x143390830",
+   "source": "src/game/engine.h:111 (slot), src/game/fingerprint.cpp:18 (expected)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "PamServerCharacterSpawnEntity::unspawn",
+   "kind": "slot",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x141C4B490",
+   "expected": "0x14338E4C0",
+   "source": "src/game/engine.h:110 (slot), src/game/engine.h:136 (expected)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "ServerCharacterSpawnEntity::unspawn",
+   "kind": "slot",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x141B4E1D0",
+   "expected": "0x14338E4C0",
+   "source": "src/game/engine.h:111 (slot), src/game/engine.h:136 (expected)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "NetState::setDirty",
+   "kind": "code",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x14347E420",
+   "skip": 0,
+   "bytes": "48 8B 41 18 48 85 C0 74 18",
+   "source": "src/game/fingerprint.cpp:35 (bytes), src/game/engine.h:126 (address)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "SpatialEntity::setTransform",
+   "kind": "code",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x1432EB1F0",
+   "skip": 0,
+   "bytes": "48 83 EC 38 8B 41 18 45 0F B6 C8",
+   "source": "src/game/fingerprint.cpp:37 (bytes), src/game/engine.h:118 (address)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "localClientCharacter",
+   "kind": "code",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x1439655F0",
+   "skip": 0,
+   "bytes": "48 83 EC 28 48 8B 05 B5 C6 A9 FE",
+   "source": "src/game/fingerprint.cpp:40 (bytes), src/game/engine.h:128 (address)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "Arena::allocFromMember",
+   "kind": "code",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x142A647D0",
+   "skip": 0,
+   "bytes": "48 89 5C 24 08 48 89 74 24 10 57 48 83 EC 20",
+   "source": "src/game/fingerprint.cpp:42 (bytes), src/game/engine.h:127 (address)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "XInput pointer store",
+   "kind": "code",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x1437BA76F",
+   "skip": 0,
+   "bytes": "48 89 05 6A 30 DB FE",
+   "source": "src/game/fingerprint.cpp:45 (bytes), src/game/engine.h:54 (address)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "camera managers load",
+   "kind": "code",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x1431A24FB",
+   "skip": 0,
+   "bytes": "48 8B 0D 4E 39 27 FF",
+   "source": "src/game/fingerprint.cpp:47 (bytes), src/game/engine.h:47 (address)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "rbtree increment",
+   "kind": "code",
+   "use": "build check (mecmp fingerprint.cpp)",
+   "va": "0x142A34820",
+   "skip": 3,
+   "bytes": "48 8B 09 48 85 C9 74 19",
+   "source": "src/game/fingerprint.cpp:49 (bytes), src/game/engine.h:129 (address)",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "MessageManager_registerListener",
+   "kind": "function",
+   "use": "(manager, category, listener, 0xff): subscribe to a message category",
+   "va": "0x142A3AD40",
+   "source": "src/game/runs.cpp:23",
+   "verified": false,
+   "origin": "mecmp",
+   "observed_bytes_2026_11_12": "48 8B 09 EB 0B CC CC CC CC CC CC CC CC 0F 1F 00"
+  },
+  {
+   "name": "localize",
+   "kind": "function",
+   "use": "bool (char* out, u32 capacity, const char* sid, void* args): Sid -> display text",
+   "va": "0x1436A8D40",
+   "source": "src/game/runs.cpp:24",
+   "verified": false,
+   "origin": "mecmp",
+   "observed_bytes_2026_11_12": "4C 89 44 24 18 4C 89 4C 24 20 53 57 48 83 EC 38"
+  },
+  {
+   "name": "named-challenge stats compare",
+   "kind": "function",
+   "use": "the server stats code that sends NamedChallengeFinished (reference only, not called)",
+   "va": "0x1439DEB10",
+   "source": "src/game/runs.h:5 (comment)",
+   "verified": false,
+   "origin": "mecmp",
+   "observed_bytes_2026_11_12": "44 89 4C 24 20 4C 89 44 24 18 48 89 54 24 10 48"
+  },
+  {
+   "name": "ClientGameContext*",
+   "kind": "global",
+   "use": "*ptr + 0x10 = client message manager",
+   "va": "0x142401CB0",
+   "source": "src/game/runs.cpp:21",
+   "verified": false,
+   "origin": "mecmp"
+  },
+  {
+   "name": "ServerGameContext*",
+   "kind": "global",
+   "use": "*ptr + 0x10 = server message manager",
+   "va": "0x14253D670",
+   "source": "src/game/runs.cpp:22",
+   "verified": false,
+   "origin": "mecmp"
+  },
+  {
+   "name": "ServerGameWorld*",
+   "kind": "global",
+   "use": "null between levels; the tick hook only acts for this world",
+   "va": "0x1425469E0",
+   "source": "src/game/engine.h:40",
+   "verified": false,
+   "origin": "mecmp"
+  },
+  {
+   "name": "TypeInfo list head",
+   "kind": "global",
+   "use": "the engine's TypeInfo list (next at +0x08); mecmp waits for >= 9000 entries",
+   "va": "0x14215D028",
+   "source": "src/game/engine.h:39",
+   "verified": false,
+   "origin": "mecmp"
+  },
+  {
+   "name": "PamReplayPlayerComponentData",
+   "kind": "typeinfo",
+   "use": "mecmp's startup check: this TypeInfo must be at this address",
+   "va": "0x14286B890",
+   "class_name": "PamReplayPlayerComponentData",
+   "source": "src/game/engine.h:59",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "ServerCharacterEntity",
+   "kind": "typeinfo",
+   "use": "mecmp's startup check: this TypeInfo must be at this address",
+   "va": "0x1427FE1E0",
+   "class_name": "ServerCharacterEntity",
+   "source": "src/game/engine.h:57",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "ObjectBlueprint",
+   "kind": "typeinfo",
+   "use": "mecmp's startup check: this TypeInfo must be at this address",
+   "va": "0x1427E7EB0",
+   "class_name": "ObjectBlueprint",
+   "source": "src/game/engine.h:58",
+   "verified": true,
+   "origin": "mecmp",
+   "verified_by": "verify_dll_addresses.py, 2026-11-12, game loaded in the city, mecmp not loaded"
+  },
+  {
+   "name": "PamServerNamedChallengeEntity",
+   "kind": "vtable",
+   "use": "+0x80 -> PamNamedChallengeData {+0x10 Sid, +0x58 main stat code, +0x98 ContentId}",
+   "va": "0x141C7EC70",
+   "source": "src/game/runs.cpp:25",
+   "verified": false,
+   "origin": "mecmp"
+  },
+  {
+   "name": "PamServerChallengeMarkerEntity",
+   "kind": "vtable",
+   "use": "+0x80 24-byte content id, +0xb8 author's trial name; data +0x68 CheckpointOrder, +0x6c Time",
+   "va": "0x141C7E3E8",
+   "source": "src/game/runs.cpp:42",
+   "verified": false,
+   "origin": "mecmp"
+  },
+  {
+   "name": "category PamSocialPlay*",
+   "kind": "constant",
+   "use": "message header: +0x08 category, +0x0c type",
+   "value": "0x54776FC6",
+   "source": "src/game/runs.cpp:27",
+   "verified": false,
+   "origin": "mecmp"
+  },
+  {
+   "name": "NamedChallengeFinished",
+   "kind": "constant",
+   "use": "message header: +0x08 category, +0x0c type",
+   "value": "0xD71D027F",
+   "source": "src/game/runs.cpp:28",
+   "verified": false,
+   "origin": "mecmp"
+  },
+  {
+   "name": "NamedChallengeStarted",
+   "kind": "constant",
+   "use": "message header: +0x08 category, +0x0c type",
+   "value": "0xC164590C",
+   "source": "src/game/runs.cpp:29",
+   "verified": false,
+   "origin": "mecmp"
+  },
+  {
+   "name": "NamedChallengeCancelled",
+   "kind": "constant",
+   "use": "message header: +0x08 category, +0x0c type",
+   "value": "0x9A9A27C6",
+   "source": "src/game/runs.cpp:30",
+   "verified": false,
+   "origin": "mecmp"
+  },
+  {
+   "name": "ChallengeFinished (player-made time trial)",
+   "kind": "constant",
+   "use": "message header: +0x08 category, +0x0c type",
+   "value": "0x9B35497C",
+   "source": "src/game/runs.cpp:35",
+   "verified": false,
+   "origin": "mecmp"
+  },
+  {
+   "name": "StartChallenge",
+   "kind": "constant",
+   "use": "message header: +0x08 category, +0x0c type",
+   "value": "0x1CCA484E",
+   "source": "src/game/runs.cpp:33",
+   "verified": false,
+   "origin": "mecmp"
+  },
+  {
+   "name": "RestartChallenge",
+   "kind": "constant",
+   "use": "message header: +0x08 category, +0x0c type",
+   "value": "0x72F865F9",
+   "source": "src/game/runs.cpp:33",
+   "verified": false,
+   "origin": "mecmp"
+  },
+  {
+   "name": "FLAG_TABLE",
+   "kind": "global",
+   "use": "pointer to the progression flag hash table",
+   "va": "0x14257C9D8",
+   "source": "docs/MEMORY.md (this kit)",
+   "verified": true,
+   "origin": "mec-ap"
+  },
+  {
+   "name": "EXCL_TYPEINFO",
+   "kind": "typeinfo",
+   "use": "PamMovementExclusionEntityData (the traversal items)",
+   "va": "0x142878C00",
+   "class_name": "PamMovementExclusionEntityData",
+   "source": "docs/MEMORY.md (this kit)",
+   "verified": true,
+   "origin": "mec-ap"
+  },
+  {
+   "name": "ENTITY_VTABLE",
+   "kind": "vtable",
+   "use": "flag-check entity class (apply targets)",
+   "va": "0x141C7B168",
+   "source": "docs/MEMORY.md (this kit)",
+   "verified": true,
+   "origin": "mec-ap"
+  },
+  {
+   "name": "APPLY",
+   "kind": "function",
+   "use": "void apply(Entity* e, int value, bool force): call with force = 0, game thread only",
+   "va": "0x143A75790",
+   "source": "docs/MEMORY.md (this kit)",
+   "verified": true,
+   "origin": "mec-ap",
+   "observed_bytes_2026_11_12": "48 89 5C 24 10 57 48 83 EC 20 8B 41 18 41 0F B6"
+  }
+ ]
+}
