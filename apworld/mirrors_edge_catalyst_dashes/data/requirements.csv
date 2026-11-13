@@ -1,0 +1,7 @@
+location,requires,source,notes
+# What each dash (and each star tier) or GridLeak needs, on top of its Dash Unlock. Same format as the other world's file.,,,
+# location: a location name or id (Dash - X / Dash - X - 2 Stars / one GridLeak - District NNN), category:Dash, category:GridLeak, or *.,,,
+# requires: item names joined with & or , (AND) and | (OR), parentheses allowed; Item:N for N copies. No row = nothing.,,,
+# A star tier with no row of its own needs what its dash's finish needs.,,,
+# Item names: Springboard, Climb Up, Ledge Hang, Progressive Wallrun (Wallrun / Double Wallrun), MAG Rope, the abilities in items.json, or aliases.,,,
+# Nothing is recorded yet: fill this in as dashes are played with moves missing.,,,
