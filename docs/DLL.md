@@ -1,8 +1,11 @@
 # An injected DLL: what it would add and everything needed to start one
 
-This is the research package. **A first implementation exists since 2026-11-12: `dll/`**, dashes
-only (finish + 1/2/3-star checks). It is written but not yet compiled or run; see
-`dll/README.md`. The `apply` queue, `localize`, an overlay and dash locking are not part of it.
+This is the research package. **An implementation exists: `dll/`** (see `dll/README.md`).
+- Dashes (finish + 1/2/3-star checks): built and tested end to end on 2026-11-12.
+- The `apply` queue (§5): working in game since 2026-11-13. Coil and FastClimb, received from a
+  dash, were applied on their live entities from the server tick and read back as 1. **Coil worked
+  in play right away, with no death or reload** (FastClimb: the tester was "pretty certain" it also worked without a reload).
+- `localize`, an overlay and dash locking are not part of it.
 
 **Almost every address on this page comes from another project's source.** The source is MECMP,
 a multiplayer mod for Catalyst: `github.com/CodeNameMeteor/mecmp`, MIT, version 0.9.0, commit
@@ -147,13 +150,19 @@ mecmp calls the original postUpdate first, then acts only when `world` equals
 - call with `force = 0`;
 - confirm `[e+0x78]` changed before reporting success.
 
-**Open:** which thread owns the flag-check entities. The tick hook runs on the *server* game
-thread. If those entities belong to the client world, `apply` belongs in the client hook instead.
-Settle this before the first call, not by trial.
+**Which thread: the server's (settled 2026-11-13, read-only).** Slot 0 of `ENTITY_VTABLE` is
+`getType`, `lea rax,[0x1428641A0]; ret`, and that TypeInfo's name is
+**`PamServerProgressionFlagEntity`**. The sender that triggers it at respawn (vtable `+0x1C3FCB0`,
+FINDINGS §60) reads as **`PamServerCharacterEntity`**. Both are server entities, so `apply` runs in
+the server tick hook. `dll/src/apply.cpp` implements this queue: the link thread scans for
+candidates; the tick re-reads the flag table, re-validates each entity and calls; the result
+reports `[e+0x78]` as read back. The `apply` function's first 24 bytes, read the same night, match
+FINDINGS §63's disassembly and are part of the DLL's build check.
 
-**Two mods on one slot.** mecmp's tick hook refuses a slot that does not hold the original. Ours
-should too. So mecmp and an AP DLL that both hook postUpdate cannot run together: whichever loads
-second backs off. Either pick another tick point or document "not with mecmp". Run the verify
+**Two mods on one slot.** mecmp's tick hook refuses a slot that does not hold the original.
+`mec_ap.dll` instead chains in front of whatever executable code is there, so loading mecmp first
+and then `mec_ap.dll` works for both (seen once, 2026-11-12). The other order turns mecmp's tick
+hook off. Run the verify
 script **without** mecmp loaded: its hooks would show up as mismatches.
 
 ## 6. Event-driven checks: the challenge messages
@@ -478,8 +487,8 @@ protects the next.
 | 4 | ContentId stable | the same dash in two sessions | the same ContentId. **Done 2026-11-12: across a full game restart** |
 | 5 | a slower replay fires | replay a dash, slower than the best | a Finished line with new record 0. **Done 2026-11-12: three slower runs, each sent Finished** |
 | 6 | `localize` is right | call it on a known `ID_OPP_*_LABEL` | the menu text from §78 |
-| 7 | which thread owns flag-check entities | read where they are created before calling anything | a definite answer |
-| 8 | `apply` from the hook | one `live_entity` ability, one call, `force = 0` | `[e+0x78]` changes and the ability works with no death |
+| 7 | which thread owns flag-check entities | read where they are created before calling anything | a definite answer. **Done 2026-11-13: server (`PamServerProgressionFlagEntity`), §5** |
+| 8 | `apply` from the hook | one `live_entity` ability, one call, `force = 0` | `[e+0x78]` changes and the ability works with no death. **Done 2026-11-13: Coil and FastClimb applied live (`[e+0x78]` read back 1, no crash). The first try (0.2.0) found no entity: it compared `[e+0x80]` with the address `node+0x10` instead of the pointer stored there; fixed in 0.2.1, see MEMORY.md §3** |
 
 Steps 1 to 5 need no code from this project. Step 1 uses the script that ships here, and steps 2
 to 5 use mecmp's release.

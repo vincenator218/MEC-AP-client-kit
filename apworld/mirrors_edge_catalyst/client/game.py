@@ -13,8 +13,10 @@ Rules from docs/MEMORY.md this module follows:
 * Report state, not intent. Every write is read back and compared.
 * Progression flags are written in exactly one place: ProgressionWriter.set_flag_for_item.
   mec_memory itself never writes them.
-* No `apply` calls. Abilities written here take effect at the next death or checkpoint
-  restart; see the Applier class for where a game-thread hook would plug in.
+* No `apply` calls from here: calling it from this (foreign) thread crashed the game twice.
+  The client asks mec_ap.dll to apply a written ability on the game's own thread
+  (client.py, dll_link.py); without the DLL it takes effect at the next death or checkpoint
+  restart.
 """
 from __future__ import annotations
 
@@ -121,20 +123,6 @@ class ProgressionWriter:
         return True
 
 
-class Applier:
-    """Where an immediate `apply` (MEMORY.md §3) would go.
-
-    It must run on the game's thread: calling it from a foreign thread crashed the game
-    twice, and no per-frame hook point has been chosen (OPEN_QUESTIONS.md #1). Until one
-    exists this does nothing and the ability takes effect at the next death or
-    checkpoint restart. A hook-backed implementation should return True only when it has
-    confirmed the entity's last-applied value ([e+0x78]) changed.
-    """
-
-    def apply_now(self, flag: str, value: int) -> bool:
-        return False
-
-
 class ExclusionDriver:
     """Keeps one movement exclusion volume asserting the blocked moves (MEMORY.md §5).
 
@@ -206,6 +194,7 @@ class TickResult:
     detected: set[int] = field(default_factory=set)
     flags_written: list[str] = field(default_factory=list)
     reasons: dict[str, str] = field(default_factory=dict)   # flag -> why it was written
+    values: dict[str, int] = field(default_factory=dict)    # flag -> the value written
     flags_failed: list[str] = field(default_factory=list)
     moves_ok: bool | None = None
     final_done: bool = False
@@ -218,7 +207,6 @@ class GameSession:
         self.mem = MecMemory()
         self.table = FlagTable(self.mem)
         self.writer = ProgressionWriter(self.table)
-        self.applier = Applier()
         self.moves = ExclusionDriver(self.mem)
         self._was_loaded = False
         self._last_table: int | None = None
@@ -329,7 +317,7 @@ class GameSession:
                 if self.writer.set_flag_for_item(flag, value, reason):
                     r.flags_written.append(flag)
                     r.reasons[flag] = reason
-                    self.applier.apply_now(flag, value)
+                    r.values[flag] = value
                 else:
                     r.flags_failed.append(flag)
             if plan.blocked is not None:

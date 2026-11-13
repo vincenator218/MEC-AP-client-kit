@@ -6,9 +6,10 @@
    (FINDINGS §88): the `ServerGameWorld` tick (slot `0x141B42D28`) and the client replay
    updater (`0x141C491A0`). They need an injected DLL. On 2026-11-12 both slots held the expected
    originals on our build, and so did all 24 strong checks (`tools/client/verify_dll_addresses.py`,
-   read-only). Nothing has been hooked or called yet. Everything needed to start, including the
-   apply queue, is in [`DLL.md`](DLL.md) §5. Still open there: which thread owns the flag-check
-   entities.
+   read-only). The flag-check entities are server entities (`PamServerProgressionFlagEntity`,
+   read 2026-11-13), so the call belongs in the server tick hook. `mec_ap.dll` 0.2.0 implements
+   it ([`DLL.md`](DLL.md) §5). **Works in game (2026-11-13, 0.2.1)**: Coil and FastClimb applied
+   live and read back, and Coil worked in play at once, with no respawn. Still to see: a persistent-entity ability (Focus), and taking one back.
 1a. **Event-driven checks instead of polling, and dashes as locations.** A message listener hears
    every finished named challenge (dash, delivery, grid node, billboard, MetaGrid) with its
    ContentId and time. Needs the DLL. Untested. See [`DLL.md`](DLL.md) §6 for the messages and

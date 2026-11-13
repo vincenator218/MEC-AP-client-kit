@@ -17,6 +17,7 @@ endif()
 
 add_library(mec_ap SHARED
   src/dllmain.cpp
+  src/apply.cpp
   src/build_check.cpp
   src/hooks.cpp
   src/listener.cpp

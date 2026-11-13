@@ -46,4 +46,20 @@ constexpr size_t Fin_ContentId = 0x48, Fin_Set = 0x4C, Fin_Delta = 0x50, Fin_Had
                  Fin_Record = 0x58, Fin_NewRecord = 0x60;
 constexpr size_t Msg_ContentId = 0x48; // Started, Cancelled, Activated: the same field
 
+// --- applying an ability (docs/MEMORY.md §2-§3; our own research, not MECMP) -------------------
+// The progression flag table: *FlagTable = table; +0x20 buckets, +0x28 bucket count; a node has
+// +0x00 hash, +0x10 a pointer to the flag's definition object (entities cache that pointer at
+// their +0x80; the definition holds the hash again at +0x10), +0x18 i32 value, +0x28 next.
+constexpr uintptr_t FlagTable = 0x14257C9D8;
+constexpr size_t Table_Buckets = 0x20, Table_Count = 0x28;
+constexpr size_t Node_Hash = 0x00, Node_Identity = 0x10, Node_Value = 0x18, Node_Next = 0x28;
+// PamServerProgressionFlagEntity: its vtable, and slot 0 (getType) is `lea rax,[TypeInfo]; ret`.
+// The class name was read through slot 0 on 2026-11-12; the TypeInfo was at this address.
+constexpr uintptr_t VT_ProgressionFlagEntity = 0x141C7B168;
+constexpr uintptr_t TI_PamServerProgressionFlagEntity = 0x1428641A0;
+constexpr size_t Ent_Flags = 0x18, Ent_Data = 0x28, Ent_LastValue = 0x78, Ent_Identity = 0x80;
+constexpr uint32_t kEntEnabled = 0x8, kEntLive = 0x2000;
+// void apply(entity, int value, bool force); always force = 0 (MEMORY.md §3).
+constexpr uintptr_t Fn_Apply = 0x143A75790;
+
 } // namespace mecap::addr

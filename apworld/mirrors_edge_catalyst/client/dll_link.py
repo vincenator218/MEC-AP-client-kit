@@ -6,6 +6,12 @@ whole protocol). Finished runs carry a sequence number and are kept in the DLL's
 this side acknowledges them, so a run finished while the client was closed, or before it had a
 slot, is sent again on the next connection. A finish is acknowledged only after the handler has
 dealt with it; the handler says when it could not yet (no slot), and the event is kept.
+
+It also carries ability applies: after the client writes an ability flag it sends
+{"cmd":"apply","id":N,"hash":"<djb2a hex>","value":V}, and the DLL calls the game's apply on the
+server game thread and answers {"ev":"applied","id":N,"result":...} with what the game shows.
+Only when the hello says "apply": true. Applies are live only; after a reconnect the client asks
+again.
 """
 from __future__ import annotations
 
@@ -21,13 +27,17 @@ PROTOCOL = 1
 RETRY_SEC = 3.0
 
 FinishedHandler = Callable[[dict], Awaitable[bool]]   # True: handled, acknowledge it
+EventHandler = Callable[[dict], None]
 
 
 class DllLink:
-    def __init__(self, on_finished: FinishedHandler,
-                 on_live: Callable[[dict], None] | None = None) -> None:
+    def __init__(self, on_finished: FinishedHandler, on_live: EventHandler | None = None,
+                 on_applied: EventHandler | None = None, on_hello: EventHandler | None = None) -> None:
         self.on_finished = on_finished
         self.on_live = on_live or (lambda ev: None)
+        self.on_applied = on_applied or (lambda ev: None)
+        self.on_hello = on_hello or (lambda ev: None)
+        self._next_id = 0
         self.hello: dict | None = None             # the DLL's last hello, None while not connected
         self.pending: dict[int, dict] = {}         # seq -> finish not yet acknowledged
         self._writer: asyncio.StreamWriter | None = None
@@ -36,6 +46,21 @@ class DllLink:
     @property
     def connected(self) -> bool:
         return self.hello is not None
+
+    @property
+    def can_apply(self) -> bool:
+        """The DLL is active and says it can apply abilities on this build."""
+        h = self.hello
+        return bool(h and h.get("build_ok") and h.get("apply"))
+
+    async def apply(self, flag_hash: int, value: int) -> int | None:
+        """Ask the DLL to apply a flag the client has written. The request id, or None."""
+        if not self.can_apply or self._writer is None:
+            return None
+        self._next_id += 1
+        await self._send({"cmd": "apply", "id": self._next_id, "hash": f"{flag_hash:08x}",
+                          "value": int(value)})
+        return self._next_id
 
     async def run(self, stop: asyncio.Event) -> None:
         while not stop.is_set():
@@ -84,7 +109,9 @@ class DllLink:
                 log.warning("mec_ap.dll speaks protocol %r, this client %d: update both.",
                             ev.get("proto"), PROTOCOL)
             if ev.get("build_ok"):
-                log.info("Connected to mec_ap.dll %s. Dash checks are on.", ev.get("dll"))
+                log.info("Connected to mec_ap.dll %s. Dash checks are on. %s", ev.get("dll"),
+                         "Received abilities apply immediately." if ev.get("apply") else
+                         f"Abilities still apply at the next respawn ({ev.get('apply_why') or 'no apply'}).")
             else:
                 log.warning("mec_ap.dll %s is loaded but inactive: %s. Dashes will not be "
                             "detected.", ev.get("dll"), ev.get("why") or "unknown reason")
@@ -93,6 +120,10 @@ class DllLink:
             await self.flush()
         elif kind in ("started", "cancelled"):
             self.on_live(ev)
+        elif kind == "applied":
+            self.on_applied(ev)
+        if kind == "hello":
+            self.on_hello(ev)
 
     async def flush(self) -> None:
         for seq in sorted(self.pending):

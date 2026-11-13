@@ -15,10 +15,12 @@ from CommonClient import (ClientCommandProcessor, CommonContext, get_base_parser
                           handle_url_arg, logger, server_loop)
 from NetUtils import ClientStatus
 
-from ..data import DASH, DASHES_BY_CONTENT_ID, GAME, ITEMS, LOCATIONS_BY_ID, MACGUFFIN_NAME
+from ..data import (DASH, DASHES_BY_CONTENT_ID, DOUBLE_WALLRUN_FLAG, GAME, ITEMS, LOCATIONS_BY_ID,
+                    MACGUFFIN_NAME)
 from .dll_link import DllLink
 from .game import GameSession, TickResult
-from .plan import build_plan, dash_checks, received_names
+from .mec_memory import djb2a
+from .plan import build_plan, dash_checks, desired_flags, received_names
 
 TICK_SEC = 1.0
 IDLE_SEC = 3.0
@@ -31,6 +33,22 @@ APPLIES_WHEN = {
     "persistent_entity": "takes effect at your next death or checkpoint restart",
     "table_write_reload": "appears in the replay menu after the next load (checkpoint restart)",
 }
+# Flags a flag-check entity enforces: mec_ap.dll can apply these immediately (docs/MEMORY.md §3).
+APPLY_METHODS = ("live_entity", "persistent_entity")
+# What an apply result means for the player. Anything not "now" falls back to the next respawn.
+APPLY_NOW = ("applied", "already")
+APPLY_RETRY = ("table_mismatch",)     # the game changed the flag first; the next tick writes again
+
+
+def flag_label(flag: str) -> str:
+    names = [n for n, i in ITEMS.items() if i.flag == flag]
+    return names[0] if names else flag
+
+
+def appliable(flag: str) -> bool:
+    if flag == DOUBLE_WALLRUN_FLAG:   # no item of its own (Progressive Wallrun #2); a live entity
+        return True
+    return any(i.flag == flag and i.grant_method in APPLY_METHODS for i in ITEMS.values())
 
 
 class MECCommandProcessor(ClientCommandProcessor):
@@ -69,7 +87,9 @@ class MECContext(CommonContext):
         self.reject_volume = False
         self.warned: set[str] = set()
         self.last: TickResult = TickResult()
-        self.dll = DllLink(self.on_dash_finished, self.on_dash_live)
+        self.dll = DllLink(self.on_dash_finished, self.on_dash_live, self.on_applied, self.on_dll_hello)
+        self.applying: dict[int, tuple[str, int, bool]] = {}   # request id -> (flag, value, quiet)
+        self.dll_reapply = False          # the DLL just connected: apply what is already written
 
     # ---------------------------------------------------------------- server
     async def server_auth(self, password_requested: bool = False):
@@ -142,7 +162,11 @@ class MECContext(CommonContext):
                 logger.info("Check: %s", self.location_names.lookup_in_game(lid))
 
         for flag in r.flags_written:
-            self.log_grant(flag, r.reasons.get(flag, ""))
+            value = r.values.get(flag, 1)
+            now = appliable(flag) and await self.request_apply(flag, value, quiet=False)
+            self.log_grant(flag, r.reasons.get(flag, ""), applying=now)
+        if self.dll_reapply and self.dll.can_apply and self.writes_allowed():
+            await self.reapply_all()
         for flag in r.flags_failed:
             self.warn_once(f"flag:{flag}", f"Could not set {flag}; will keep trying.")
         if r.moves_ok is False:
@@ -153,16 +177,69 @@ class MECContext(CommonContext):
 
         await self.check_goal(r)
 
-    def log_grant(self, flag: str, reason: str) -> None:
-        names = [n for n, i in ITEMS.items() if i.flag == flag]
-        label = names[0] if names else flag
+    def log_grant(self, flag: str, reason: str, applying: bool = False) -> None:
+        label = flag_label(flag)
         if reason.startswith("not received"):
-            logger.info("Took back %s: %s", label, reason)
+            logger.info("Took back %s: %s%s", label, reason,
+                        " (applying now through mec_ap.dll)" if applying else "")
+            return
+        if applying:
+            logger.info("Applied %s (%s): applying now through mec_ap.dll.", label, reason or flag)
             return
         # Unlocks_DoubleWallrun has no item of its own (Progressive Wallrun #2); it is a live entity
-        method = ITEMS[names[0]].grant_method if names else "live_entity"
+        method = ITEMS[label].grant_method if label in ITEMS else "live_entity"
         when = APPLIES_WHEN.get(method, "")
         logger.info("Applied %s (%s)%s", label, reason or flag, f": {when}." if when else ".")
+
+    # ---------------------------------------------------------- applying now
+    async def request_apply(self, flag: str, value: int, quiet: bool) -> bool:
+        """Ask mec_ap.dll to apply a flag already written. False when it cannot."""
+        if not self.dll.can_apply:
+            return False
+        req = await self.dll.apply(djb2a(flag), value)
+        if req is None:
+            return False
+        self.applying[req] = (flag, value, quiet)
+        return True
+
+    async def reapply_all(self) -> None:
+        """The DLL connected after the flags were written: the entities may still hold the old
+        value until a respawn. Ask for every ability flag the slot holds; the DLL answers
+        "already" for the ones that are fine, and only real changes are logged."""
+        self.dll_reapply = False
+        have = received_names(i.item for i in self.items_received)
+        n = 0
+        for flag, (value, _reason) in desired_flags(have, self.slot_data or {}).items():
+            if appliable(flag) and await self.request_apply(flag, value, quiet=True):
+                n += 1
+        if n:
+            logger.info("mec_ap.dll connected: checking %d abilities in game.", n)
+
+    def on_dll_hello(self, ev: dict) -> None:
+        self.applying.clear()             # results for an old connection never come
+        self.dll_reapply = bool(ev.get("build_ok") and ev.get("apply"))
+
+    def on_applied(self, ev: dict) -> None:
+        req = self.applying.pop(ev.get("id"), None)
+        if req is None:
+            return
+        flag, value, quiet = req
+        label, result = flag_label(flag), ev.get("result")
+        what = "taken back" if value == 0 else "active"
+        if result == "applied":
+            logger.info("%s is %s now (read back from the game).", label, what)
+        elif result == "already":
+            if not quiet:
+                logger.info("%s was already %s in game.", label, what)
+        elif result in APPLY_RETRY:
+            logger.debug("Apply %s: the game changed the flag first; writing it again.", label)
+        elif result == "fault":
+            self.warn_once("apply_fault", "mec_ap.dll hit an error inside the game while applying "
+                                          f"{label} and stopped applying. Abilities now take effect "
+                                          "at the next respawn; restart the game to try again.")
+        elif not quiet:                   # a re-check only reports what it changed
+            logger.info("%s takes effect at your next death or checkpoint restart (mec_ap.dll: %s).",
+                        label, result)
 
     def warn_once(self, key: str, msg: str) -> None:
         if key not in self.warned:
@@ -241,8 +318,10 @@ class MECContext(CommonContext):
             logger.info("Moves blocked (read back from the game): %s", ", ".join(gone) or "none")
         if self.dll.connected:
             h = self.dll.hello
-            logger.info("mec_ap.dll %s: %s.", h.get("dll"),
-                        "active" if h.get("build_ok") else f"inactive ({h.get('why')})")
+            logger.info("mec_ap.dll %s: %s; abilities %s.", h.get("dll"),
+                        "active" if h.get("build_ok") else f"inactive ({h.get('why')})",
+                        "apply immediately" if self.dll.can_apply else
+                        f"apply at the next respawn ({h.get('apply_why') or 'not supported'})")
         elif self.slot_data.get("dashes"):
             logger.info("mec_ap.dll: not connected. Dashes are not detected until it is.")
         if self.dll.pending:

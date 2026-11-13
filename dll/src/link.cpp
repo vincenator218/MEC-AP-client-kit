@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "apply.h"
 #include "listener.h"
 #include "log.h"
 #include "version.h"
@@ -21,15 +22,48 @@ namespace mecap::link {
 namespace {
 
 bool g_buildOk = false;
-std::string g_why;
+std::string g_why, g_applyWhy;
+std::vector<apply::Request> g_applyRequests; // read from the client, submitted once per loop
 std::wstring g_journalPath, g_ackedPath;
 long long g_lastSeq = 0, g_acked = 0;
 SOCKET g_listen = INVALID_SOCKET, g_client = INVALID_SOCKET;
 std::string g_inbuf;
 
-long long seqOf(const std::string& line) {
-    const size_t at = line.find("\"seq\":");
-    return at == std::string::npos ? 0 : std::atoll(line.c_str() + at + 6);
+// The number after "key": in a flat JSON line (our own protocol: no nesting, no spaces in keys).
+long long numOf(const std::string& line, const char* key, long long fallback = 0) {
+    const std::string k = std::string("\"") + key + "\":";
+    const size_t at = line.find(k);
+    if (at == std::string::npos) return fallback;
+    size_t p = at + k.size();
+    while (p < line.size() && line[p] == ' ') ++p;
+    return std::strtoll(line.c_str() + p, nullptr, 10);
+}
+
+long long seqOf(const std::string& line) { return numOf(line, "seq"); }
+
+// The string after "key": ("key": "x" or "key":"x"), or "" when missing.
+std::string strOf(const std::string& line, const char* key) {
+    const std::string k = std::string("\"") + key + "\":";
+    size_t p = line.find(k);
+    if (p == std::string::npos) return "";
+    p += k.size();
+    while (p < line.size() && line[p] == ' ') ++p;
+    if (p >= line.size() || line[p] != '"') return "";
+    const size_t end = line.find('"', p + 1);
+    return end == std::string::npos ? "" : line.substr(p + 1, end - p - 1);
+}
+
+std::string cmdOf(const std::string& line) { return strOf(line, "cmd"); }
+
+// "hash": "67800619" -> 0x67800619; 0 when missing.
+uint32_t hashOf(const std::string& line) {
+    return static_cast<uint32_t>(std::strtoul(strOf(line, "hash").c_str(), nullptr, 16));
+}
+
+std::string jsonSafe(const std::string& s) {
+    std::string out;
+    for (char c : s) out += (c == '"' || c == '\\') ? '\'' : c;
+    return out;
 }
 
 std::vector<std::string> journalLines() {
@@ -87,12 +121,13 @@ bool sendLine(const std::string& line) {
 }
 
 void sendHello() {
-    std::string why;
-    for (char c : g_why) why += (c == '"' || c == '\\') ? '\'' : c;
-    char b[512];
+    char b[768];
+    const bool canApply = apply::enabled();
     snprintf(b, sizeof(b),
-             "{\"ev\":\"hello\",\"proto\":%d,\"dll\":\"%s\",\"build_ok\":%s,\"why\":\"%s\",\"acked\":%lld,\"last\":%lld}",
-             kProtocol, kVersion, g_buildOk ? "true" : "false", why.c_str(), g_acked, g_lastSeq);
+             "{\"ev\":\"hello\",\"proto\":%d,\"dll\":\"%s\",\"build_ok\":%s,\"why\":\"%s\",\"apply\":%s,"
+             "\"apply_why\":\"%s\",\"acked\":%lld,\"last\":%lld}",
+             kProtocol, kVersion, g_buildOk ? "true" : "false", jsonSafe(g_why).c_str(), canApply ? "true" : "false",
+             canApply ? "" : jsonSafe(g_applyWhy).c_str(), g_acked, g_lastSeq);
     if (!sendLine(b)) return;
     for (const std::string& line : journalLines())
         if (seqOf(line) > g_acked && !sendLine(line)) return;
@@ -122,6 +157,18 @@ void onEvent(const listener::Event& e) {
     sendLine(b);
 }
 
+// What the game showed after an apply request. Live only: the client re-asks after a reconnect.
+void onApplied(const apply::Result& r) {
+    LOG("apply %s=%d: %s (%d entities check it, %d targeted%s)", hex8(r.hash).c_str(), r.value, r.result, r.matched,
+        r.targets, r.live ? ", the live one" : "");
+    char b[256];
+    snprintf(b, sizeof(b),
+             "{\"ev\":\"applied\",\"id\":%u,\"hash\":\"%s\",\"value\":%d,\"result\":\"%s\",\"matched\":%d,"
+             "\"targets\":%d,\"live\":%s}",
+             r.id, hex8(r.hash).c_str(), r.value, r.result, r.matched, r.targets, r.live ? "true" : "false");
+    sendLine(b);
+}
+
 void readClient() {
     char buf[512];
     for (;;) {
@@ -139,12 +186,18 @@ void readClient() {
         while ((nl = g_inbuf.find('\n')) != std::string::npos) {
             const std::string line = g_inbuf.substr(0, nl);
             g_inbuf.erase(0, nl + 1);
-            if (line.find("\"ack\"") != std::string::npos) {
+            if (cmdOf(line) == "ack") {
                 const long long seq = seqOf(line);
                 if (seq > g_acked && seq <= g_lastSeq) {
                     g_acked = seq;
                     saveAcked();
                 }
+            } else if (cmdOf(line) == "apply") {
+                const long long value = numOf(line, "value", -1);
+                const uint32_t hash = hashOf(line);
+                const auto id = static_cast<uint32_t>(numOf(line, "id"));
+                if (hash && value >= 0 && value <= 0xFFFF && g_applyRequests.size() < 256)
+                    g_applyRequests.push_back({id, hash, static_cast<int32_t>(value)});
             }
         }
         if (g_inbuf.size() > 65536) g_inbuf.clear();
@@ -188,15 +241,21 @@ DWORD WINAPI run(void*) {
         }
         for (const listener::Event& e : listener::drain()) onEvent(e);
         if (g_client != INVALID_SOCKET) readClient();
+        if (!g_applyRequests.empty()) {
+            apply::submit(g_applyRequests); // the scan runs here, on this thread, not the game's
+            g_applyRequests.clear();
+        }
+        for (const apply::Result& r : apply::drainResults()) onApplied(r);
         Sleep(100);
     }
 }
 
 } // namespace
 
-void start(bool buildOk, const std::string& why) {
+void start(bool buildOk, const std::string& why, const std::string& applyWhy) {
     g_buildOk = buildOk;
     g_why = why;
+    g_applyWhy = applyWhy;
     g_journalPath = mecap::log::dllFolder() + L"mec_ap_events.jsonl";
     g_ackedPath = mecap::log::dllFolder() + L"mec_ap_acked.txt";
     loadState();

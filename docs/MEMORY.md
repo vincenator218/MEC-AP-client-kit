@@ -46,7 +46,7 @@ while node:
 | node offset | field |
 |---|---|
 | `+0x00` | u32 hash |
-| `+0x10` | pointer that flag-check entities cache as their flag identity (see §3) |
+| `+0x10` | pointer to the flag's definition object. Flag-check entities cache **this pointer** (the value stored here, not the address `node+0x10`) as their flag identity (see §3) |
 | `+0x18` | **i32 value** (0/1 for booleans; counts and times for others) |
 | `+0x28` | next node in the bucket chain |
 
@@ -90,12 +90,14 @@ What `APPLY` does (from disassembly):
 | `+0x28` | `data`: the static per-ability definition |
 | `+0x68` / `+0x70` | int / bool output ports |
 | `+0x78` | last applied value |
-| `+0x80` | cached flag identity = `node + 0x10` of the flag it checks |
+| `+0x80` | cached flag identity = `*(node + 0x10)`, the definition pointer stored in the flag's node. The definition object has the flag's hash at its own `+0x10` |
 
 ### Finding the right entity
 
 Scan writable memory for objects whose first qword is `base + 0x1C7B168` and
-whose `[e+0x80] == node+0x10`. There are about 1100 such entities in total, and only a
+whose `[e+0x80] == [node+0x10]` (the qword **stored** at `node+0x10`; the CE prototype's
+`readQword(n + 0x10)`). Checked 2026-11-13 on all 1116 entities in a loaded level: every one
+resolves this way, and none resolves to the address `node+0x10`. There are about 1100 such entities in total, and only a
 few match any one flag. Then:
 
 1. **If one has `[e+0x18] & 0x2000`** (the per-spawn instance), call `apply` on it.
@@ -197,8 +199,10 @@ vertical traversal", and world logic must not assume it does.
 
 - **Threading.** The prototype calls `apply` through Cheat Engine's `executeCodeEx`,
   which runs it on a new thread. That crashed the game twice over several dozen calls. A real
-  client must make the call **on the game's thread**, for example by hooking a per-frame
-  function and draining a queue of pending grants there. No hook point has been chosen yet.
+  client must make the call **on the game's thread**: the flag-check entities are
+  `PamServerProgressionFlagEntity`, so the server game thread (read 2026-11-13). `mec_ap.dll`
+  drains a queue of applies in its server tick hook (`docs/DLL.md` §5). First calls in game on
+  2026-11-13: Coil and FastClimb applied on their live entities, read back, no crash.
 - **Never broadcast `apply` to every matching entity** (see §3 rule 3).
 - **The autosave can happen at any time**, not only at checkpoints. Any test value
   in the table can end up in the save. For a client that's the point. For testing, keep

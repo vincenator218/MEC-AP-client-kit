@@ -19,11 +19,18 @@ the client acknowledged seq 1, and the client logged the dash start too.
 ## What it does, and what it does not
 
 - It **reads** the game's "challenge finished / started / cancelled" messages.
+- **Abilities now (since 0.2.0; working since 0.2.1, 2026-11-13).** After the client writes an ability flag, it
+  asks the DLL to apply it. On the server game thread the DLL re-reads the flag table (it does
+  nothing if the game disagrees with the client), re-validates the flag-check entity, and calls the
+  game's `apply(entity, value, 0)`. It follows `docs/MEMORY.md` §3: the per-spawn entity if there is
+  one, else at most 3 persistent ones with their own data, else nothing, so world objects are
+  never called. It answers with `[e+0x78]` as read back. If this is off (its own check failed, or
+  no DLL), abilities apply at the next death or checkpoint restart as before.
 - It changes game memory in exactly **two places**: one pointer each in the vtables of the
   server tick and the client replay updater. That is how it gets onto the game's own threads to
   register its listener. No game code is patched.
-- It writes **no progression flags**, no save data, and calls no game function except
-  `MessageManager_registerListener`.
+- It writes **no progression flags** and no save data. It calls two game functions:
+  `MessageManager_registerListener` and the flag entity's `apply`.
 - It does **not** stop you from starting a dash (there is no per-dash lock in the game; §11d).
 - Before touching anything it checks the game build (3 TypeInfo objects, the 2 hook slots, the
   listener function's first bytes). On any mismatch it hooks nothing and tells the client why.
@@ -92,6 +99,7 @@ can connect.
 | `src/hooks.cpp` | the two vtable-slot hooks |
 | `src/listener.cpp` | the message listener; turns messages into events |
 | `src/link.cpp` | journal and TCP link to the client |
+| `src/apply.cpp` | ability applies: entity scan, the server-tick queue, the checks |
 | `src/addresses.h` | every game address used (all are in `data/dll_addresses.json`) |
 | `src/mem.h` | safe reads, the slot swap |
 | `inject/mec_ap_inject.cpp` | the loader |
@@ -100,6 +108,10 @@ Credit: the hooking method, listener layout, message fields and addresses come f
 see `THIRD_PARTY_NOTICES.md`.
 
 ## Not verified yet
+
+- ability applies beyond the first two: a persistent-entity ability (Focus), taking one back
+  (`revert_skill_tree_purchases`), and many applies in one session. Done so far: Coil and
+  FastClimb applied live (2026-11-13, 0.2.1), and Coil worked in play at once, no respawn;
 
 - `started` with MECMP loaded first: it was logged without MECMP (second run) but not in the first
   run, which had MECMP loaded; `cancelled` has not been seen yet;

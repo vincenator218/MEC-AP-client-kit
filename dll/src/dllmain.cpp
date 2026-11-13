@@ -1,9 +1,12 @@
 // mec_ap.dll: the Archipelago agent inside Mirror's Edge Catalyst.
 //
-// It does one thing: tell the Archipelago client (apworld client/, over 127.0.0.1) when a dash or
-// any other named challenge is started, cancelled or finished, with the run's time. It writes no
-// progression flags, calls no game function except MessageManager_registerListener, and changes
-// game memory in exactly two places: the tick and client-updater vtable slots (hooks.cpp).
+// It does two things for the Archipelago client (apworld client/, over 127.0.0.1):
+//   * tells it when a dash or any other named challenge is started, cancelled or finished;
+//   * when asked, applies an ability flag the client has just written, on the server game thread
+//     (apply.cpp), so a received ability works now instead of at the next respawn.
+// It writes no progression flags, calls no game functions except MessageManager_registerListener
+// and the flag entity's apply, and changes game memory in exactly two places: the tick and
+// client-updater vtable slots (hooks.cpp).
 //
 // Startup, on a thread of its own (never inside DllMain: loader lock):
 //   1. wait for the engine's TypeInfo list (build_check.cpp);
@@ -16,6 +19,7 @@
 
 #include <string>
 
+#include "apply.h"
 #include "build_check.h"
 #include "hooks.h"
 #include "link.h"
@@ -35,9 +39,11 @@ DWORD WINAPI start(void* module) {
         ok = false;
         why = "the hooks could not be installed (see mec_ap.log)";
     }
+    std::string applyWhy = "the DLL is inactive";
     if (!ok) LOG("inactive: %s. Nothing in the game was changed.", why.c_str());
     else LOG("ready. Dashes and other challenges are reported to the Archipelago client.");
-    mecap::link::start(ok, why);
+    if (ok && !mecap::apply::check(applyWhy)) LOG("apply: off: %s. Abilities apply at the next respawn.", applyWhy.c_str());
+    mecap::link::start(ok, why, applyWhy);
     return 0;
 }
 

@@ -6,6 +6,7 @@
 #include <cstdint>
 
 #include "addresses.h"
+#include "apply.h"
 #include "listener.h"
 #include "log.h"
 #include "mem.h"
@@ -31,6 +32,7 @@ std::atomic<uint32_t> g_ticks{0};
 void postUpdate(void* world, void* updateInfo) {
     g_origPostUpdate(world, updateInfo);
     if (g_ticks.fetch_add(1) % 30 == 0) listener::registerServer(); // about once a second
+    apply::onServerTick(); // the flag-check entities are server entities: this is their thread
 }
 
 // Client thread, per frame (one call per updater object).
