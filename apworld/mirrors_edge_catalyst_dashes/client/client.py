@@ -1,0 +1,378 @@
+"""
+The Mirror's Edge Catalyst Dashes client: Archipelago on one side, the running game on the other.
+
+* Dashes: mec_ap.dll reports each finished run (dll_link.py). A run counts only if its Dash
+  Unlock has been received (the soft lock: nothing stops the dash in game); it then sends the
+  finish check and every star tier the time beat. A locked run is dropped and must be redone.
+* GridLeaks: polled from the progression flags, as count checks per district.
+* Items: moves are blocked or freed through a movement volume; abilities are written to the flag
+  table (game.ProgressionWriter, the one write path) and applied at once through the DLL when it
+  is there, otherwise at the next respawn. Dash Unlocks change nothing in the game.
+* Goal: enough star checks sent.
+"""
+from __future__ import annotations
+
+import asyncio
+import logging
+
+import Utils
+from CommonClient import (ClientCommandProcessor, CommonContext, get_base_parser, gui_enabled,
+                          handle_url_arg, logger, server_loop)
+from NetUtils import ClientStatus
+
+from ..data import (DASHES_BY_CONTENT_ID, DOUBLE_WALLRUN_FLAG, GAME, ITEMS, LOCATIONS_BY_ID,
+                    GRIDLEAK_CATEGORY)
+from .dll_link import DllLink
+from .game import GameSession, TickResult
+from .mec_memory import djb2a
+from .plan import (build_plan, dash_checks, dash_unlocked, desired_flags, received_names,
+                   stars_checked, unlocked_dashes)
+
+TICK_SEC = 1.0
+IDLE_SEC = 3.0
+# More already-collected GridLeak checks than this on the first look at a save means it is
+# probably not this slot's seed save. Hold the checks and every write until /confirm_save.
+FIRST_LOOK_LIMIT = 10
+
+APPLY_METHODS = ("live_entity", "persistent_entity")
+
+
+def flag_label(flag: str) -> str:
+    names = [n for n, i in ITEMS.items() if i.flag == flag]
+    return names[0] if names else flag
+
+
+def appliable(flag: str) -> bool:
+    if flag == DOUBLE_WALLRUN_FLAG:   # no item of its own (Progressive Wallrun #2); a live entity
+        return True
+    return any(i.flag == flag and i.grant_method in APPLY_METHODS for i in ITEMS.values())
+
+
+class MECDCommandProcessor(ClientCommandProcessor):
+    ctx: "MECDContext"
+
+    def _cmd_mec(self) -> bool:
+        """Show the game connection, stars, unlocked dashes, moves and anything on hold."""
+        self.ctx.report_status()
+        return True
+
+    def _cmd_dashes(self) -> bool:
+        """List the dashes you hold an unlock for."""
+        self.ctx.report_dashes()
+        return True
+
+    def _cmd_confirm_save(self) -> bool:
+        """This IS the right save: send the held checks and start applying items."""
+        self.ctx.confirm_save()
+        return True
+
+    def _cmd_next_volume(self) -> bool:
+        """Moves that should be blocked are not: drive a different movement volume."""
+        self.ctx.reject_volume = True
+        logger.info("Switching to another movement volume on the next tick.")
+        return True
+
+
+class MECDContext(CommonContext):
+    game = GAME
+    items_handling = 0b111              # everything, including our own and start inventory
+    command_processor = MECDCommandProcessor
+
+    def __init__(self, server_address, password):
+        super().__init__(server_address, password)
+        self.session = GameSession()
+        self.slot_data: dict | None = None
+        self.first_look_done = False
+        self.save_confirmed = False
+        self.held: set[int] = set()
+        self.goal_sent = False
+        self.reject_volume = False
+        self.warned: set[str] = set()
+        self.last: TickResult = TickResult()
+        self.sent: set[int] = set()       # checks sent this session (before the server echoes them)
+        self.dll = DllLink(self.on_dash_finished, self.on_dash_live, self.on_applied, self.on_dll_hello)
+        self.applying: dict[int, tuple[str, int, bool]] = {}   # request id -> (flag, value, quiet)
+        self.dll_reapply = False
+
+    # ---------------------------------------------------------------- server
+    async def server_auth(self, password_requested: bool = False):
+        if password_requested and not self.password:
+            await super().server_auth(password_requested)
+        await self.get_username()
+        await self.send_connect()
+
+    def on_package(self, cmd: str, args: dict):
+        if cmd == "Connected":
+            self.slot_data = args.get("slot_data") or {}
+            self.goal_sent = self.finished_game
+            self.first_look_done = False
+            logger.info("Load your seed save in the game. Items are applied once the client has "
+                        "looked at it. Dashes need mec_ap.dll; you need %d stars to win.",
+                        self.slot_data.get("stars_required", 0))
+            asyncio.create_task(self.check_goal())
+
+    async def disconnect(self, allow_autoreconnect: bool = False):
+        self.slot_data = None
+        await super().disconnect(allow_autoreconnect)
+
+    def make_gui(self):
+        ui = super().make_gui()
+        ui.base_title = "Archipelago Mirror's Edge Catalyst Dashes Client"
+        return ui
+
+    async def shutdown(self):
+        await super().shutdown()
+        await asyncio.to_thread(self.session.shutdown)
+
+    def have(self):
+        return received_names(i.item for i in self.items_received)
+
+    # ------------------------------------------------------------------ plan
+    def writes_allowed(self) -> bool:
+        return (self.slot_data is not None and self.first_look_done
+                and (not self.held or self.save_confirmed))
+
+    def make_plan(self):
+        if self.slot_data is None:
+            return build_plan([], {}, {}, False)
+        watch = {lid: LOCATIONS_BY_ID[lid] for lid in self.missing_locations - self.held
+                 if lid in LOCATIONS_BY_ID and LOCATIONS_BY_ID[lid].category == GRIDLEAK_CATEGORY}
+        plan = build_plan([i.item for i in self.items_received], watch, self.slot_data,
+                          self.writes_allowed())
+        plan.reject_volume, self.reject_volume = self.reject_volume, False
+        return plan
+
+    # ---------------------------------------------------------------- results
+    async def send_checks(self, ids: set[int]) -> None:
+        if not ids:
+            return
+        self.sent |= ids
+        await self.check_locations(ids)
+        for lid in sorted(ids):
+            logger.info("Check: %s", self.location_names.lookup_in_game(lid))
+        await self.check_goal()
+
+    async def handle(self, r: TickResult) -> None:
+        if self.last.attached and not r.attached:
+            logger.info("Lost the game. Waiting for it to come back...")
+            self.first_look_done = False
+        if r.just_loaded:
+            logger.info("World loaded. Re-applying every received item.")
+        self.last = r
+        if not r.loaded or self.slot_data is None:
+            return
+
+        new = r.detected & self.missing_locations
+        if not self.first_look_done:
+            self.first_look_done = True
+            if len(new) > FIRST_LOOK_LIMIT and not self.save_confirmed:
+                self.held = set(new)
+                logger.warning(
+                    "This save already has %d GridLeak checks this slot has never sent. It may not "
+                    "be your seed save. Nothing has been sent and nothing will be written. If this "
+                    "is the right save, type /confirm_save.", len(new))
+                return
+        await self.send_checks(new)
+
+        for flag in r.flags_written:
+            value = r.values.get(flag, 1)
+            now = appliable(flag) and await self.request_apply(flag, value, quiet=False)
+            self.log_grant(flag, r.reasons.get(flag, ""), applying=now)
+        for flag in r.flags_failed:
+            self.warn_once(f"flag:{flag}", f"Could not set {flag}; will keep trying.")
+        if self.dll_reapply and self.dll.can_apply and self.writes_allowed():
+            await self.reapply_all()
+        if r.moves_ok is False:
+            self.warn_once("moves", "Could not find a movement volume to hold the blocked moves "
+                                    "yet. Retrying.")
+        elif r.moves_ok:
+            self.warned.discard("moves")
+
+    def log_grant(self, flag: str, reason: str, applying: bool = False) -> None:
+        label = flag_label(flag)
+        if reason.startswith("not received"):
+            logger.info("Took back %s: %s%s", label, reason,
+                        " (applying now through mec_ap.dll)" if applying else "")
+        elif applying:
+            logger.info("Received %s: applying now through mec_ap.dll.", label)
+        else:
+            logger.info("Received %s: takes effect at your next death or checkpoint restart "
+                        "(mec_ap.dll is not connected).", label)
+
+    def warn_once(self, key: str, msg: str) -> None:
+        if key not in self.warned:
+            self.warned.add(key)
+            logger.warning(msg)
+
+    async def check_goal(self) -> None:
+        if self.goal_sent or self.slot_data is None or self.slot is None:
+            return
+        need = self.slot_data.get("stars_required", 0)
+        if need and stars_checked(self.checked_locations | self.sent) >= need:
+            await self.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
+            self.goal_sent = self.finished_game = True
+            logger.info("%d stars: goal complete!", need)
+
+    # ---------------------------------------------------------- applying now
+    async def request_apply(self, flag: str, value: int, quiet: bool) -> bool:
+        if not self.dll.can_apply:
+            return False
+        req = await self.dll.apply(djb2a(flag), value)
+        if req is None:
+            return False
+        self.applying[req] = (flag, value, quiet)
+        return True
+
+    async def reapply_all(self) -> None:
+        """The DLL connected after the flags were written: ask for every ability flag the slot
+        holds; it answers "already" for the ones that are fine, and only real changes are logged."""
+        self.dll_reapply = False
+        for flag, (value, _reason) in desired_flags(self.have(), self.slot_data or {}).items():
+            if appliable(flag):
+                await self.request_apply(flag, value, quiet=True)
+
+    def on_dll_hello(self, ev: dict) -> None:
+        self.applying.clear()
+        self.dll_reapply = bool(ev.get("build_ok") and ev.get("apply"))
+
+    def on_applied(self, ev: dict) -> None:
+        req = self.applying.pop(ev.get("id"), None)
+        if req is None:
+            return
+        flag, value, quiet = req
+        label, result = flag_label(flag), ev.get("result")
+        what = "taken back" if value == 0 else "active"
+        if result == "applied":
+            logger.info("%s is %s now (read back from the game).", label, what)
+        elif result == "already":
+            if not quiet:
+                logger.info("%s was already %s in game.", label, what)
+        elif result == "table_mismatch":
+            logger.debug("Apply %s: the game changed the flag first; writing it again.", label)
+        elif result == "fault":
+            self.warn_once("apply_fault", "mec_ap.dll hit an error inside the game while applying "
+                                          f"{label} and stopped applying. Abilities now take effect "
+                                          "at the next respawn; restart the game to try again.")
+        elif not quiet:
+            logger.info("%s takes effect at your next death or checkpoint restart (mec_ap.dll: %s).",
+                        label, result)
+
+    # ----------------------------------------------------------------- dashes
+    @staticmethod
+    def dash_of(content_id: str) -> str | None:
+        try:
+            locs = DASHES_BY_CONTENT_ID.get(int(content_id, 16))
+        except (TypeError, ValueError):
+            return None
+        return locs[0].dash if locs else None
+
+    async def on_dash_finished(self, ev: dict) -> bool:
+        """A finished run from the DLL. False keeps it for later (no slot yet)."""
+        if self.slot_data is None or self.slot is None:
+            return False
+        dash = self.dash_of(ev.get("content_id"))
+        if dash is None:
+            return True                       # a delivery, billboard...: not a check here
+        run = int(ev.get("run_cs", 0))
+        if not dash_unlocked(self.have(), dash):
+            logger.info("Dash finished: %s in %d.%02d s, but you do not hold its Dash Unlock yet. "
+                        "This run does not count; run it again once the unlock arrives.",
+                        dash, run // 100, run % 100)
+            return True
+        logger.info("Dash finished: %s in %d.%02d s.", dash, run // 100, run % 100)
+        await self.send_checks(dash_checks(int(ev["content_id"], 16), run) & self.missing_locations)
+        return True
+
+    def on_dash_live(self, ev: dict) -> None:
+        dash = self.dash_of(ev.get("content_id"))
+        if dash:
+            locked = "" if self.slot_data is None or dash_unlocked(self.have(), dash) else \
+                " (locked: this run will not count)"
+            logger.info("Dash %s: %s%s.", ev.get("ev"), dash, locked)
+
+    # --------------------------------------------------------------- commands
+    def confirm_save(self) -> None:
+        self.save_confirmed = True
+        if self.held:
+            held, self.held = self.held, set()
+            asyncio.create_task(self.send_checks(held))
+            logger.info("Sending %d held checks; items will now be applied.", len(held))
+        else:
+            logger.info("Nothing was on hold.")
+
+    def report_dashes(self) -> None:
+        if self.slot_data is None:
+            logger.info("Not connected to a slot.")
+            return
+        dashes = sorted(unlocked_dashes(self.have()))
+        logger.info("Unlocked dashes (%d/22): %s", len(dashes), ", ".join(dashes) or "none")
+
+    def report_status(self) -> None:
+        r = self.last
+        logger.info("Game: %s, world %s.", "attached" if r.attached else "not found",
+                    "loaded" if r.loaded else "not loaded")
+        if self.slot_data is None:
+            logger.info("Not connected to a slot: nothing is read or written for the slot.")
+            return
+        logger.info("Stars: %d/%d. Unlocked dashes: %d/22 (/dashes lists them).",
+                    stars_checked(self.checked_locations | self.sent),
+                    self.slot_data.get("stars_required", 0), len(unlocked_dashes(self.have())))
+        v = self.session.moves.verified
+        if v is None:
+            logger.info("Moves: not verified in game yet.")
+        else:
+            gone = [m for m, b in v.items() if b]
+            logger.info("Moves blocked (read back from the game): %s", ", ".join(gone) or "none")
+        if self.dll.connected:
+            h = self.dll.hello
+            logger.info("mec_ap.dll %s: %s; abilities %s.", h.get("dll"),
+                        "active" if h.get("build_ok") else f"inactive ({h.get('why')})",
+                        "apply immediately" if self.dll.can_apply else "apply at the next respawn")
+        else:
+            logger.info("mec_ap.dll: not connected. Dashes are not detected until it is.")
+        if self.dll.pending:
+            logger.info("%d finished runs from the DLL are waiting to be sent.", len(self.dll.pending))
+        if self.held:
+            logger.info("%d checks on hold until /confirm_save.", len(self.held))
+
+
+async def game_loop(ctx: MECDContext) -> None:
+    while not ctx.exit_event.is_set():
+        plan = ctx.make_plan()
+        try:
+            r = await asyncio.to_thread(ctx.session.tick, plan)
+        except Exception:                                        # noqa: BLE001
+            logger.exception("Game interface error; reattaching.")
+            ctx.session.detach()
+            await asyncio.sleep(IDLE_SEC)
+            continue
+        await ctx.handle(r)
+        await asyncio.sleep(TICK_SEC if r.loaded else IDLE_SEC)
+
+
+async def main(args) -> None:
+    ctx = MECDContext(args.connect, args.password)
+    ctx.auth = args.name
+    ctx.server_task = asyncio.create_task(server_loop(ctx), name="server loop")
+    if gui_enabled:
+        ctx.run_gui()
+    ctx.run_cli()
+    game_task = asyncio.create_task(game_loop(ctx), name="game loop")
+    dll_task = asyncio.create_task(ctx.dll.run(ctx.exit_event), name="dll link")
+    await ctx.exit_event.wait()
+    ctx.server_address = None
+    game_task.cancel()
+    dll_task.cancel()
+    await ctx.shutdown()
+
+
+def launch(*args: str) -> None:
+    Utils.init_logging("MECDashesClient", exception_logger="Client")
+    parser = get_base_parser(description="Mirror's Edge Catalyst Dashes Archipelago client.")
+    parser.add_argument("--name", default=None, help="Slot name to connect as.")
+    parser.add_argument("url", nargs="?", help="Archipelago connection url")
+    args = handle_url_arg(parser.parse_args(args), parser=parser)
+    import colorama
+    colorama.just_fix_windows_console()
+    asyncio.run(main(args))
+    colorama.deinit()
