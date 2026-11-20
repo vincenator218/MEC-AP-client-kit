@@ -14,8 +14,8 @@
 
 - **Dashes**: finishing each of the 22 dashes, plus a check for each star tier you beat
   (1, 2 and 3 stars). A 3-star run sends all four checks at once.
-- **GridLeaks**: one check every 10 leaks collected in a district (the size is an option). The
-  checks stop below each district's total, so you never need every last leak.
+- **GridLeaks**: one check every 10 leaks collected in a district, up to 60% of the district
+  (both are options). The rest of each district's leaks are spare, so you never need them all.
 
 ## What is the goal?
 

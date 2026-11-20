@@ -28,13 +28,22 @@ class DashStars(Range):
 
 
 class GridLeakBundleSize(Range):
-    """Every this-many GridLeaks collected in a district sends one check. The checks stop below
-    the district's total, so you never need every leak: with 10, Downtown (87 leaks) has checks
-    at 10, 20 ... 80 and The View (80 leaks) at 10 ... 70. 0 turns GridLeaks off."""
+    """Every this-many GridLeaks collected in a district sends one check, up to GridLeak Percent
+    of the district, so you never need every leak. 0 turns GridLeaks off."""
     display_name = "GridLeak Bundle Size"
     range_start = 0
     range_end = 40
     default = 10
+
+
+class GridLeakPercent(Range):
+    """GridLeak checks stop at this share of each district's leaks; the rest are spare. With 60
+    and bundles of 10: Downtown (87 leaks) has checks at 10 ... 50, The View (80) at 10 ... 40.
+    The last leak of a district is never a check, whatever this is."""
+    display_name = "GridLeak Percent"
+    range_start = 10
+    range_end = 99
+    default = 60
 
 
 # --------------------------------------------------------------------- items
@@ -73,6 +82,7 @@ class MECDashesOptions(PerGameCommonOptions):
     stars_required: StarsRequired
     dash_stars: DashStars
     gridleak_bundle_size: GridLeakBundleSize
+    gridleak_percent: GridLeakPercent
     starting_dashes: StartingDashes
     traversal_items: TraversalItems
     revert_skill_tree_purchases: RevertSkillTreePurchases
@@ -80,6 +90,6 @@ class MECDashesOptions(PerGameCommonOptions):
 
 OPTION_GROUPS = [
     OptionGroup("Goal", [StarsRequired]),
-    OptionGroup("Locations", [DashStars, GridLeakBundleSize]),
+    OptionGroup("Locations", [DashStars, GridLeakBundleSize, GridLeakPercent]),
     OptionGroup("Items", [StartingDashes, TraversalItems, RevertSkillTreePurchases]),
 ]

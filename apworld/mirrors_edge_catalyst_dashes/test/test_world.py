@@ -23,16 +23,23 @@ class TestData(MECDTestBase):
         self.assertEqual(gridleak_steps(80, 5)[-1], 75)
         self.assertEqual(gridleak_steps(80, 0), [])
 
+    def test_gridleak_percent(self):
+        self.assertEqual(gridleak_steps(87, 10, 60), [10, 20, 30, 40, 50])
+        self.assertEqual(gridleak_steps(80, 10, 60), [10, 20, 30, 40])
+        self.assertEqual(gridleak_steps(74, 10, 60), [10, 20, 30, 40])
+        self.assertEqual(gridleak_steps(80, 10, 99), [10, 20, 30, 40, 50, 60, 70])  # never all 80
+        self.assertEqual(gridleak_steps(15, 5, 70), [5, 10])
+
 
 class TestDefaults(MECDTestBase):
     def test_location_count(self):
         world = self.multiworld.worlds[self.player]
-        # 22 dashes x (finish + 3 stars) + GridLeaks every 10, below each district's total
-        leaks = sum(len(gridleak_steps(len(v), 10)) for v in GRIDLEAKS_BY_DISTRICT.values())
-        self.assertEqual(leaks, 8 + 8 + 7 + 7)
+        # 22 dashes x (finish + 3 stars) + GridLeaks every 10, up to 60% of each district
+        leaks = sum(len(gridleak_steps(len(v), 10, 60)) for v in GRIDLEAKS_BY_DISTRICT.values())
+        self.assertEqual(leaks, 5 + 4 + 4 + 4)
         self.assertEqual(len(world.location_names), 88 + leaks)
-        self.assertNotIn(gridleak_location_name("The View", 80), world.location_names)
-        self.assertIn(gridleak_location_name("Downtown", 80), world.location_names)
+        self.assertIn(gridleak_location_name("Downtown", 50), world.location_names)
+        self.assertNotIn(gridleak_location_name("Downtown", 60), world.location_names)
 
     def test_starting_dashes(self):
         world = self.multiworld.worlds[self.player]
@@ -65,6 +72,24 @@ class TestDefaults(MECDTestBase):
         self.assertEqual(pool.count(PROGRESSIVE_WALLRUN_NAME), 2)
         for name in ("Springboard", "Climb Up", "Ledge Hang", "MAG Rope"):
             self.assertIn(name, pool)
+
+
+class TestRequirements(MECDTestBase):
+    def test_calebs_run_needs_mag_rope(self):
+        world = self.multiworld.worlds[self.player]
+        unlock = dash_unlock_name("Caleb's Run")
+        if unlock not in world.starting_dashes:
+            self.collect_by_name(unlock)
+        self.collect_all_but("MAG Rope")
+        for tier in range(4):                    # the stars inherit the finish's row
+            self.assertFalse(self.can_reach_location(dash_location_name("Caleb's Run", tier)))
+        self.collect_by_name("MAG Rope")
+        self.assertTrue(self.can_reach_location(dash_location_name("Caleb's Run", 3)))
+
+    def test_a_starting_dash_needs_nothing(self):
+        world = self.multiworld.worlds[self.player]
+        for _ in range(50):
+            self.assertNotEqual(world._pick_starting_dashes(1), [dash_unlock_name("Caleb's Run")])
 
 
 class TestSmall(MECDTestBase):
