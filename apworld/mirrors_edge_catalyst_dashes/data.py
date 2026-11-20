@@ -146,13 +146,14 @@ def gridleak_location_name(district: str, n: int) -> str:
     return f"{district} GridLeaks {n}"
 
 
-def gridleak_steps(total: int, size: int) -> list[int]:
-    """The counts that are checks in a district of `total` leaks: every `size` leaks, stopping
-    below the total, so no district ever needs every last leak (a leak that is hard to reach
-    or missed cannot block the seed)."""
+def gridleak_steps(total: int, size: int, percent: int = 99) -> list[int]:
+    """The counts that are checks in a district of `total` leaks: every `size` leaks, up to
+    `percent` of the district and always below the total, so no district ever needs every last
+    leak (a leak that is hard to reach or missed cannot block the seed)."""
     if size <= 0:
         return []
-    return list(range(size, total, size))
+    cap = min(total - 1, total * percent // 100)
+    return list(range(size, cap + 1, size))
 
 
 def _build_gridleaks():

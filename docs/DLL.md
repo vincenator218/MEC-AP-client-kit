@@ -1,6 +1,8 @@
-# An injected DLL: what it would add and everything needed to start one
+# The injected DLL: research and design
 
-This is the research package. **An implementation exists: `dll/`** (see `dll/README.md`).
+The research behind `mec_ap.dll`, kept so the next steps (a hard dash lock, `localize`, an
+overlay, auto-loading) can start from it. **An implementation exists: `dll/`** (see
+`dll/README.md`).
 - Dashes (finish + 1/2/3-star checks): built and tested end to end on 2026-11-12.
 - The `apply` queue (§5): working in game since 2026-11-13. Coil and FastClimb, received from a
   dash, were applied on their live entities from the server tick and read back as 1. **Coil worked
@@ -25,11 +27,9 @@ PC: `startup: game build recognised (9988 types)`, `build check: 15 functions an
 match`, `hooks: all installed`, and `runs: listening for finished runs` on both the server and
 the client message manager. So the listener registration ran without crashing.
 
-**What that does not prove:**
-- `MessageManager_registerListener`, `localize` and the globals only got a weak check (inside the
-  image, readable). Their first bytes are recorded in the JSON for next time. They are very likely
-  right on a matching build, but a likely address is not a tested call.
-- **This project has not called or hooked anything.** Steps 3 to 8 are still open.
+**Since then this project has hooked and called things itself** (`mec_ap.dll`, 2026-11-12/13):
+both hooks, `MessageManager_registerListener` and `apply` all ran on this build. `localize` has
+only been called by MECMP, not by this project (§12 step 6 is still open).
 
 Every address is also in [`data/dll_addresses.json`](../data/dll_addresses.json), with the mecmp
 file and line it was read from. `tools/client/verify_dll_addresses.py` checks that file against the
@@ -54,6 +54,9 @@ read and write memory. A hook and a message listener need code running **inside*
 | real display names for hints | none | the game's own `localize` |
 | in-game text (connection state, items received) | none | an overlay (§8) |
 
+Built in `mec_ap.dll` so far: the **ability** and **dashes** rows. Not built: events for other
+activities, the final-activity lock, `localize`, the overlay (`docs/ROADMAP.md`).
+
 ## 2. Architecture
 
 **A. The Python client stays the Archipelago side, and the DLL is a thin game-side agent
@@ -69,19 +72,20 @@ read and write memory. A hook and a message listener need code running **inside*
 in Archipelago work this way, and the client lives in the game. Every piece of
 `client/plan.py` and `client/client.py` would be ported to C++ and tested again.
 
-The channel for A, sketched (JSON lines; nothing is fixed yet):
+**A is what was built.** The channel as implemented (protocol 1, JSON lines on
+127.0.0.1:47910; the exact format is in `dll/src/link.h`):
 
 | direction | message | meaning |
 |---|---|---|
-| client to DLL | `grant {flag, value, reason}` | queue an `apply` for an ability whose flag the client has already written |
-| DLL to client | `apply_result {flag, ok, last_applied}` | read back from the entity's `[e+0x78]`: report state, not intent |
-| DLL to client | `challenge_finished {content_id, kind, stat_code, sid, name, ms, new_record}` | a check, or the goal |
-| DLL to client | `challenge_started` / `challenge_cancelled` | optional, for the overlay |
-| client to DLL | `overlay_text {lines}` | what to draw |
-| both | `hello {protocol, build_ok}` | the DLL reports whether its build check (§4) passed |
+| DLL to client | `hello {proto, dll, build_ok, why, apply, apply_why, acked, last}` | the DLL's checks (§4) and whether it can apply |
+| DLL to client | `finished {seq, content_id, run_cs, record_cs, ...}` | a finished run, journaled to disk first, re-sent until acknowledged |
+| client to DLL | `ack {seq}` | the client has dealt with that finish |
+| DLL to client | `started` / `cancelled {content_id}` | live only, for the log |
+| client to DLL | `apply {id, hash, value}` | apply a flag the client has already written |
+| DLL to client | `applied {id, hash, value, result, matched, targets, live}` | what the game shows afterwards (`[e+0x78]` read back) |
 
-The flag write itself can stay in the Python `ProgressionWriter`, its one deliberate code path.
-The DLL only adds the `apply` call.
+The flag write stays in the Python `ProgressionWriter`, its one deliberate code path; the DLL
+only adds the `apply` call. Not built: an `overlay_text` message (§8).
 
 ## 3. Loading the DLL
 
@@ -115,9 +119,11 @@ mecmp writes nothing until all of these match. On any mismatch it stays inactive
 3. seven functions start with the expected bytes. Only position-independent bytes are compared,
    so relocation does not matter.
 
-All of them are in `dll_addresses.json` and the verify script checks them. A DLL for this project
-should do the same and also include this kit's own verified addresses: `FLAG_TABLE`,
-`ENTITY_VTABLE`, `APPLY` and `EXCL_TYPEINFO`.
+All of them are in `dll_addresses.json` and the verify script checks them. `mec_ap.dll` does the
+same before anything else (`dll/src/build_check.cpp`): 3 TypeInfo names, the 2 hook slots and
+`registerListener`'s first bytes. Its ability path has a check of its own (`apply.cpp`): the flag
+entity's class name through its vtable, and `apply`'s first 24 bytes. On a mismatch it changes
+nothing and tells the client why.
 
 ## 5. The per-frame hook, and the apply queue
 
@@ -294,9 +300,15 @@ The same as mecmp: CMake, C++17, x64.
 - Or **llvm-mingw**:
   `cmake -B build -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-clang++ ...`.
 
-The research PC has no C++ compiler installed (checked 2026-10-30).
+`mec_ap.dll` is built with Visual Studio 2022 Build Tools (MSVC 19.44), CMake and NMake
+(`dll/README.md`).
 
-## 11. Dashes as locations: what must be settled first
+## 11. Dashes as locations: what had to be settled
+
+Answers, as of 2026-11-19: 1 done (§11b), 2 done (§11a), 3 done (§11a), 4 **open**, 5 open (the
+DLL never uploads anything itself; what the game uploads was not studied), 6 done (the DLL's
+journal), 7 done (1330000 + 10 * `ap_index` + tier), 8 started (`requirements.csv` in each world).
+
 
 1. **The census.** Which named challenges exist, with their ContentId, Sid and stat code. None of
    it is in the exe's strings (`ME-AP/strings.txt` has no `ch_rrt_` at all); it lives in the game's
@@ -425,8 +437,9 @@ Other ways to stop a locked dash, in order of preference:
    thing to the replay-download listener (`replay_check.cpp`): it changes a message as it passes,
    so the game takes its own failure path. Which slot handles the start is unknown; it needs
    reverse engineering.
-3. **Let it run, but don't count it.** On Started for a locked dash, the overlay says so, and its
-   Finished is ignored. This works with only the pieces already verified.
+3. **Let it run, but don't count it.** On Started for a locked dash, warn; ignore its Finished.
+   **This is what the Dashes world does** (the "soft lock", working in game 2026-11-19), with the
+   warning in the client's log instead of an overlay.
 4. `HideInMap` (`+0x9C`) might hide the map icon. It is static data shared by the level, not saved,
    and is untested.
 
@@ -469,7 +482,7 @@ is a star check. Slower replays would not show, but a first finish always does. 
 **Still open:**
 - Deliveries, grid nodes, and the full billboard list.
 - Per-dash locking: no native lock exists, so it needs a DLL hook that refuses the start (§11c
-  option 2), or "runs but doesn't count".
+  option 2). "Runs but doesn't count" is built (the Dashes world's soft lock).
 - Whether Finished fires offline. The "upload" messages suggest the game talks to the stats
   backend at the end of every run, which is question 4 and question 5 together.
 - A level reload without a restart (question 2 covers restarts only so far).

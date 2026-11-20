@@ -1,16 +1,22 @@
-# The Archipelago world and client
+# The Archipelago worlds and clients
 
-`mirrors_edge_catalyst/` is the apworld source. The game client lives inside it
-(`client/`) and opens from the Archipelago Launcher.
+Two worlds, each with its game client inside it (`client/`, opened from the Archipelago
+Launcher):
+
+- `mirrors_edge_catalyst/`: **Mirror's Edge Catalyst**, the whole open world. Most of this page.
+- `mirrors_edge_catalyst_dashes/`: **Mirror's Edge Catalyst Dashes**, dashes and movement only.
+  See "The Dashes world" at the end.
 
 ```
-python tools/build_apworld.py          # -> build/mirrors_edge_catalyst.apworld
+python tools/build_apworld.py                 # -> build/mirrors_edge_catalyst.apworld
+python tools/build_apworld.py --world dashes  # -> build/mirrors_edge_catalyst_dashes.apworld
 ```
 
-The build copies in `data/items.json`, `data/locations.json` and `tools/client/mec_memory.py`,
-so each of those keeps a single home in the kit.
+The build copies in `data/items.json`, `data/locations.json`, `data/named_challenges.json` and
+`tools/client/mec_memory.py`, so each keeps a single home in the kit. The Dashes world also gets
+the main world's `logic.py`, `data/aliases.json`, `client/game.py` and `client/dll_link.py`.
 
-## Layout
+## Layout (main world)
 
 | file | what |
 |---|---|
@@ -21,8 +27,9 @@ so each of those keeps a single home in the kit.
 | `options.py`, `world.py` | options, item pool, rules, slot data |
 | `client/plan.py` | pure: received items -> flags / blocked moves; location detection |
 | `client/game.py` | memory side: flag table, the one flag-writing path, exclusion volume driver |
+| `client/dll_link.py` | the link to `mec_ap.dll`: dash finishes in (journaled, acknowledged), apply requests out |
 | `client/client.py` | CommonClient context and the 1-second game loop |
-| `test/` | world generation, parser, client plan, flag table on fake memory |
+| `test/` | world generation, parser, client plan, flag table on fake memory, dashes, the DLL link against a fake DLL |
 
 ## Decisions (asked and answered)
 
@@ -38,9 +45,10 @@ so each of those keeps a single home in the kit.
 - **Wallrun:** `Progressive Wallrun` x2. The first copy clears `ExcludeWallrun`, the second
   writes `Unlocks_DoubleWallrun`. The old `Wallrun` (1320113) and `DoubleWallrun` (1320006)
   items no longer exist; the progressive item is 1320115.
-- **Apply hook:** none. Abilities are written to the table only and take effect at the next
-  death or checkpoint restart (MEMORY.md §3 timing table). `client/game.py:Applier` is the
-  seam for a game-thread hook later.
+- **Abilities:** the client writes the flag (its one write path), then asks `mec_ap.dll` to
+  apply it on the game thread, so it works at once. Without the DLL, or if the DLL's own check
+  fails, the ability takes effect at the next death or checkpoint restart (MEMORY.md §3). When
+  the DLL connects after flags were written, the client asks it to re-check every ability.
 - **Dashes (2026-11-12):** options `dashes` (off by default) and `dash_stars` (0-3, default 3).
   - Each of the 22 dashes has a finish check and up to three star checks: 88 locations, ids
     `1330000 + 10 * ap_index + tier` (`ap_index` is the position in the in-game dash list, stored
@@ -92,13 +100,16 @@ ability list -> `requires`, with skill-tree names added to `aliases.json` as the
 
 ## What is verified, and how
 
-- 87 apworld tests (2026-11-12, with the dash ones) and AP 0.6.7's `test/general` suite (319
-  tests, all worlds except `soe` and `zillion`, which need packages of their own) pass.
-  Generation was also run with `Generate.py` on a 2-player multiworld (before dashes).
+- Unit tests (2026-11-19): main world 90, Dashes world 37, and AP 0.6.7's `test/general` suite
+  with both installed (322; all worlds except `soe` and `zillion`, which need packages of their
+  own) pass. Generation was also run with `Generate.py` on a 2-player multiworld (before dashes).
 - Dashes: `test/test_dashes.py` checks the 88 locations, the star rule, generation with
   `dash_stars` 0 and 3, and `DllLink` against a fake DLL on a real localhost socket (a finish is
-  kept, not acknowledged, until there is a slot). **The DLL itself has not been compiled or run
-  yet.**
+  kept, not acknowledged, until there is a slot). `test/test_apply.py` checks which flags are
+  applied and the apply round trip.
+- **With the real DLL, in game:** a dash finish sent exactly its finish and 1-star checks to a
+  local server (2026-11-12); Coil and FastClimb received from a dash were applied at once and
+  read back, and Coil worked in play with no respawn (2026-11-13). Details in `dll/README.md`.
 - The client ran against a real 0.6.7 server with a **simulated** game memory (the
   FakeMem table in `test/test_client.py`). Verified there: received items written and read
   back, the 2nd Progressive Wallrun writing Double Wallrun, a skill-tree purchase reverted,
@@ -128,21 +139,48 @@ ability list -> `requires`, with skill-tree names added to `aliases.json` as the
   - replaying the story Grid Node Run sent nothing, as designed (it is not a location);
   - at attach the build check read `class None`; a later read found the right class. It
     was a startup race, and the check now runs only once the world is loaded.
-- **Not yet verified in game:** the exclusion driver inside the client (moves were all
-  given at the start), which side missions are in free roam and whether the rest unlock
-  in a chain, the 2nd Progressive Wallrun, the skill-tree revert,
-  side-mission unlocks, the final activity and goal, the wrong-save guard, and surviving a
-  game restart.
+- **Not yet verified in game (main world):** the exclusion driver inside the main client
+  (moves were all given at the start; the Dashes client drove it on 2026-11-19, and the tester
+  could not finish Caleb's Run without MAG Rope, but blocking was not checked move by move),
+  which side missions are in free roam and whether the rest unlock in a chain, the skill-tree
+  revert, side-mission unlocks from the client, the final activity and goal, the wrong-save
+  guard, and surviving a game restart.
 
 ## Known gaps
 
-- Game-thread hook for `apply` (OPEN_QUESTIONS.md #1). An injected DLL would fix this, and
-  would also let the goal count only a completion made after the shard unlock. It would make
-  dashes possible checks too. What's needed to start one is in `docs/DLL.md`.
+- The final activity is not locked in the world (see above). With the DLL, the goal could count
+  only a completion message made after the unlock (`docs/ROADMAP.md`).
 - Ability requirements: `requirements.csv` is empty. With `traversal_items: randomized`, a
   seed can hand out a location you cannot physically reach.
-- 23 `live_entity` and 11 `persistent_entity` abilities are expected/untested (ITEMS.md).
-  Here they only get the table write, which applies at the next respawn.
+- Most abilities are `expected` / `untested` for the live apply (ITEMS.md). If the DLL cannot
+  apply one, it still takes effect at the next respawn.
 - Pipes and ladders cannot be blocked, so "no Climb Up" is not "no vertical traversal".
 - `Global_CityUnlockState` as a progressive item: not used, completely untested.
 - Whether a live-unlocked side mission plays correctly from the menu (OPEN_QUESTIONS.md #10).
+
+## The Dashes world
+
+`mirrors_edge_catalyst_dashes/`, game **Mirror's Edge Catalyst Dashes**. Dashes and movement
+only: no side missions, no opportunities. Built 2026-11-13, first played 2026-11-19.
+
+- **Checks:** each dash's finish and its 1/2/3-star tiers (`dash_stars`, 1-3), detected through
+  `mec_ap.dll`; GridLeaks every `gridleak_bundle_size` (default 10) in a district, up to
+  `gridleak_percent` (default 60) of it and always below its total, so no district needs every
+  leak. Default: 88 + 17 = 105 checks.
+- **Items:** the 5 moves (Wallrun as 2 Progressive Wallruns), the 35 abilities, 22 **Dash
+  Unlocks** (1320500 + `ap_index`), filler `Gridnet Static`. `starting_dashes` (default 3) are
+  given at the start, at least one of them a dash that needs no move by `requirements.csv`, so a
+  seed can always start. Useful abilities that do not fit go to the start inventory.
+- **Soft lock:** the client sends a dash's checks only if you hold its unlock. A locked run is
+  logged ("does not count; run it again once the unlock arrives") and dropped; the warning also
+  shows when a locked dash starts. Seen working in game on 2026-11-19.
+- **Goal:** `stars_required` (default 40, capped at what the seed has). Each star check has a
+  hidden "Star" event with the same rule, so the generator proves the goal is reachable. The
+  client sends the goal when enough star checks have been sent.
+- **Logic:** its own `data/requirements.csv`, same format; a star tier inherits its dash's row.
+  Two rows from play (2026-11-19): Caleb's Run needs MAG Rope; Out in the Open needs nothing.
+- **Ids:** shared things keep the main world's ids (abilities, moves, dash checks 1330000+,
+  GridLeak counts), so the shared client code is identical.
+- **Client commands:** `/mec`, `/dashes`, `/confirm_save`, `/next_volume`.
+- **Not yet seen in game:** a star check, a GridLeak check, an ability applied in this world, the
+  goal.

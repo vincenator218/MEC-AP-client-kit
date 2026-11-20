@@ -9,7 +9,7 @@ from worlds.AutoWorld import WebWorld, World
 
 from . import logic
 from .data import (DASH_UNLOCK, DASH_UNLOCKS, DASHES, FILLER, FILLER_NAME, GAME, GRIDLEAK_CATEGORY,
-                   GRIDLEAKS_BY_DISTRICT, ITEMS, LOCATIONS, TRAVERSAL_ITEMS, dash_unlock_name,
+                   GRIDLEAKS_BY_DISTRICT, ITEMS, LOCATIONS, TRAVERSAL_ITEMS, dash_location_name, dash_unlock_name,
                    gridleak_location_name, gridleak_steps)
 from .options import OPTION_GROUPS, MECDashesOptions
 
@@ -63,14 +63,27 @@ class MECDashesWorld(World):
         self.location_names = self._chosen_locations()
         self.star_locations = [n for n in self.location_names if LOCATIONS[n].tier > 0]
         self.stars_required = min(o.stars_required.value, len(self.star_locations))
-        self.starting_dashes = sorted(self.random.sample(DASH_UNLOCKS, o.starting_dashes.value))
+        self.starting_dashes = self._pick_starting_dashes(o.starting_dashes.value)
         self.logic_items = self._items_used_by_logic()
+
+    def _pick_starting_dashes(self, n: int) -> list[str]:
+        """n random Dash Unlocks, at least one of them for a dash whose finish needs no move
+        (requirements.csv): otherwise every starting dash could need a move that is only found
+        on another dash, and nothing would be reachable."""
+        free = [u for u in DASH_UNLOCKS
+                if self.requirements.for_location(dash_location_name(ITEMS[u].dash)) == logic.NOTHING]
+        if not free:
+            raise OptionError(f"{GAME}: data/requirements.csv gives every dash a requirement; "
+                              f"at least one must need nothing to start a seed.")
+        first = self.random.choice(free)
+        rest = self.random.sample([u for u in DASH_UNLOCKS if u != first], n - 1)
+        return sorted([first] + rest)
 
     def _chosen_locations(self) -> list[str]:
         names = [n for n, l in DASHES.items() if l.tier <= self.options.dash_stars.value]
-        size = self.options.gridleak_bundle_size.value
+        size, pct = self.options.gridleak_bundle_size.value, self.options.gridleak_percent.value
         for district, leaks in GRIDLEAKS_BY_DISTRICT.items():
-            names += [gridleak_location_name(district, n) for n in gridleak_steps(len(leaks), size)]
+            names += [gridleak_location_name(district, n) for n in gridleak_steps(len(leaks), size, pct)]
         return names
 
     # ----------------------------------------------------------------- regions
@@ -194,6 +207,7 @@ class MECDashesWorld(World):
             "stars_required": self.stars_required,
             "dash_stars": self.options.dash_stars.value,
             "gridleak_bundle_size": self.options.gridleak_bundle_size.value,
+            "gridleak_percent": self.options.gridleak_percent.value,
             "traversal_items": self.options.traversal_items.current_key,
             "revert_skill_tree_purchases": bool(self.options.revert_skill_tree_purchases.value),
         }

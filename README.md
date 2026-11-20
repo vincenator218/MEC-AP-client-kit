@@ -1,67 +1,87 @@
 # Mirror's Edge Catalyst: Archipelago client kit
 
-Everything needed to build an [Archipelago](https://archipelago.gg) client and
-world for **Mirror's Edge Catalyst (PC)**: what the checks are, how to detect
-them, what the items are, and how to give them to a running game.
+Everything found so far for building an [Archipelago](https://archipelago.gg) randomizer for
+**Mirror's Edge Catalyst (PC, Steam build)**: what the checks are, how to detect them, what the
+items are, how to give them to a running game, and two working worlds built on that.
 
-This kit is distilled from a longer reverse-engineering log. Only results that
-were tested in-game are presented as facts. Anything expected but not yet
-tested is labeled that way.
+This is meant to be picked up later. It is a design document and a bucket of ideas as much as
+code. Only results tested in game are stated as facts; each says how and when it was tested.
+Everything else is labeled expected, untested or idea.
+
+## Start here
+
+1. **This page**: how it works and what works.
+2. [`docs/ROADMAP.md`](docs/ROADMAP.md): where it could go next, the idea bucket, how to test in
+   game, and the rules learned the hard way.
+3. [`docs/MEMORY.md`](docs/MEMORY.md): the live interface (flag table, abilities, movement volumes).
+4. [`docs/DLL.md`](docs/DLL.md) and [`dll/README.md`](dll/README.md): the injected DLL.
+5. [`apworld/README.md`](apworld/README.md): the two worlds' design decisions and what was verified.
+6. [`docs/OPEN_QUESTIONS.md`](docs/OPEN_QUESTIONS.md): what is still unknown.
+
+"FINDINGS §N" refers to the original reverse-engineering log (`ME-AP/FINDINGS.md`), which is
+**not in this repository**. The results that matter are restated here.
 
 ## How it works, in one paragraph
 
-All progression state (collectibles, missions, abilities, gear) lives in one
-**flag table** in game memory. Each flag is a 32-bit value keyed by a hash of
-its name. The same values are written to the save file by the game's autosave.
-- **Detecting checks:** poll flags in that table.
-- **Giving items:** write a flag, then (for abilities) call one game function
-  so the change takes effect immediately instead of at the next respawn.
-- **Persistence:** you get it for free from the autosave.
+All progression state (collectibles, missions, abilities, gear) lives in one **flag table** in
+game memory: 32-bit values keyed by a hash of each flag's name, saved by the game's autosave.
+- **Detecting checks:** poll flags in that table. Dashes have no flag: an injected DLL hears the
+  game's "challenge finished" message instead.
+- **Giving items:** write the flag. For an ability to work *now* rather than at the next respawn,
+  the game's own `apply` must run on its game thread, which the DLL does.
+- **Five basic moves** (springboard, climb up, ledge hang, wallrun, MAG rope) have no flag: the
+  client blocks them through a movement volume, one byte each.
+- **Persistence:** flags reach the save through the autosave; moves are never saved.
+
+## Status
+
+| capability | status |
+|---|---|
+| Read any flag live (location detection) | works (both clients) |
+| Write any flag live, kept by the autosave | works, verified on disk after a relaunch |
+| Block / give the 5 moves live, no flag, no mod | works (FINDINGS §83-§86); the clients drive it, `MEC_MoveToggles.pyw` too |
+| Ability at the next respawn (table write alone) | works (Coil 2026-10-29, QuickTurn 2026-11-13) |
+| Ability **immediately** | works through `mec_ap.dll` 0.2.1 (2026-11-13: Coil and FastClimb, read back; Coil worked in play at once). Proven earlier with Cheat Engine on Switch Place, a stamina tier, Double Wallrun, MAG Rope Swing and Focus, but those foreign-thread calls crashed the game twice |
+| Dashes as checks (finish + 1/2/3 stars) | works through the DLL, end to end to a server (2026-11-12) |
+| Dash Unlocks (Dashes world) | soft lock works (2026-11-19): a locked dash says so and its run does not count. No hard lock exists |
+| Side mission unlock | write `SilverCompleted_<mission>`; in the replay menu at the next load (checkpoint restart tested) |
+| Opportunity unlock | write its completion flag; in the Runs menu at the next load, plays from there, a real completion writes the time (one tested end to end). 32 of 40 have a menu entry |
+| Grants survive: fresh load, death, mission start, fast travel, checkpoint restart | tested |
+| Which activity needs which move (logic) | barely started: 2 rows (Dashes world) |
 
 ## Layout
 
 | path | what |
 |---|---|
-| `apworld/` | **The Archipelago world and client.** Build with `python tools/build_apworld.py`. Design decisions, what is verified and the known gaps are in `apworld/README.md`; the logic table is `apworld/mirrors_edge_catalyst/data/requirements.csv`. |
-| `apworld/mirrors_edge_catalyst_dashes/` | **A second, smaller world: Mirror's Edge Catalyst Dashes.** Checks are the 22 dashes (finish + 1/2/3 stars) and GridLeaks every N per district (stopping below each district's total); items are the 5 moves, the abilities and 22 Dash Unlocks (soft lock: a locked dash's run does not count); the goal is N stars. Build with `python tools/build_apworld.py --world dashes`. It shares `logic.py`, the game-side client modules and the data files with the main world (copied in at build time). Movement requirements per dash are not recorded yet. |
-| `dll/` | **`mec_ap.dll`**, the injected agent for dash checks and immediate ability applies, and its injector. C++, built with CMake and Visual Studio 2022 Build Tools; see `dll/README.md`. Built and tested end to end (2026-11-12): a dash finish in game sent its finish and star checks to a local Archipelago server through the real client. Ability applies work since 0.2.1 (2026-11-13). |
-| `docs/MEMORY.md` | **The live interface.** Addresses, table layout, hashing, how to read and write flags, how to apply an ability now, and the safety rules. Start here. |
-| `docs/ITEMS.md` | The item pool (87): abilities, gear, MAG Rope, side-mission and opportunity unlocks, with how each is granted and how well tested it is. |
-| `docs/LOCATIONS.md` | The 853 locations (793 on by default): categories, flag patterns and detection rules. |
-| `docs/SAVE_FILE.md` | Offline save editing, for building a starting save or as a fallback. |
-| `docs/OPEN_QUESTIONS.md` | What still needs work before a release. |
-| `docs/DLL.md` | **Research package for an injected DLL** (not built): the game-thread hook for `apply`, event-driven checks and dashes, `localize`, an overlay, the C++ Archipelago libraries, and the order to verify it all. Addresses come from MECMP; the 24 that can be checked from outside match our build (2026-11-12). |
-| `data/dll_addresses.json` | Every address in `docs/DLL.md`, each with the source file and line it was read from. |
-| `data/named_challenges.json` | All 22 dashes (ContentId, Sid, stat code, district, display name confirmed in game) and the billboards seen so far, read from game memory. Not yet locations. |
-| `data/locations.json` / `.csv` | Every location: id, name, category, district, default, flag, hash, detection rule. |
-| `data/items.json` | All 87 items: id, flag, hash, grant method, test status. |
-| `data/flag_names.json` | All 2376 progression flag names and their hashes. |
-| `tools/build_checks.py` | Regenerates `data/locations.*` from `flag_names.json`. |
-| `tools/client/` | **`mec_memory.py`** — the client's memory layer (attach, scan for SDK class instances, drive the exclusion volumes, read flags). **`MEC_MoveToggles.pyw`** — a double-click GUI for testers to remove individual moves; see that folder's README. **`verify_dll_addresses.py`** — read-only check of `data/dll_addresses.json` against the running game. |
-| `tools/save/` | PROF_SAVE tools: `make_seed_save.py` (Archipelago starting save), `make_testing_save.py` (playtest save: everything unlocked, no abilities, lots of XP), `read_save.py`, `set_flag.py`, `clear_all_unlocks.py`, `save_checksum.py`. |
-| `reference/cheatengine/ap_live.lua` | A Cheat Engine prototype of the whole live interface (read, grant, unlock, watch). |
-| `reference/cheatengine/setflag.lua` | A minimal flag get/set, handy for testing. |
-| `reference/cheatengine/list_live_checks.lua` | Lists every flag-check entity in memory (read-only census). |
+| `apworld/mirrors_edge_catalyst/` | **The main world**: the open world from a story-complete save. Checks: side missions, opportunities, GridLeaks and optional categories, optional dashes. Items: abilities, moves, replay-menu unlocks, Data Shards. `python tools/build_apworld.py`. |
+| `apworld/mirrors_edge_catalyst_dashes/` | **The Dashes world**: dashes (finish + stars) and GridLeak bundles; items are moves, abilities and Dash Unlocks; goal N stars. `python tools/build_apworld.py --world dashes`. Shares the game-side client code with the main world (copied in at build). |
+| `apworld/README.md` | both worlds' design decisions, ids, what was verified, known gaps |
+| `dll/` | **`mec_ap.dll`** (dash events, immediate ability applies) and `mec_ap_inject.exe`. C++17, CMake, Visual Studio 2022 Build Tools. Credits MECMP (MIT). |
+| `docs/ROADMAP.md` | the path to a full release, ideas, test playbook, hard-won rules |
+| `docs/MEMORY.md` | **the live interface**: addresses, the flag table, hashing, `apply`, movement volumes, safety rules |
+| `docs/DLL.md` | the DLL research: hooks, the challenge messages, `apply` on the game thread, dash data, `localize`, overlay, C++ AP libraries, verification order. Addresses from MECMP, checked on our build |
+| `docs/ITEMS.md` | the 87 items, their ids, how each is granted and how well tested |
+| `docs/LOCATIONS.md` | the 853 flag locations (793 on by default) and the 22 dashes: categories, flags, detection |
+| `docs/SAVE_FILE.md` | offline save editing: the format, seed saves, playtest saves |
+| `docs/OPEN_QUESTIONS.md` | what is still unknown, numbered |
+| `data/items.json`, `data/locations.json` / `.csv` | every item and flag location: id, flag, hash, grant method / detection, test status |
+| `data/named_challenges.json` | the 22 dashes (ContentId, Sid, stat code, district, display name, star times, list order) and the billboards seen so far |
+| `data/flag_names.json` | all 2376 progression flag names and hashes |
+| `data/opportunity_names.json` | the 32 Runs-menu opportunities' in-game names |
+| `data/dll_addresses.json` | every address in `docs/DLL.md`, with the MECMP file and line it came from |
+| `tools/build_apworld.py` | builds either world's `.apworld`, or stages it for tests |
+| `tools/build_checks.py` | regenerates `data/locations.*` from `flag_names.json` |
+| `tools/client/` | `mec_memory.py` (the memory layer), `MEC_MoveToggles.pyw` (a GUI for testers to remove moves; see its README), `verify_dll_addresses.py` (read-only address check) |
+| `tools/save/` | PROF_SAVE tools: `make_seed_save.py`, `make_testing_save.py`, `read_save.py`, `set_flag.py`, `clear_all_unlocks.py`, `save_checksum.py` |
+| `reference/cheatengine/` | the Cheat Engine prototypes the research used: `ap_live.lua` (read, grant, unlock, watch), `setflag.lua`, `list_live_checks.lua` |
 
-## Status at a glance
-
-| capability | status |
-|---|---|
-| Read any flag live (location detection) | works |
-| Write any flag live, persisted by autosave | works, verified on disk after relaunch |
-| Traversal moves (springboard, climb up, hang, wallrun, MAG rope) gated live, no flag and no mod | works; one byte on a `PamMovementExclusionEntityData` instance, immediate, survives death (FINDINGS §83-§86) |
-| Ability applied **immediately** (live entity + apply call) | tested on 4 flags (Switch Place, stamina tier, Double Wallrun, MAG Rope Swing); 23 more use the same setup |
-| Ability applied immediately (persistent entity) | tested on Focus |
-| Any ability, write only | applies at the next death or checkpoint restart |
-| Side mission unlock | write `SilverCompleted_<mission>`; shows up in the replay menu at the next load (checkpoint restart tested) |
-| Opportunity unlock | write the activity's completion flag; it shows up in the Runs menu at the next load with no completion time, plays from there, and a real completion writes the time (tested end to end on one opportunity). 32 of the 40 opportunities have a menu entry; the 18 countdown deliveries and 8 interventions never do, so they are checks only |
-| Grants survive: fresh load, death, mission start, fast travel, checkpoint restart | tested |
-| Game-thread hook for the apply call | **works** (`mec_ap.dll` 0.2.1, 2026-11-13): Coil and FastClimb received from a dash were applied immediately on their live entities and read back; Coil worked in play at once, with no respawn. The flag-check entities are server entities, so the DLL calls `apply` from its server tick hook. The prototype's foreign-thread calls crashed the game twice; this replaces them (`docs/DLL.md` §5) |
-
-## Quick try (Cheat Engine)
+## Quick try without Archipelago (Cheat Engine)
 
 1. Back up `Documents\Mirrors Edge Catalyst\settings\PROF_SAVE`.
 2. Launch the game and load in. Attach Cheat Engine to `MirrorsEdgeCatalyst.exe`.
 3. Paste `reference/cheatengine/ap_live.lua` into the Lua window and execute it. `ap_check()` must report "plausible" and "found".
 4. If you own Double Wallrun: `ap_grant("Unlocks_DoubleWallrun", 0)` and the double wall-run stops working; `ap_grant("Unlocks_DoubleWallrun", 1)` and it works again.
 5. Put every flag you touched back before you die or wait for an autosave. See the safety rules in `docs/MEMORY.md`.
+
+Cheat Engine calls `apply` from its own thread, which crashed the game twice in the research.
+Keep such tests short; the clients use the DLL instead.
