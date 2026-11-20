@@ -5,13 +5,18 @@ The full list is in `data/locations.json` / `data/locations.csv`, one row per lo
 To regenerate it, run `python tools/build_checks.py`. Once a world is published, freeze
 the file so IDs never shift. IDs are assigned in name order inside each block.
 
-**852 locations, 792 on by default.**
+**853 flag locations, 793 on by default**, plus the **22 dashes** (below), which have no flag.
+
+The worlds do not use every row as-is: both replace the 324 per-leak GridLeak rows with
+per-district *count* checks (ids 1310500+n Downtown, 1310600+n Anchor, 1310700+n The View,
+1310800+n Rezoning), and the main world turns most categories into options
+(`apworld/README.md`).
 
 ## Detecting a check
 
-Every location is one progression flag. Poll its value in the live flag table
-(`MEMORY.md` §2), or read it from the save file (`SAVE_FILE.md`). A location
-counts as checked when:
+Every location in `locations.json` is one progression flag. Poll its value in the live flag
+table (`MEMORY.md` §2), or read it from the save file (`SAVE_FILE.md`). A location counts as
+checked when:
 
 | rule | used by |
 |---|---|
@@ -30,7 +35,7 @@ Verified:
 - Every category's hashes resolve against a real save.
 - Collectible totals match the in-game World Progression screen.
 
-## On by default (792)
+## On by default (793)
 
 | ID block (1310000 +) | category | count | flag pattern |
 |---|---|---|---|
@@ -43,7 +48,7 @@ Verified:
 | +5100 | Grid Node | 3 | `GridNodes_{Rezoning,Dt,View}Completed` |
 | +5200 | Billboard Hack | 12 | `HackableBillboards_<x>NN` |
 | +6000 | Opportunity | 40 | `MiscCompleted_OW Opp <Dist>Ph<N> NN` |
-| +7000 | Side Mission | 11 | `<Mission>_CompletedTime` |
+| +7000 | Side Mission | 12 | `<Mission>_CompletedTime` (11 replayable missions + Birdman's Delivery) |
 | +8000 | Opportunity (Delivery) | 18 | `OWPh<2-7>Delivery0<1-3>_CompletedTime` |
 
 ### Opportunity names
@@ -78,6 +83,18 @@ Zone codes:
 | Trainstation | Zephyr Transit Hub | — |
 | TheShard | The Shard | — |
 
+## Dashes (no flag; 1330000+)
+
+The 22 dashes are not in `locations.json`: a dash has no progression flag. They are in
+`data/named_challenges.json` (ContentId, Sid, stat code, district, display name, star times,
+`ap_index` = position in the in-game dash list). A finish is detected by `mec_ap.dll`, which hears
+the game's "challenge finished" message (`docs/DLL.md` §6). Each dash has a finish check and
+three star checks, ids `1330000 + 10 * ap_index + tier` (tier 0 = finished, 1-3 = stars); a run
+earns every star whose time it beats (a time exactly on a threshold is counted; unverified).
+
+The best time per dash is also in the save's stats block, as text (`docs/DLL.md` §11d): a
+possible no-DLL detection path, untested.
+
 ## Included but off by default (60)
 
 | category | count | why it's off |
@@ -92,18 +109,22 @@ Zone codes:
 
 - `SecurityCameras_*Destroyed` (194), `Doors_*`, `FastTravel_Discovered*`, `LairPhotoLocations_*`,
   `CriticalPathProgression_*` (story state), `IntelCollectiblesWorld` (a counter) and `Collectables_*` totals.
-- Dashes / time trials: their results are not in the save or the flag table.
+- Player-made time trials (user content, not stable). Dashes are covered above.
 
 ## Known gaps
 
 1. **Collectible names are placeholders.** "GridLeak - Anchor 017" is one specific GUID, but the
    numbering is alphabetical by GUID, not by map position. Electronic parts keep their real chip
    numbers. Useful hints would need world positions from the level data.
-2. `Ct` in the opportunity names (CtPh6) is assumed to be Rezoning. Unverified.
+2. ~~`Ct` = Rezoning~~: confirmed (the localization Sids spell it `RZ`, and the Rezoning
+   opportunities showed under Rezoning in game; FINDINGS §78).
 3. Spot-check one zone code per district against the in-game map.
    The in-game marker calls these activities **OPPORTUNITY**, and deliveries are one
    kind of opportunity, which is why both blocks are named that way. Rezoning
    couldn't be checked on a fresh save: its district may not be on the map yet.
-4. **Balance:** 792 locations against about 50 items needs filler, or fewer default
-   locations. A natural option set is a toggle per collectible category, plus side missions,
-   opportunities, deliveries, hubs, nodes and billboards.
+4. **Balance:** 793 locations against about 50 items needs filler, or fewer locations. Both
+   worlds solve it with options: the main world has a toggle per category and GridLeak bundles;
+   the Dashes world has star tiers and GridLeak bundles capped at a share of each district.
+5. **GridLeak sub-areas.** A leak is known only by its district and a GUID. Grouping leaks by
+   smaller areas ("15 in the Underground") needs each leak's world position, read from memory or
+   the level data. Not started.

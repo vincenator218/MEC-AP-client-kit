@@ -1,7 +1,18 @@
 # Items
 
-The full list is in `data/items.json` (87 items). Proposed item IDs start at
-**1320000**. Location IDs are 1310000–1319999, so the two ranges don't overlap.
+The full list is in `data/items.json` (87 items). Item IDs are in the **1320000** block:
+
+| ids | what |
+|---|---|
+| 1320000–1320035 | abilities and gear (`Unlocks_*`) |
+| 1320110–1320114 | the five traversal moves; the main world merges Wallrun (1320113) and Double Wallrun (1320006) into **Progressive Wallrun 1320115** |
+| 1320200–1320214 | side-mission unlocks (main world only) |
+| 1320300–1320339 | opportunity unlocks (main world only) |
+| 1320400 / 1320401 | Data Shard (main world's MacGuffin) / Gridnet Static (filler) |
+| 1320500–1320521 | Dash Unlocks (Dashes world only), `1320500 + ap_index` |
+
+Location IDs are in 1310000–1319999 and, for dashes, 1330000+, so the ranges don't overlap. Both
+worlds use the same ids for the same thing; see `apworld/README.md`.
 
 ## Grant methods
 
@@ -9,14 +20,19 @@ See `MEMORY.md` for the mechanics.
 
 | `grant_method` | what the client does | when the player gets it |
 |---|---|---|
-| `live_entity` | write the flag, then `apply` on the flag's per-spawn (`0x2000`) entity | immediately |
-| `persistent_entity` | write the flag, then `apply` on its unique persistent entities (only if the flag has ≤ 3 entities) | immediately (tested on Focus); otherwise at the next respawn |
+| `live_entity` | write the flag; then `mec_ap.dll` calls `apply` on the flag's per-spawn (`0x2000`) entity on the game thread | immediately with the DLL; otherwise at the next death or checkpoint restart |
+| `persistent_entity` | write the flag; then the DLL calls `apply` on its unique persistent entities (only if the flag has ≤ 3 entities) | immediately with the DLL (Focus proven with Cheat Engine, not yet through the DLL); otherwise at the next respawn |
 | `table_write_reload` | write the flag only | at the next load (checkpoint restart, relaunch) |
+| `exclusion_volume` | set one byte on a movement volume (`MEMORY.md` §5); no flag | immediately |
 | `unknown` | nothing reliable yet | — |
+
+The table write is always the client's (one code path, `client/game.py:ProgressionWriter`); the DLL
+only makes it take effect now (`docs/DLL.md` §5).
 
 ## Test status (`live_status`)
 
-- `tested`: granted and revoked in-game with this exact method.
+- `tested`: granted (and usually revoked) in game with this method: by Cheat Engine in the
+  research, or through `mec_ap.dll` since 2026-11-13 (Coil, FastClimb; the note says which).
 - `expected`: same entity class, mode and setup as a tested flag, but not tried one by one.
 - `untested`: the method is plausible but not tried. At worst, the table write still applies at the next respawn.
 
@@ -28,7 +44,7 @@ stamina tiers (+1 bar each).
 
 | id | item | flag | hash | grant | status | note |
 |---|---|---|---|---|---|---|
-| 1320000 | Coil | `Unlocks_Coil` | `0xF996B210` | live_entity | expected |  |
+| 1320000 | Coil | `Unlocks_Coil` | `0xF996B210` | live_entity | tested | Through mec_ap.dll (2026-11-13): applied live and worked in play at once. |
 | 1320001 | CombatRecovery | `Unlocks_CombatRecovery` | `0x37A952EC` | live_entity | expected |  |
 | 1320002 | Disrupter_IncreaseRange | `Unlocks_Disrupter_IncreaseRange` | `0xFE47B0D7` | live_entity | expected |  |
 | 1320003 | Disruptor_Overload | `Unlocks_Disruptor_Overload` | `0xB75C826E` | persistent_entity | untested | Calling its world-object entities crashed the game once; call only unique-data entities (docs/MEMORY.md). Live effect not yet confirmed. |
@@ -37,7 +53,7 @@ stamina tiers (+1 bar each).
 | 1320006 | DoubleWallrun | `Unlocks_DoubleWallrun` | `0xF139B4B3` | live_entity | tested |  |
 | 1320007 | ExtendedComboVulnerability | `Unlocks_ExtendedComboVulnerability` | `0x87156FC6` | persistent_entity | untested |  |
 | 1320008 | ExtendedSlide | `Unlocks_ExtendedSlide` | `0x427FB289` | live_entity | expected |  |
-| 1320009 | FastClimb | `Unlocks_FastClimb` | `0x6F18BEF0` | live_entity | expected |  |
+| 1320009 | FastClimb | `Unlocks_FastClimb` | `0x6F18BEF0` | live_entity | tested | Through mec_ap.dll (2026-11-13): applied live, read back; in play "pretty certain" it worked. |
 | 1320010 | FlowAttack | `Unlocks_FlowAttack` | `0x06943543` | live_entity | expected |  |
 | 1320011 | FlowAttack_PowerAttack | `Unlocks_FlowAttack_PowerAttack` | `0x710BF0CB` | live_entity | expected |  |
 | 1320012 | FlowAttack_Special_PowerAttack | `Unlocks_FlowAttack_Special_PowerAttack` | `0x17EEE7F5` | live_entity | expected |  |
@@ -61,7 +77,7 @@ stamina tiers (+1 bar each).
 | 1320030 | MoveEnemyAttack | `Unlocks_MoveEnemyAttack` | `0x525F777A` | live_entity | expected |  |
 | 1320031 | MoveEnemyBack | `Unlocks_MoveEnemyBack` | `0x67800619` | live_entity | tested | Switch Place |
 | 1320032 | PositionalAdvantage | `Unlocks_PositionalAdvantage` | `0xEC427EC6` | persistent_entity | untested |  |
-| 1320033 | QuickTurn | `Unlocks_QuickTurn` | `0x732EB4A1` | live_entity | expected |  |
+| 1320033 | QuickTurn | `Unlocks_QuickTurn` | `0x732EB4A1` | live_entity | expected | The table write applied at the next checkpoint restart (2026-11-13). |
 | 1320034 | Shift | `Unlocks_Shift` | `0x2B48D119` | live_entity | expected |  |
 | 1320035 | SkillWindowSkillRoll | `Unlocks_SkillWindowSkillRoll` | `0x92135F48` | live_entity | expected |  |
 
@@ -107,9 +123,10 @@ Notes that matter for logic:
   items. One on/off switch instead of separate swing / pull-up / pull-down. That is simpler
   but coarser: logic can no longer require one specific rope use, and the decision is
   reversible if that granularity turns out to matter.
-- `Wallrun` removes wallrunning entirely, so it sits *under* the existing
-  `Unlocks_DoubleWallrun` item: presumably this gates wallrunning at all and that one gates
-  the second wallrun. The interaction is untested.
+- `Wallrun` removes wallrunning entirely, so it sits *under* `Unlocks_DoubleWallrun`. Both worlds
+  make them one **Progressive Wallrun** (two copies: the first lifts `ExcludeWallrun`, the second
+  writes `Unlocks_DoubleWallrun`), so the order is always right. What Double Wallrun does while
+  `ExcludeWallrun` is still set has not been tried.
 - Nothing here touches the save file, so a game restart always clears it.
 
 ## Side mission unlocks
@@ -258,8 +275,11 @@ already in the world on a story-complete save.
 
 ## Design notes
 
-- The skill-tree menu still lets the player **buy** abilities with XP, and buying sets
-  the same flag. Decide whether the client reverts unearned purchases, or whether the
-  starting save gives no XP.
+- The skill-tree menu still lets the player **buy** abilities with XP, and buying sets the same
+  flag. Decided: the option `revert_skill_tree_purchases` (on by default) makes the client set
+  any ability the slot has not received back to 0, and the seed save has 0 XP
+  (`make_seed_save.py`). The revert path is unit-tested only; it has not been checked in game.
 - A starting save with every ability cleared can be made with
   `tools/save/clear_all_unlocks.py`. Tested: nothing is re-granted from mission state at load.
+- **Dash Unlocks** (Dashes world) have no effect in the game at all: the client simply ignores a
+  finished run of a dash you do not hold yet. See `docs/ROADMAP.md` for a real lock.

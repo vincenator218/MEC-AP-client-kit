@@ -2,13 +2,13 @@
 
 All offsets are relative to the base of `MirrorsEdgeCatalyst.exe`, and come
 from the PC build the research used. They are build-specific: always
-sanity-check them first (`ap_check()` in `reference/cheatengine/ap_live.lua`
-does this).
+sanity-check them first (`ap_check()` in `reference/cheatengine/ap_live.lua`,
+`MecMemory.sanity()` in `tools/client/mec_memory.py`, and `mec_ap.dll`'s own checks do this).
 
 | symbol | offset | what |
 |---|---|---|
 | `FLAG_TABLE` | `+0x257C9D8` | pointer to the progression flag hash table |
-| `ENTITY_VTABLE` | `+0x1C7B168` | vtable of the flag-check entity class |
+| `ENTITY_VTABLE` | `+0x1C7B168` | vtable of the flag-check entity class, `PamServerProgressionFlagEntity` (a server entity; read through its `getType` slot, 2026-11-13) |
 | `APPLY` | `+0x3A75790` | `void apply(Entity* e, int value, bool force)` |
 | `EXCL_TYPEINFO` | `+0x2878C00` | type info for `PamMovementExclusionEntityData` (§5) |
 

@@ -25,13 +25,15 @@ no abilities, collectibles or activity completions. Use one seed save per slot.
 2. Open the Archipelago Launcher and pick **Mirror's Edge Catalyst Client**, then connect to
    your room. If it says access was denied, run the launcher as administrator.
 3. The client finds the game by itself and survives the game closing and reopening.
+4. Optional but recommended: load `mec_ap.dll` (below). With it, received abilities work at once
+   instead of at your next death, and dashes can be checks.
 
-### Dashes (optional, `dashes: true`)
+### mec_ap.dll, and dashes (optional, `dashes: true`)
 
-Dashes have no save flag, so they need `mec_ap.dll` loaded into the game. Build it once (see
-`dll/README.md` in the client kit), then after each game start run `mec_ap_inject.exe`. The client
-says `Connected to mec_ap.dll ... Dash checks are on.` Finishing a dash sends its check, and each
-star time you beat sends that star's check. Before a new seed, delete `mec_ap_events.jsonl` and
+Build the DLL once (see `dll/README.md` in the client kit), then after each game start run
+`mec_ap_inject.exe`. The client says `Connected to mec_ap.dll ... Received abilities apply
+immediately.` Dashes have no save flag, so they need the DLL: finishing a dash sends its check,
+and each star time you beat sends that star's check. Before a new seed, delete `mec_ap_events.jsonl` and
 `mec_ap_acked.txt` next to the DLL, or older runs are sent to the new seed. Dashes are not locked:
 you can play any of them at any time.
 

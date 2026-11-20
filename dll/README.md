@@ -1,12 +1,15 @@
-# mec_ap.dll: dash checks from inside the game
+# mec_ap.dll: dash checks and immediate abilities, from inside the game
 
-A small DLL that is loaded into Mirror's Edge Catalyst and tells the Archipelago client when a
-**dash** (or any other named challenge) is started, cancelled or finished, with the run's time.
-Dashes have no progression flag to read (docs/DLL.md §11), so this is the only way to detect
-them. The client turns a finish into checks: the finish itself, and each star tier the time beats.
+A small DLL loaded into Mirror's Edge Catalyst (version 0.2.1). It does two things for the
+Archipelago clients of both worlds:
+- tells them when a **dash** (or any other named challenge) is started, cancelled or finished,
+  with the run's time. Dashes have no progression flag to read (docs/DLL.md §11), so this is the
+  only way to detect them. The client turns a finish into checks: the finish itself, and each
+  star tier the time beats;
+- **applies a received ability at once**, by calling the game's own `apply` on its game thread.
+  Without the DLL, an ability only takes effect at the next death or checkpoint restart.
 
-**Status: built and run in game once (2026-11-12, Steam build, with MECMP 0.9.0-beta.3.1 loaded
-first).** It compiled cleanly with MSVC 19.44. In the game it passed its build check, found
+**First run: 2026-11-12, Steam build, with MECMP 0.9.0-beta.3.1 loaded first.** It compiled cleanly with MSVC 19.44. In the game it passed its build check, found
 both hook slots already taken by MECMP and chained in front of them, and registered on both
 message managers. One dash finish (Too Close to the Sun, 57.16, a slower run than the 49.66
 record) was logged and journaled once, with the right ContentId and run time.
@@ -15,6 +18,14 @@ record) was logged and journaled once, with the right ContentId and run time.
 Archipelago client connected to the DLL. Too Close to the Sun in 63.40 (stars at 68.00 / 59.00 /
 55.00) sent exactly `Dash - Too Close to the Sun` and `... - 1 Star`; the server received both,
 the client acknowledged seq 1, and the client logged the dash start too.
+
+**Abilities, 2026-11-13 (0.2.1, without MECMP):** finishing High Roller Avenue gave Coil and
+FastClimb; each was applied on its live entity from the server tick and read back as 1, the game
+kept running, and Coil worked in play at once. (0.2.0 found no entity: it compared `[e+0x80]`
+with the address `node+0x10` instead of the pointer stored there.)
+
+**2026-11-19:** run with the Dashes world's client; its soft lock reported a locked dash on start
+as intended.
 
 ## What it does, and what it does not
 
@@ -34,6 +45,11 @@ the client acknowledged seq 1, and the client logged the dash start too.
 - It does **not** stop you from starting a dash (there is no per-dash lock in the game; §11d).
 - Before touching anything it checks the game build (3 TypeInfo objects, the 2 hook slots, the
   listener function's first bytes). On any mismatch it hooks nothing and tells the client why.
+  Applying has its own check (the flag entity's class name, `apply`'s first 24 bytes); if that
+  fails, dashes still work and abilities wait for the next respawn.
+- Each batch of applies starts with a scan of the game's memory for flag entities, about 4.5 s
+  on the DLL's own thread (the game is not paused). The ability arrives a few seconds after its
+  check.
 
 ## Build (once)
 
@@ -57,11 +73,14 @@ the client acknowledged seq 1, and the client logged the dash start too.
 ## Use
 
 1. Put `mec_ap.dll` and `mec_ap_inject.exe` in one folder (anywhere; not inside the game folder).
-2. Start the Archipelago client from the Launcher and connect to your slot.
+2. Start your world's client from the Launcher (**Mirror's Edge Catalyst Client** or **Mirror's
+   Edge Catalyst Dashes Client**) and connect to your slot.
 3. Start the game and run `mec_ap_inject.exe` (before or after the game starts; it waits out the
-   EA activation window). If the game runs as administrator, run the injector as administrator.
-4. `mec_ap.log` next to the DLL should say `ready`, and the client
-   `Connected to mec_ap.dll 0.1.0. Dash checks are on.`
+   EA activation window). Run it from a terminal so its output stays on screen; double-clicked,
+   its window closes before you can read it. If the game runs as administrator, run the injector
+   as administrator.
+4. `mec_ap.log` next to the DLL should say `ready` and `apply: check passed`, and the client
+   `Connected to mec_ap.dll 0.2.1. Dash checks are on. Received abilities apply immediately.`
 5. Load into free roam and run dashes. The client logs each start, cancel and finish.
 
 **Run it again after every game restart**: the DLL lives only as long as the game process.

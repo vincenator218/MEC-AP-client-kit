@@ -42,6 +42,14 @@ N x { u32 hash, u32 value }      hash = djb2a(flag name), same as the live table
 - Both CRC32 fields are recomputed by every write tool (standard CRC-32 seeded with `0x12345678`).
   The game has not been seen rejecting a stale checksum, but the tools keep it correct.
 
+### The stats block (not handled by the tools)
+
+The file's first block holds the player's **stats** as text key/value pairs (289 of them on the
+research save), separate from the progression block. Among them, per dash,
+`ch_rrt_<code>_time_<uid>` is the best time in hundredths, plus distances, and
+`total_stars_<uid>`; billboards have `ch_hbb_*_tstamp_<uid>`. `<uid>` is the player's number.
+This is where dash records live (`docs/DLL.md` §11d). No tool here reads or edits it yet.
+
 ## Tools (`tools/save/`)
 
 ```

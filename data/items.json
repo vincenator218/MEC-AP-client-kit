@@ -6,8 +6,8 @@
   "hash": "0xF996B210",
   "group": "movement",
   "grant_method": "live_entity",
-  "live_status": "expected",
-  "note": ""
+  "live_status": "tested",
+  "note": "Applied live through mec_ap.dll (2026-11-13): [e+0x78] read back 1 and it worked in play at once. Also seen applying at the next respawn with the table write alone (2026-10-29)."
  },
  {
   "id": 1320001,
@@ -96,8 +96,8 @@
   "hash": "0x6F18BEF0",
   "group": "movement",
   "grant_method": "live_entity",
-  "live_status": "expected",
-  "note": ""
+  "live_status": "tested",
+  "note": "Applied live through mec_ap.dll (2026-11-13): [e+0x78] read back 1; in play the tester was \"pretty certain\" it worked without a reload."
  },
  {
   "id": 1320010,
@@ -337,7 +337,7 @@
   "group": "movement",
   "grant_method": "live_entity",
   "live_status": "expected",
-  "note": ""
+  "note": "The table write alone applied at the next checkpoint restart (2026-11-13); a live apply has not been seen yet."
  },
  {
   "id": 1320034,

@@ -16,12 +16,16 @@ in your options) in the replay menu. Finish it while you hold the shards.
 
 By default: side missions, the 40 opportunities, and GridLeaks in bundles (every 5 leaks in a
 district sends one check). Countdown deliveries, security hubs, grid nodes, billboards,
-electronic parts, surveillance recordings, documents and secret bags can be turned on.
+electronic parts, surveillance recordings, documents, secret bags and the 22 dashes (finish and
+star times; needs `mec_ap.dll`) can be turned on.
+
+For a smaller game built only around dashes and movement, see **Mirror's Edge Catalyst Dashes**.
 
 ## When do items take effect?
 
 - Traversal moves: immediately.
-- Abilities: at your next death or checkpoint restart.
+- Abilities: immediately with `mec_ap.dll` loaded; otherwise at your next death or checkpoint
+  restart.
 - Side mission and opportunity unlocks: in the replay menu after the next load.
 
 ## Is the logic complete?
