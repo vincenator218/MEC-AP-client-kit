@@ -29,6 +29,11 @@ and every GridLeak, so the checks can be earned again.
 4. Before a new seed, delete `mec_ap_events.jsonl` and `mec_ap_acked.txt` next to the DLL, or
    runs from before the seed are sent to it.
 
+Locked dashes: once the client is connected and the world is loaded it says `Hard dash lock: 22
+dashes are tied to their Dash Unlock.` Reload a checkpoint once so the dashes you do not hold
+leave the map, and again each time a Dash Unlock arrives. When you close the client, every dash
+comes back on the map (the lock lives in game memory; the unlocks you hold are in your save).
+
 Client commands: `/mec` (stars, unlocked dashes, moves, DLL state), `/dashes` (which dashes are
 unlocked), `/confirm_save`, `/next_volume` (a move that should be blocked still works).
 

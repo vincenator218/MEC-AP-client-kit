@@ -281,5 +281,7 @@ already in the world on a story-complete save.
   (`make_seed_save.py`). The revert path is unit-tested only; it has not been checked in game.
 - A starting save with every ability cleared can be made with
   `tools/save/clear_all_unlocks.py`. Tested: nothing is re-granted from mission state at load.
-- **Dash Unlocks** (Dashes world) have no effect in the game at all: the client simply ignores a
-  finished run of a dash you do not hold yet. See `docs/ROADMAP.md` for a real lock.
+- **Dash Unlocks** (Dashes world) set the dash's own lock flag to 1 (`data/dash_unlock_flags.json`)
+  when the slot has `hard_dash_lock` (default): the dash then comes back on the map at the next
+  checkpoint reload (DLL.md §11e). Either way the client ignores a finished run of a dash you do
+  not hold yet.

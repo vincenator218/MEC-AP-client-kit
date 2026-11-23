@@ -171,9 +171,15 @@ only: no side missions, no opportunities. Built 2026-11-13, first played 2026-11
   Unlocks** (1320500 + `ap_index`), filler `Gridnet Static`. `starting_dashes` (default 3) are
   given at the start, at least one of them a dash that needs no move by `requirements.csv`, so a
   seed can always start. Useful abilities that do not fit go to the start inventory.
-- **Soft lock:** the client sends a dash's checks only if you hold its unlock. A locked run is
-  logged ("does not count; run it again once the unlock arrives") and dropped; the warning also
-  shows when a locked dash starts. Seen working in game on 2026-11-19.
+- **Hard lock** (`hard_dash_lock`, on by default; `client/dash_lock.py`): the client points each
+  dash's `UnlockFlag` at its own lock flag (`data/dash_unlock_flags.json`, docs/DLL.md §11e) and
+  holds that flag at 0 until the Dash Unlock arrives, through the one write path. A locked dash is
+  off the map and cannot be started; changes show after a checkpoint reload. The pointers are
+  re-validated every tick and set back to null when the client closes. `make_seed_save.py`
+  clears the 22 flags.
+- **Soft lock** (always, and all there is with `hard_dash_lock` off): the client sends a dash's
+  checks only if you hold its unlock. A locked run is logged ("does not count; run it again
+  once the unlock arrives") and dropped. Seen working in game on 2026-11-19.
 - **Goal:** `stars_required` (default 40, capped at what the seed has). Each star check has a
   hidden "Star" event with the same rule, so the generator proves the goal is reachable. The
   client sends the goal when enough star checks have been sent.
@@ -181,6 +187,6 @@ only: no side missions, no opportunities. Built 2026-11-13, first played 2026-11
   Two rows from play (2026-11-19): Caleb's Run needs MAG Rope; Out in the Open needs nothing.
 - **Ids:** shared things keep the main world's ids (abilities, moves, dash checks 1330000+,
   GridLeak counts), so the shared client code is identical.
-- **Client commands:** `/mec`, `/dashes`, `/confirm_save`, `/next_volume`.
+- **Client commands:** `/mec` (also shows the hard lock), `/dashes`, `/confirm_save`, `/next_volume`.
 - **Not yet seen in game:** a star check, a GridLeak check, an ability applied in this world, the
-  goal.
+  goal, and the hard lock driven by the client itself (the lock was tested with the probe tool).

@@ -76,6 +76,14 @@ class RevertSkillTreePurchases(DefaultOnToggle):
     display_name = "Revert Skill Tree Purchases"
 
 
+class HardDashLock(DefaultOnToggle):
+    """On: a dash you have no Dash Unlock for is taken off the map and cannot be started, using
+    the game's own per-dash unlock (needs no DLL). A received unlock shows after you reload a
+    checkpoint; fast travel or a death is not enough.
+    Off: every dash can be run, but a run of a locked dash does not count."""
+    display_name = "Hard Dash Lock"
+
+
 @dataclass
 class MECDashesOptions(PerGameCommonOptions):
     start_inventory_from_pool: StartInventoryPool
@@ -86,10 +94,11 @@ class MECDashesOptions(PerGameCommonOptions):
     starting_dashes: StartingDashes
     traversal_items: TraversalItems
     revert_skill_tree_purchases: RevertSkillTreePurchases
+    hard_dash_lock: HardDashLock
 
 
 OPTION_GROUPS = [
     OptionGroup("Goal", [StarsRequired]),
     OptionGroup("Locations", [DashStars, GridLeakBundleSize, GridLeakPercent]),
-    OptionGroup("Items", [StartingDashes, TraversalItems, RevertSkillTreePurchases]),
+    OptionGroup("Items", [StartingDashes, TraversalItems, RevertSkillTreePurchases, HardDashLock]),
 ]

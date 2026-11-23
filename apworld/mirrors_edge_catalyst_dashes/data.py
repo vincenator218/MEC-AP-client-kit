@@ -32,13 +32,14 @@ def _load_json(name: str):
 RAW_ITEMS: list[dict] = _load_json("items.json")
 RAW_LOCATIONS: list[dict] = _load_json("locations.json")
 RAW_CHALLENGES: list[dict] = _load_json("named_challenges.json")["challenges"]
+RAW_DASH_LOCKS: list[dict] = _load_json("dash_unlock_flags.json")["dashes"]
 
 # ------------------------------------------------------------------------- items
 # grant kinds the client understands
 FLAG = "flag"                    # write a progression flag (an ability), then apply it through the DLL
 EXCLUSION = "exclusion"          # clear one Exclude* byte on a movement volume
 PROGRESSIVE_WALLRUN = "progressive_wallrun"
-DASH_UNLOCK = "dash_unlock"      # nothing in the game: the client counts that dash's checks
+DASH_UNLOCK = "dash_unlock"      # the dash's lock flag (hard_dash_lock) and the client's soft lock
 FILLER = "filler"
 
 PROGRESSIVE_WALLRUN_NAME = "Progressive Wallrun"
@@ -210,3 +211,22 @@ DASHES_BY_CONTENT_ID: dict[int, list[LocationInfo]] = {}
 for _l in DASHES.values():
     DASHES_BY_CONTENT_ID.setdefault(_l.content_id, []).append(_l)
 DASH_NAMES: list[str] = [c["name"] for c in _dashes_in_order()]
+
+
+def _build_dash_locks() -> dict[str, tuple[int, str]]:
+    """dash name -> (ContentId, lock flag), from data/dash_unlock_flags.json (docs/DLL.md 11e)."""
+    by_index = {c["ap_index"]: c for c in _dashes_in_order()}
+    out: dict[str, tuple[int, str]] = {}
+    for r in RAW_DASH_LOCKS:
+        c = by_index[r["ap_index"]]
+        if c["content_id"] != r["content_id"]:
+            raise ValueError(f"dash_unlock_flags.json and named_challenges.json disagree on {c['name']}")
+        out[c["name"]] = (int(c["content_id"], 16), r["unlock_flag"])
+    if len(out) != len(by_index) or len({f for _, f in out.values()}) != len(out):
+        raise ValueError("dash_unlock_flags.json needs one distinct flag for every dash")
+    return out
+
+
+# The hard dash lock: each dash's own lock flag (1 = unlocked) and its ContentId
+DASH_LOCKS: dict[str, tuple[int, str]] = _build_dash_locks()
+DASH_OF_LOCK_FLAG: dict[str, str] = {flag: dash for dash, (_cid, flag) in DASH_LOCKS.items()}

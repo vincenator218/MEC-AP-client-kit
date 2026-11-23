@@ -529,7 +529,8 @@ memory then; a flag read by its hash alone would not show.
 
 What this means:
 - **The game has a real per-dash lock, driven by an ordinary progression flag.** A Dash Unlock
-  item can be a flag write through the one write path, like an ability.
+  item can be a flag write through the one write path, like an ability. The Dashes world's
+  client does this (option `hard_dash_lock`, `client/dash_lock.py`).
 - Both directions need a **checkpoint reload**. **Neither fast travel nor a death refreshes it**
   (tested 2026-11-22). A received unlock shows at the next checkpoint reload unless a live refresh
   is found.
