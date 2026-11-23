@@ -21,6 +21,7 @@ import struct
 import time
 from dataclasses import dataclass, field
 
+from .activity_lock import ActivityHideDriver
 from .game import NODE_HASH, GameSession, Plan
 from .mec_memory import MecMemory, djb2a
 
@@ -38,6 +39,8 @@ RESCAN_SEC = 30.0                            # a failed or partial scan is retri
 @dataclass
 class DashesPlan(Plan):
     dash_locks: dict | None = None           # content_id -> lock flag; None = leave the pointers alone
+    hide_activities: dict | None = None      # activity name -> its own completion flag; None = leave alone
+    hide_lock_flag: str = ""                  # the shared flag (held at 1) hidden activities point at
 
 
 @dataclass
@@ -134,21 +137,32 @@ class DashLockDriver:
 
 
 class DashesGameSession(GameSession):
-    """game.GameSession plus the dash lock pointers."""
+    """game.GameSession plus the dash lock pointers and the hidden activities."""
 
     def __init__(self) -> None:
         super().__init__()
         self.locks = DashLockDriver(self.mem, self.table)
+        self.hide = ActivityHideDriver(self.mem, self.table)
+        self._hide_flag = ""
 
     def detach(self) -> None:
         super().detach()
         self.locks = DashLockDriver(self.mem, self.table)
+        self.hide = ActivityHideDriver(self.mem, self.table)
 
     def _tick(self, plan: Plan):
         r = super()._tick(plan)
+        if not (r.loaded and plan.writes_allowed):
+            return r
         wanted = getattr(plan, "dash_locks", None)
-        if r.loaded and plan.writes_allowed and wanted:
+        if wanted:
             self.locks.ensure(wanted)
+        hide, flag = getattr(plan, "hide_activities", None), getattr(plan, "hide_lock_flag", "")
+        # only once the shared flag reads 1 (it is written through ProgressionWriter just above),
+        # so an activity never points at a 0 and briefly looks "not done" in a different way
+        if hide and flag and self.table.read(flag) == 1:
+            self._hide_flag = flag
+            self.hide.ensure(hide, flag)
         return r
 
     def shutdown(self) -> None:
@@ -159,6 +173,10 @@ class DashesGameSession(GameSession):
                     n = self.locks.release()
                     if n:
                         log.info("Dash locks removed from %d dashes.", n)
+                    if self._hide_flag:
+                        n = self.hide.release(self._hide_flag)
+                        if n:
+                            log.info("%d hidden activities put back.", n)
             except Exception:                                    # noqa: BLE001
-                log.exception("Could not remove the dash locks.")
+                log.exception("Could not remove the dash locks or put the activities back.")
         super().shutdown()

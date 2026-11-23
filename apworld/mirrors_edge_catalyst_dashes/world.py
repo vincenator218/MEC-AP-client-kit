@@ -211,4 +211,5 @@ class MECDashesWorld(World):
             "traversal_items": self.options.traversal_items.current_key,
             "revert_skill_tree_purchases": bool(self.options.revert_skill_tree_purchases.value),
             "hard_dash_lock": bool(self.options.hard_dash_lock.value),
+            "hide_other_activities": bool(self.options.hide_other_activities.value),
         }

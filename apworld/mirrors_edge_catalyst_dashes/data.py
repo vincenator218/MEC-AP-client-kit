@@ -33,6 +33,7 @@ RAW_ITEMS: list[dict] = _load_json("items.json")
 RAW_LOCATIONS: list[dict] = _load_json("locations.json")
 RAW_CHALLENGES: list[dict] = _load_json("named_challenges.json")["challenges"]
 RAW_DASH_LOCKS: list[dict] = _load_json("dash_unlock_flags.json")["dashes"]
+RAW_MISSIONS: list[dict] = _load_json("missions.json")["missions"]
 
 # ------------------------------------------------------------------------- items
 # grant kinds the client understands
@@ -230,3 +231,11 @@ def _build_dash_locks() -> dict[str, tuple[int, str]]:
 # The hard dash lock: each dash's own lock flag (1 = unlocked) and its ContentId
 DASH_LOCKS: dict[str, tuple[int, str]] = _build_dash_locks()
 DASH_OF_LOCK_FLAG: dict[str, str] = {flag: dash for dash, (_cid, flag) in DASH_LOCKS.items()}
+
+# hide_other_activities (docs/DLL.md 11f): every opportunity (type 1), delivery / security hub
+# (type 2) and side mission (type 3), by name -> its own completion flag. They point at
+# ACTIVITY_LOCK_FLAG (held at 1) instead; nothing reads that flag in the shipped game.
+ACTIVITY_LOCK_FLAG = "Example_ExampleMission3Part1Completed"
+HIDE_ACTIVITIES: dict[str, str] = {m["name"]: m["completed_flag"] for m in RAW_MISSIONS
+                                   if m["type"] in (1, 2, 3)}
+assert ACTIVITY_LOCK_FLAG not in DASH_OF_LOCK_FLAG

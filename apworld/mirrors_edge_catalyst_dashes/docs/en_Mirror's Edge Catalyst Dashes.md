@@ -25,4 +25,6 @@ Earn the number of dash stars set in your options (default 40 of the 66).
 ## What is not in this game?
 
 Side missions, opportunities (Runs), deliveries and the story. For those, play the
-**Mirror's Edge Catalyst** world.
+**Mirror's Edge Catalyst** world. With `hide_other_activities` (on by default) they are taken
+off the map while the client runs, so the dashes stand out; only the 6 Dead Drop Deliveries
+stay, because the game always offers one per story phase.

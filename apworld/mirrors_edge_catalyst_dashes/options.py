@@ -84,6 +84,14 @@ class HardDashLock(DefaultOnToggle):
     display_name = "Hard Dash Lock"
 
 
+class HideOtherActivities(DefaultOnToggle):
+    """On: opportunities, security hubs, side missions and most deliveries are taken off the map
+    (they are not checks in this game), so the dashes stand out. Shows after a checkpoint
+    reload; everything comes back when the client closes. The 6 Dead Drop Deliveries stay: the
+    game always offers one per story phase."""
+    display_name = "Hide Other Activities"
+
+
 @dataclass
 class MECDashesOptions(PerGameCommonOptions):
     start_inventory_from_pool: StartInventoryPool
@@ -95,10 +103,12 @@ class MECDashesOptions(PerGameCommonOptions):
     traversal_items: TraversalItems
     revert_skill_tree_purchases: RevertSkillTreePurchases
     hard_dash_lock: HardDashLock
+    hide_other_activities: HideOtherActivities
 
 
 OPTION_GROUPS = [
     OptionGroup("Goal", [StarsRequired]),
     OptionGroup("Locations", [DashStars, GridLeakBundleSize, GridLeakPercent]),
     OptionGroup("Items", [StartingDashes, TraversalItems, RevertSkillTreePurchases, HardDashLock]),
+    OptionGroup("Map", [HideOtherActivities]),
 ]

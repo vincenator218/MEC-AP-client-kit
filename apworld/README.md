@@ -177,6 +177,12 @@ only: no side missions, no opportunities. Built 2026-11-13, first played 2026-11
   off the map and cannot be started; changes show after a checkpoint reload. The pointers are
   re-validated every tick and set back to null when the client closes. `make_seed_save.py`
   clears the 22 flags.
+- **Hide other activities** (`hide_other_activities`, on by default; `client/activity_lock.py`):
+  the 92 opportunities, deliveries, security hubs and side missions (`data/missions.json` types
+  1-3) get their `CompletedFlag` pointed at one shared flag held at 1, so the game treats them as
+  done and takes them off the map (docs/DLL.md §11f). Their real completion flags are never
+  touched, and every pointer is put back when the client closes. The 6 Dead Drop Deliveries
+  cannot be hidden this way.
 - **Soft lock** (always, and all there is with `hard_dash_lock` off): the client sends a dash's
   checks only if you hold its unlock. A locked run is logged ("does not count; run it again
   once the unlock arrives") and dropped. Seen working in game on 2026-11-19.
@@ -194,4 +200,6 @@ only: no side missions, no opportunities. Built 2026-11-13, first played 2026-11
   star checks; the Dash Unlocks for Caleb's Run and Feature Creep arrived from them and both
   dashes were on the map after a reload; FlowAttack from the 3-star check was applied live
   through the DLL and read back.
+- **`hide_other_activities` seen in game, 2026-11-22:** with a new seed and the client
+  reconnected, a checkpoint reload left only the dashes held and the 6 Dead Drop Deliveries.
 - **Not yet seen in game:** the goal.

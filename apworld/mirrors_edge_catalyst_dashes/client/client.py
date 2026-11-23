@@ -7,6 +7,8 @@ The Mirror's Edge Catalyst Dashes client: Archipelago on one side, the running g
 * Hard dash lock (option hard_dash_lock, dash_lock.py): each dash's UnlockFlag pointer is aimed at
   its own lock flag, which the client holds at 0 until the Dash Unlock arrives. A locked dash is
   then off the map and cannot be started. Changes show after a checkpoint reload.
+* Hide other activities (option hide_other_activities, activity_lock.py): opportunities, hubs,
+  side missions and deliveries are made to look done, so they leave the map. Put back on close.
 * GridLeaks: polled from the progression flags, as count checks per district.
 * Items: moves are blocked or freed through a movement volume; abilities are written to the flag
   table (game.ProgressionWriter, the one write path) and applied at once through the DLL when it
@@ -23,7 +25,7 @@ from CommonClient import (ClientCommandProcessor, CommonContext, get_base_parser
                           handle_url_arg, logger, server_loop)
 from NetUtils import ClientStatus
 
-from ..data import (DASH_LOCKS, DASH_OF_LOCK_FLAG, DASHES_BY_CONTENT_ID, DOUBLE_WALLRUN_FLAG, GAME,
+from ..data import (ACTIVITY_LOCK_FLAG, DASH_LOCKS, DASH_OF_LOCK_FLAG, DASHES_BY_CONTENT_ID, DOUBLE_WALLRUN_FLAG, GAME,
                     ITEMS, LOCATIONS_BY_ID, GRIDLEAK_CATEGORY, dash_unlock_name)
 from .dash_lock import DashesGameSession, LockState
 from .dll_link import DllLink
@@ -99,6 +101,8 @@ class MECDContext(CommonContext):
         self.dll_reapply = False
         self.lock_state: LockState | None = None
         self.locks_announced = False
+        self.hide_state = None
+        self.hide_announced = False
 
     def hard_lock(self) -> bool:
         return bool(self.slot_data and self.slot_data.get("hard_dash_lock"))
@@ -166,6 +170,7 @@ class MECDContext(CommonContext):
             logger.info("Lost the game. Waiting for it to come back...")
             self.first_look_done = False
             self.locks_announced = False
+            self.hide_announced = False
         if r.just_loaded:
             logger.info("World loaded. Re-applying every received item.")
         self.last = r
@@ -187,6 +192,8 @@ class MECDContext(CommonContext):
         self.report_locks()
         for flag in r.flags_written:
             value = r.values.get(flag, 1)
+            if flag == ACTIVITY_LOCK_FLAG:
+                continue                         # reported by report_locks
             if flag in DASH_OF_LOCK_FLAG:
                 if value == 1:
                     logger.info("Received %s: reload a checkpoint to see the dash on the map (fast "
@@ -226,6 +233,17 @@ class MECDContext(CommonContext):
                                     "you hold the unlock. Retrying.")
         else:
             self.warned.discard("locks")
+
+        h = self.session.hide.state
+        if h is not None and h is not self.hide_state:
+            self.hide_state = h
+            if h.hidden and (h.written or not self.hide_announced):
+                self.hide_announced = True
+                logger.info("Hid %d other activities (opportunities, hubs, side missions, deliveries). "
+                            "Reload a checkpoint to clear them from the map; the 6 Dead Drop "
+                            "Deliveries stay.", h.hidden)
+            if h.missing:
+                logger.debug("Could not hide: %s", ", ".join(sorted(h.missing)))
 
     def log_grant(self, flag: str, reason: str, applying: bool = False) -> None:
         label = flag_label(flag)
@@ -368,6 +386,9 @@ class MECDContext(CommonContext):
                             f", {len(s.missing) + len(s.foreign)} could not be" if s.missing or s.foreign else "")
         else:
             logger.info("Hard dash lock: off for this slot (a locked dash can be run, but does not count).")
+        if self.slot_data and self.slot_data.get("hide_other_activities"):
+            h = self.hide_state
+            logger.info("Other activities: %s.", f"{h.hidden} hidden" if h else "not hidden yet")
         v = self.session.moves.verified
         if v is None:
             logger.info("Moves: not verified in game yet.")

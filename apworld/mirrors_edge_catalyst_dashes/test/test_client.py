@@ -2,13 +2,15 @@
 import struct
 import unittest
 
+from ..client.activity_lock import M_COMPLETED, M_NAME, VT_MISSION, ActivityHideDriver
 from ..client.dash_lock import (D_CONTENT_ID, D_UNLOCK_FLAG, DashesGameSession, DashLockDriver,
                                 VT_SERVER_NAMED_CHALLENGE)
 from ..client.game import FLAG_TABLE_PTR, LOADED_PROBE, FlagTable, ProgressionWriter
 from ..client.mec_memory import djb2a
 from ..client.plan import (blocked_moves, build_plan, dash_checks, dash_lock_pointers, dash_unlocked,
-                           desired_flags, received_names, stars_checked, unlocked_dashes)
-from ..data import (DASH_LOCKS, DASH_OF_LOCK_FLAG, DASHES, DASHES_BY_CONTENT_ID, DOUBLE_WALLRUN_FLAG,
+                           desired_flags, hidden_activities, received_names, stars_checked,
+                           unlocked_dashes)
+from ..data import (ACTIVITY_LOCK_FLAG, HIDE_ACTIVITIES, DASH_LOCKS, DASH_OF_LOCK_FLAG, DASHES, DASHES_BY_CONTENT_ID, DOUBLE_WALLRUN_FLAG,
                     ITEMS, PROGRESSIVE_WALLRUN_NAME, dash_location_name, dash_unlock_name)
 
 
@@ -67,11 +69,12 @@ class LockFakeMem:
     its data for each dash, laid out as docs/DLL.md 11e describes."""
     base = 0x140000000
 
-    def __init__(self, flags: dict[str, int], nbuck: int = 31):
+    def __init__(self, flags: dict[str, int], nbuck: int = 31, missions: dict[str, str] | None = None):
         self.mem: dict[int, int] = {}
         self.writes = 0
         self.defs: dict[str, int] = {}
         self.data: dict[int, int] = {}
+        self.missions: dict[str, int] = {}
         table, buckets, node_at, def_at = 0x10000, 0x20000, 0x30000, 0x80000
         self._put(self.base + FLAG_TABLE_PTR, struct.pack("<Q", table))
         self._put(table + 0x20, struct.pack("<Q", buckets))
@@ -96,6 +99,13 @@ class LockFakeMem:
             self._put(data + D_UNLOCK_FLAG, struct.pack("<Q", 0))
             self._put(data + D_CONTENT_ID, struct.pack("<I", cid))
             self.data[cid] = data
+        for i, (name, completed) in enumerate((missions or {}).items()):
+            m, text = 0x600000 + i * 0x100, 0x700000 + i * 0x100
+            self._put(text, name.encode("latin1") + b"\0")
+            self._put(m, struct.pack("<Q", VT_MISSION))
+            self._put(m + M_NAME, struct.pack("<Q", text))
+            self._put(m + M_COMPLETED, struct.pack("<Q", self.defs[completed]))
+            self.missions[name] = m
 
     def _put(self, addr, data):
         for i, b in enumerate(data):
@@ -105,6 +115,12 @@ class LockFakeMem:
         if all(addr + i in self.mem for i in range(size)):
             return bytes(self.mem[addr + i] for i in range(size))
         return None
+
+    def read_partial(self, addr, size):
+        out = bytearray()
+        while len(out) < size and addr + len(out) in self.mem:
+            out.append(self.mem[addr + len(out)])
+        return bytes(out) or None
 
     def read_u64(self, a):
         b = self.read(a, 8)
@@ -214,3 +230,52 @@ class TestDashLockDriver(unittest.TestCase):
         s.moves.release = lambda: 0
         s.shutdown()
         self.assertEqual(self.pointer("Caleb's Run"), 0)
+
+
+class TestHideActivities(unittest.TestCase):
+    MISSIONS = {"OW Opp DtPh2 02": "MiscCompleted_OW Opp DtPh2 02",
+                "Exit Strategy": "SilverCompleted_Exit Strategy",
+                "Security Hub Downtown 1": "BronzeCompleted_Security Hub Downtown 1"}
+
+    def setUp(self):
+        flags = {LOADED_PROBE: 0, ACTIVITY_LOCK_FLAG: 1, **{f: 0 for f in self.MISSIONS.values()}}
+        self.mem = LockFakeMem(flags, missions=self.MISSIONS)
+        self.driver = ActivityHideDriver(self.mem, FlagTable(self.mem))
+
+    def completed(self, name):
+        return self.mem.read_u64(self.mem.missions[name] + M_COMPLETED)
+
+    def test_plan(self):
+        self.assertEqual(len(HIDE_ACTIVITIES), 92)
+        self.assertEqual(HIDE_ACTIVITIES["Exit Strategy"], "SilverCompleted_Exit Strategy")
+        self.assertNotIn("The Shard", HIDE_ACTIVITIES)                   # story stays
+        on = {"hide_other_activities": True}
+        self.assertEqual(desired_flags(received_names([]), on)[ACTIVITY_LOCK_FLAG][0], 1)
+        self.assertNotIn(ACTIVITY_LOCK_FLAG, desired_flags(received_names([]), {}))
+        self.assertIsNone(hidden_activities({}))
+        self.assertEqual(build_plan([], {}, on, True).hide_activities, HIDE_ACTIVITIES)
+        self.assertIsNone(build_plan([], {}, on, False).hide_activities)
+
+    def test_hide_and_put_back(self):
+        s = self.driver.ensure(self.MISSIONS, ACTIVITY_LOCK_FLAG)
+        self.assertEqual((s.hidden, s.written, s.missing), (3, 3, []))
+        self.assertEqual(self.completed("Exit Strategy"), self.mem.defs[ACTIVITY_LOCK_FLAG])
+        n = self.mem.writes
+        self.assertEqual(self.driver.ensure(self.MISSIONS, ACTIVITY_LOCK_FLAG).written, 0)
+        self.assertEqual(self.mem.writes, n)
+        self.assertEqual(self.driver.release(ACTIVITY_LOCK_FLAG), 3)
+        self.assertEqual(self.completed("Exit Strategy"), self.mem.defs["SilverCompleted_Exit Strategy"])
+
+    def test_pointer_that_is_not_its_own_flag_is_left_alone(self):
+        m = self.mem.missions["Exit Strategy"]
+        self.mem._put(m + M_COMPLETED, struct.pack("<Q", 0xABCDEF0))
+        s = self.driver.ensure(self.MISSIONS, ACTIVITY_LOCK_FLAG)
+        self.assertEqual(s.missing, ["Exit Strategy"])
+        self.assertEqual(self.completed("Exit Strategy"), 0xABCDEF0)
+
+    def test_release_after_a_client_restart(self):
+        self.driver.ensure(self.MISSIONS, ACTIVITY_LOCK_FLAG)
+        fresh = ActivityHideDriver(self.mem, FlagTable(self.mem))      # a new client, same game
+        self.assertEqual(fresh.ensure(self.MISSIONS, ACTIVITY_LOCK_FLAG).written, 0)
+        self.assertEqual(fresh.release(ACTIVITY_LOCK_FLAG), 3)
+        self.assertEqual(self.completed("OW Opp DtPh2 02"), self.mem.defs["MiscCompleted_OW Opp DtPh2 02"])

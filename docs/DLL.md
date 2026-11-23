@@ -588,6 +588,9 @@ that is 1. Tested with `tools/client/activity_lock_probe.py`:
 - Like the dash lock: pointers live in memory and need writing at every game start; only a
   checkpoint reload refreshes (not fast travel, not death).
 
+The Dashes world uses this to clear its map (option `hide_other_activities`,
+`client/activity_lock.py`), since none of these activities are checks there.
+
 **Everything at once** (same day): all 22 dashes and all 92 type 1-3 activities locked, then a
 reload. **Everything was gone except 6 "Dead Drop Delivery" markers**: the countdown deliveries
 `OWPh<2-7>Delivery01`, whose `_Available` read 1.

@@ -62,7 +62,8 @@ the main world at build time (`tools/build_apworld.py`), so each exists once.
    completion flag, the check, stays 0. This would make every on-foot activity an item-gated
    location, not only the side missions. Same build steps as 3, with one shared lock flag.
    Locking everything at once left only the 6 Dead Drop Deliveries: the game always offers one
-   per phase, so they need another way (DLL.md §11f).
+   per phase, so they need another way (DLL.md §11f). Already used by the Dashes world to clear
+   its map (option `hide_other_activities`).
 4. **A locked final activity** (main world). The final activity can be finished early in the
    world. With the DLL, the goal could count only a completion message that arrives after the
    unlock ([`DLL.md`](DLL.md) §1); activities other than dashes send the same messages, but only

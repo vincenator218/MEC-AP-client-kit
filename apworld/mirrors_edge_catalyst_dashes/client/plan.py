@@ -8,7 +8,7 @@ from __future__ import annotations
 from collections import Counter
 from typing import Callable, Iterable
 
-from ..data import (ABILITY_ITEMS, COUNT, DASH_LOCKS, DASH_UNLOCK, DASHES_BY_CONTENT_ID,
+from ..data import (ABILITY_ITEMS, ACTIVITY_LOCK_FLAG, COUNT, DASH_LOCKS, HIDE_ACTIVITIES, DASH_UNLOCK, DASHES_BY_CONTENT_ID,
                     DOUBLE_WALLRUN_FLAG, EXCLUSION, EXCLUSION_MOVES, FLAG, ITEMS, ITEMS_BY_ID,
                     LOCATIONS_BY_ID, PROGRESSIVE_WALLRUN_NAME, LocationInfo, dash_unlock_name)
 from .dash_lock import DashesPlan
@@ -65,7 +65,14 @@ def desired_flags(have: Counter, slot_data: dict) -> dict[str, tuple[int, str]]:
         for dash, (_cid, flag) in DASH_LOCKS.items():
             name = dash_unlock_name(dash)
             out[flag] = (1, f"received {name}") if have[name] else (0, f"{dash} is locked")
+    if slot_data.get("hide_other_activities"):
+        out[ACTIVITY_LOCK_FLAG] = (1, "hide other activities")
     return out
+
+
+def hidden_activities(slot_data: dict) -> dict[str, str] | None:
+    """Activity name -> its own completion flag, when the slot hides the other activities."""
+    return dict(HIDE_ACTIVITIES) if slot_data.get("hide_other_activities") else None
 
 
 def dash_lock_pointers(slot_data: dict) -> dict[int, str] | None:
@@ -96,4 +103,6 @@ def build_plan(item_ids: Iterable[int], watch: dict[int, LocationInfo], slot_dat
         plan.flags = desired_flags(have, slot_data)
         plan.blocked = blocked_moves(have)
         plan.dash_locks = dash_lock_pointers(slot_data)
+        plan.hide_activities = hidden_activities(slot_data)
+        plan.hide_lock_flag = ACTIVITY_LOCK_FLAG
     return plan
