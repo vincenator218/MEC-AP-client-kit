@@ -26,7 +26,7 @@ result it holds that matters here is restated in these docs.
     counts it.
 23. **The hard dash lock** ([`DLL.md`](DLL.md) §11e, works on all 22 with their own flags,
     `data/dash_unlock_flags.json`; built into the Dashes client, which writes the pointers once
-    the world is loaded and asks for one reload): writing them before the first load instead; whether anything
+    the world is loaded and asks for one reload; played 2026-11-22): writing them before the first load instead; whether anything
     short of a checkpoint reload refreshes a dash (fast travel and death do not); a run in
     progress; the flags over a game restart.
 24. **The activity lock** ([`DLL.md`](DLL.md) §11f): works for opportunities, side missions and

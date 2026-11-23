@@ -14,7 +14,7 @@ Two playable worlds share one kit:
 | items | abilities, 5 moves, side-mission and opportunity unlocks, Data Shards | abilities, 5 moves, 22 Dash Unlocks |
 | goal | Data Shards unlock a final activity; finish it | N stars |
 | needs the DLL | only for dashes and for immediate abilities | yes (dashes) |
-| played in game | yes, first session 2026-10-29 (`apworld/README.md`) | yes, 2026-11-19 (soft lock, a dash finish) |
+| played in game | yes, first session 2026-10-29 (`apworld/README.md`) | yes, 2026-11-19 (soft lock, a dash finish); 2026-11-22 (hard lock, stars, GridLeaks, a live ability) |
 
 Both worlds use the same pieces underneath:
 
@@ -53,7 +53,8 @@ the main world at build time (`tools/build_apworld.py`), so each exists once.
    **Built** into the Dashes client (option `hard_dash_lock`, on by default,
    `client/dash_lock.py`): it writes the 22 pointers once the world is loaded, holds each lock
    flag at 0 until the Dash Unlock arrives (the one write path), clears them in the seed save,
-   and tells the player to reload a checkpoint. The soft lock stays as a fallback. Left: writing
+   and tells the player to reload a checkpoint. Played on 2026-11-22: locked at start, unlocks
+   received from star checks showed after a reload. The soft lock stays as a fallback. Left: writing
    the pointers before the first load, so no reload is needed after starting (OPEN_QUESTIONS #23).
 3b. **Locking opportunities, security hubs and side missions** (main world). Found 2026-11-22
    ([`DLL.md`](DLL.md) §11f): point an activity's `CompletedFlag` at a flag that is 1 and, after a

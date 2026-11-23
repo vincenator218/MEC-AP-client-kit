@@ -188,5 +188,10 @@ only: no side missions, no opportunities. Built 2026-11-13, first played 2026-11
 - **Ids:** shared things keep the main world's ids (abilities, moves, dash checks 1330000+,
   GridLeak counts), so the shared client code is identical.
 - **Client commands:** `/mec` (also shows the hard lock), `/dashes`, `/confirm_save`, `/next_volume`.
-- **Not yet seen in game:** a star check, a GridLeak check, an ability applied in this world, the
-  goal, and the hard lock driven by the client itself (the lock was tested with the probe tool).
+- **Seen in game, 2026-11-22** (a `hard_dash_lock` seed, local server, `mec_ap.dll` loaded): the
+  client locked all 22 dashes and after a checkpoint reload only the 3 starting ones were on the
+  map; two GridLeak bundle checks were sent; a 37.56 s Birdman's Dash sent its finish and all 3
+  star checks; the Dash Unlocks for Caleb's Run and Feature Creep arrived from them and both
+  dashes were on the map after a reload; FlowAttack from the 3-star check was applied live
+  through the DLL and read back.
+- **Not yet seen in game:** the goal.
