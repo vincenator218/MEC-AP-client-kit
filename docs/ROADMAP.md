@@ -40,7 +40,8 @@ the main world at build time (`tools/build_apworld.py`), so each exists once.
 2. **One-step setup for players.** Today a player builds the DLL (or gets it), runs the injector
    after every game start, and deletes the journal before each seed. Ideas, all untried:
    - a release zip with the prebuilt `mec_ap.dll` and injector, and the client telling the player
-     what to run;
+     what to run (the Dashes client already has Launch game / Inject DLL buttons, given the DLL
+     folder once);
    - a `version.dll` proxy in the game folder so the DLL loads by itself, as MECMP does
      ([`DLL.md`](DLL.md) §3), chaining to MECMP's proxy if both are installed;
    - the client sending the seed name to the DLL, and the DLL keeping one journal per seed (no

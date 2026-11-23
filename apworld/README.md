@@ -193,7 +193,11 @@ only: no side missions, no opportunities. Built 2026-11-13, first played 2026-11
   Two rows from play (2026-11-19): Caleb's Run needs MAG Rope; Out in the Open needs nothing.
 - **Ids:** shared things keep the main world's ids (abilities, moves, dash checks 1330000+,
   GridLeak counts), so the shared client code is identical.
-- **Client commands:** `/mec` (also shows the hard lock), `/dashes`, `/confirm_save`, `/next_volume`.
+- **Client commands:** `/mec` (also shows the hard lock), `/dashes`, `/confirm_save`, `/next_volume`,
+  `/launch`, `/inject`, `/dll_folder`. The GUI's top bar has **Launch game** and **Inject DLL**
+  buttons and a game / DLL status (`client/launcher.py`): Launch starts Steam app 1233570 and
+  runs the injector, which waits for the game; the DLL folder is kept in Archipelago's
+  persistent storage.
 - **Seen in game, 2026-11-22** (a `hard_dash_lock` seed, local server, `mec_ap.dll` loaded): the
   client locked all 22 dashes and after a checkpoint reload only the 3 starting ones were on the
   map; two GridLeak bundle checks were sent; a 37.56 s Birdman's Dash sent its finish and all 3

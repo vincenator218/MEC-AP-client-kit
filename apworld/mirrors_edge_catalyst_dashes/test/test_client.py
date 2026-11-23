@@ -279,3 +279,13 @@ class TestHideActivities(unittest.TestCase):
         self.assertEqual(fresh.ensure(self.MISSIONS, ACTIVITY_LOCK_FLAG).written, 0)
         self.assertEqual(fresh.release(ACTIVITY_LOCK_FLAG), 3)
         self.assertEqual(self.completed("OW Opp DtPh2 02"), self.mem.defs["MiscCompleted_OW Opp DtPh2 02"])
+
+
+class TestLauncher(unittest.TestCase):
+    def test_folder_without_the_dll_is_refused(self):
+        import tempfile
+        from ..client.launcher import set_dll_folder
+        with tempfile.TemporaryDirectory() as d:
+            err = set_dll_folder(d)
+            self.assertIn("mec_ap_inject.exe", err)
+            self.assertIn("mec_ap.dll", err)

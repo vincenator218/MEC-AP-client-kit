@@ -39,6 +39,12 @@ opportunities, hubs, side missions and deliveries from the map (not the 6 Dead D
 Deliveries). They come back when you close the client. Turn it off with
 `hide_other_activities: false`.
 
+Game and DLL buttons: the client's top bar has **Launch game** (starts the game through Steam
+and loads `mec_ap.dll` once it is up) and **Inject DLL** (loads it into a game that is already
+running), with the game and DLL state next to them. Tell the client once where the DLL is:
+`/dll_folder <folder with mec_ap.dll and mec_ap_inject.exe>`; it is remembered. The DLL has to be
+loaded again after every game start. `/launch` and `/inject` do the same as the buttons.
+
 Client commands: `/mec` (stars, unlocked dashes, moves, DLL state), `/dashes` (which dashes are
 unlocked), `/confirm_save`, `/next_volume` (a move that should be blocked still works).
 

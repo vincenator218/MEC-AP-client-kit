@@ -29,6 +29,7 @@ from ..data import (ACTIVITY_LOCK_FLAG, DASH_LOCKS, DASH_OF_LOCK_FLAG, DASHES_BY
                     ITEMS, LOCATIONS_BY_ID, GRIDLEAK_CATEGORY, dash_unlock_name)
 from .dash_lock import DashesGameSession, LockState
 from .dll_link import DllLink
+from .launcher import Launcher, dll_folder, set_dll_folder
 from .game import TickResult
 from .mec_memory import djb2a
 from .plan import (build_plan, dash_checks, dash_unlocked, desired_flags, received_names,
@@ -72,6 +73,28 @@ class MECDCommandProcessor(ClientCommandProcessor):
         self.ctx.confirm_save()
         return True
 
+    def _cmd_launch(self) -> bool:
+        """Start the game through Steam and load mec_ap.dll into it."""
+        self.ctx.launch_game()
+        return True
+
+    def _cmd_inject(self) -> bool:
+        """Load mec_ap.dll into the running game (waits for the game if it is starting)."""
+        self.ctx.inject_dll()
+        return True
+
+    def _cmd_dll_folder(self, *folder: str) -> bool:
+        """Set or show the folder that holds mec_ap.dll and mec_ap_inject.exe."""
+        if not folder:
+            logger.info("DLL folder: %s", dll_folder() or "not set (/dll_folder <folder>)")
+            return True
+        err = set_dll_folder(" ".join(folder))
+        if err:
+            logger.warning(err)
+            return False
+        logger.info("DLL folder set to %s.", dll_folder())
+        return True
+
     def _cmd_next_volume(self) -> bool:
         """Moves that should be blocked are not: drive a different movement volume."""
         self.ctx.reject_volume = True
@@ -103,6 +126,32 @@ class MECDContext(CommonContext):
         self.locks_announced = False
         self.hide_state = None
         self.hide_announced = False
+        self.launcher = Launcher()
+
+    # ----------------------------------------------------- game and DLL buttons
+    def launch_game(self) -> None:
+        try:
+            running = self.last.attached or self.session.mem.find_pid() is not None
+        except Exception:                                        # noqa: BLE001
+            running = False
+        self.launcher.launch_game(game_running=running, dll_connected=self.dll.connected)
+
+    def inject_dll(self) -> None:
+        self.launcher.inject(dll_connected=self.dll.connected)
+
+    def status_text(self) -> str:
+        """The short state shown next to the buttons."""
+        if not self.last.attached:
+            game = "Game: not running"
+        else:
+            game = "Game: loaded" if self.last.loaded else "Game: loading"
+        if self.dll.connected:
+            dll = f"DLL {self.dll.hello.get('dll', '')}: " + ("ok" if self.dll.hello.get("build_ok") else "inactive")
+        elif self.launcher.busy:
+            dll = "DLL: loading..."
+        else:
+            dll = "DLL: not loaded"
+        return f"{game} | {dll}"
 
     def hard_lock(self) -> bool:
         return bool(self.slot_data and self.slot_data.get("hard_dash_lock"))
@@ -129,11 +178,36 @@ class MECDContext(CommonContext):
         await super().disconnect(allow_autoreconnect)
 
     def make_gui(self):
-        ui = super().make_gui()
-        ui.base_title = "Archipelago Mirror's Edge Catalyst Dashes Client"
-        return ui
+        base = super().make_gui()
+        ctx = self
+
+        class MECDManager(base):
+            base_title = "Archipelago Mirror's Edge Catalyst Dashes Client"
+
+            def build(self):
+                layout = super().build()
+                from kivy.clock import Clock
+                from kivy.metrics import dp
+                from kivymd.uix.button import MDButton, MDButtonText
+                from kivymd.uix.label import MDLabel
+
+                self.mec_status = MDLabel(text=ctx.status_text(), size_hint_x=None, width=dp(230),
+                                          halign="center")
+                self.connect_layout.add_widget(self.mec_status)
+                for text, action in (("Launch game", ctx.launch_game), ("Inject DLL", ctx.inject_dll)):
+                    button = MDButton(MDButtonText(text=text), style="filled", size=(dp(120), dp(70)),
+                                      size_hint_x=None, size_hint_y=None, radius=5,
+                                      pos_hint={"center_y": 0.55},
+                                      on_press=lambda _b, a=action: a())
+                    button.height = self.server_connect_bar.height
+                    self.connect_layout.add_widget(button)
+                Clock.schedule_interval(lambda _dt: setattr(self.mec_status, "text", ctx.status_text()), 1)
+                return layout
+
+        return MECDManager
 
     async def shutdown(self):
+        self.launcher.cancel()
         await super().shutdown()
         await asyncio.to_thread(self.session.shutdown)
 
