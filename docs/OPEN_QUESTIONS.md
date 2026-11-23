@@ -24,6 +24,15 @@ result it holds that matters here is restated in these docs.
     `RequiresOnline` is 0, which suggests yes ([`DLL.md`](DLL.md) §11 question 4).
 20. **Star thresholds.** Whether a time exactly on a star threshold earns the star. The client
     counts it.
+23. **The hard dash lock** ([`DLL.md`](DLL.md) §11e, works on all 22 with their own flags,
+    `data/dash_unlock_flags.json`): when to write the 22 `UnlockFlag` pointers; whether anything
+    short of a checkpoint reload refreshes a dash (fast travel and death do not); a run in
+    progress; the flags over a game restart.
+24. **The activity lock** ([`DLL.md`](DLL.md) §11f): works for opportunities, side missions and
+    security hubs (everything vanished in a lock-all test), **not for the Dead Drop Deliveries**,
+    which always offer one delivery per phase (lock 01 and 02 is offered; lock all three and 01
+    comes back) by a path not found yet. Also open: on-foot check for side missions and hubs; side-mission briefings;
+    story missions; a game restart.
 
 ### Items
 5. **`live_entity` abilities marked `expected`** (ITEMS.md): same entity class and setup as the

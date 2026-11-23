@@ -66,12 +66,14 @@ game memory: 32-bit values keyed by a hash of each flag's name, saved by the gam
 | `docs/OPEN_QUESTIONS.md` | what is still unknown, numbered |
 | `data/items.json`, `data/locations.json` / `.csv` | every item and flag location: id, flag, hash, grant method / detection, test status |
 | `data/named_challenges.json` | the 22 dashes (ContentId, Sid, stat code, district, display name, star times, list order) and the billboards seen so far |
+| `data/dash_unlock_flags.json` | the hard dash lock: each dash's own unlock flag, tested in game (`docs/DLL.md` §11e) |
+| `data/missions.json` | all 152 missions (opportunities, deliveries, hubs, side and story missions) with their completed and available flags (`docs/DLL.md` §11f) |
 | `data/flag_names.json` | all 2376 progression flag names and hashes |
 | `data/opportunity_names.json` | the 32 Runs-menu opportunities' in-game names |
 | `data/dll_addresses.json` | every address in `docs/DLL.md`, with the MECMP file and line it came from |
 | `tools/build_apworld.py` | builds either world's `.apworld`, or stages it for tests |
 | `tools/build_checks.py` | regenerates `data/locations.*` from `flag_names.json` |
-| `tools/client/` | `mec_memory.py` (the memory layer), `MEC_MoveToggles.pyw` (a GUI for testers to remove moves; see its README), `verify_dll_addresses.py` (read-only address check) |
+| `tools/client/` | `mec_memory.py` (the memory layer), `MEC_MoveToggles.pyw` (a GUI for testers to remove moves; see its README), `verify_dll_addresses.py` (read-only address check), `dash_unlock_probe.py` and `activity_lock_probe.py` (lock and unlock dashes and other activities by hand, DLL.md §11e-f) |
 | `tools/save/` | PROF_SAVE tools: `make_seed_save.py`, `make_testing_save.py`, `read_save.py`, `set_flag.py`, `clear_all_unlocks.py`, `save_checksum.py` |
 | `reference/cheatengine/` | the Cheat Engine prototypes the research used: `ap_live.lua` (read, grant, unlock, watch), `setflag.lua`, `list_live_checks.lua` |
 

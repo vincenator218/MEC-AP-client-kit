@@ -1,6 +1,6 @@
 # The injected DLL: research and design
 
-The research behind `mec_ap.dll`, kept so the next steps (a hard dash lock, `localize`, an
+The research behind `mec_ap.dll`, kept so the next steps (the hard dash lock, §11e; `localize`, an
 overlay, auto-loading) can start from it. **An implementation exists: `dll/`** (see
 `dll/README.md`).
 - Dashes (finish + 1/2/3-star checks): built and tested end to end on 2026-11-12.
@@ -430,7 +430,8 @@ What it means:
   Finished message. Concrete Canyon is 46.00 / 38.00 / 32.50 s.
 - Billboards are flag-detectable already (`HackableBillboards_*`), with no DLL needed.
 
-Other ways to stop a locked dash, in order of preference:
+Other ways to stop a locked dash, as listed on 2026-11-12. **Superseded by §11e**: the
+`UnlockFlag` field above works as a per-dash lock.
 1. **The native property above**, if its store can be found.
 2. **A DLL hook that refuses the start.** Swap the `PamServerNamedChallengeEntity`'s message or
    event handler slot, and drop the activation for a locked ContentId. mecmp does the same kind of
@@ -481,11 +482,139 @@ is a star check. Slower replays would not show, but a first finish always does. 
 
 **Still open:**
 - Deliveries, grid nodes, and the full billboard list.
-- Per-dash locking: no native lock exists, so it needs a DLL hook that refuses the start (§11c
-  option 2). "Runs but doesn't count" is built (the Dashes world's soft lock).
+- Per-dash locking: **found, §11e** (`UnlockFlag`). The type property above is not needed for it.
 - Whether Finished fires offline. The "upload" messages suggest the game talks to the stats
   backend at the end of every run, which is question 4 and question 5 together.
 - A level reload without a restart (question 2 covers restarts only so far).
+
+### 11e. The hard lock: each dash's `UnlockFlag` (in game, 2026-11-22)
+
+`PamNamedChallengeData.UnlockFlag` (`+0x40`, a `PamProgressionFlag*`) is null on all 22 dashes
+(§11c). **Pointing it at a progression flag makes that flag the dash's unlock.** First tested on
+Out in the Open (Steam build, no DLL loaded):
+
+| step | result |
+|---|---|
+| point `+0x40` at the `PamProgressionFlag` object of `Unlocks_Placeholder` (value 0) | nothing visible yet |
+| reload a checkpoint | **the dash is gone from the map, and its start does nothing on foot** |
+| set `Unlocks_Placeholder` = 1 through the client's `ProgressionWriter` | nothing visible yet |
+| reload a checkpoint | **the dash is back on the map and playable** |
+| set `+0x40` back to null, `Unlocks_Placeholder` back to 0 | restored; the game kept running throughout |
+
+How the flag object was found: the name string `Unlocks_Placeholder`, then a pointer to it at
+`object + 0x18` (`Name`) with `object + 0x10` (`NameHash`) = djb2a of the name. Exactly one object
+matched. (`PamProgressionFlag`: `+0x10` NameHash, `+0x18` Name, `+0x20` MaxValue; SDK dump.)
+
+**Then on all 22 dashes, each with its own flag** (same day, `tools/client/dash_unlock_probe.py`,
+the table in [`data/dash_unlock_flags.json`](../data/dash_unlock_flags.json)):
+- all 22 pointers written, flags 0, reload: **all 22 gone from the map**;
+- 3 flags set to 1, reload: only Birdman's Dash and Old Tunnels came back. Consumer Mayhem's flag,
+  `ExampleMission3_Objective1`, read 0 again: **the game resets flags that belong to a mission**
+  (`PamProgressionFlag` `+0x14` MissionIndex not 0). The 5 mission flags in the first pick were
+  replaced;
+- 2 more (High Roller Avenue, Donkey in an Oven) and the 5 replaced ones at 1, reload: **exactly
+  those 9 back**, the other 13 hidden;
+- the last 13 at 1, reload: **all 22 back, nothing else noticed in play**;
+- `restore`: 22 pointers null, 22 flags 0.
+
+**How the 22 flags were chosen.** A census of all 2374 flags in the table counted every pointer
+in writable memory to each flag's definition (not counting the table node's own). Every flag sits
+in two lists, so a flag that nothing else uses has exactly 2; `Unlocks_Placeholder`, the first
+one tested, has 2. Kept: value 0, MissionIndex 0, 2 references, so no
+`PamServerProgressionFlagEntity` and no mission on it. That gives 10 `Unlocks_*` flags (12 of the 22 never-set
+ones were dropped: a flag entity watches them), 5 `ExampleBronzeMission_*` / `ExampleMission3_*`
+result flags from two developer test missions, and 4 `Demo_*` flags. `SyncToOnline` and
+`Clamp` differ among them and do not matter. "Nothing reads it" is limited to what was loaded in
+memory then; a flag read by its hash alone would not show.
+
+What this means:
+- **The game has a real per-dash lock, driven by an ordinary progression flag.** A Dash Unlock
+  item can be a flag write through the one write path, like an ability.
+- Both directions need a **checkpoint reload**. **Neither fast travel nor a death refreshes it**
+  (tested 2026-11-22). A received unlock shows at the next checkpoint reload unless a live refresh
+  is found.
+- Turning on the developer test missions themselves (`ExampleMission3_Available`,
+  `ExampleBronzeMission_Available` = 1, then a reload) showed nothing new in the menus or on the
+  map (2026-11-22; set back to 0). So nothing is expected to write their result flags in play.
+  There is also a template flag `Example_Example_NamedChallengeUnlock`, which suggests the
+  designers meant `UnlockFlag` for exactly this.
+- The pointer is in game memory, not the save: it has to be written at every game start, before
+  the player can reach a dash. The flag value *is* in the save (autosave), which is what a
+  Dash Unlock should be.
+
+Still to settle before building it (OPEN_QUESTIONS #23):
+1. ~~One flag per dash~~: done, `data/dash_unlock_flags.json`. Not yet checked: that the 22 stay
+   at their value over a game restart and in other districts' loads (only reloads were tried),
+   and that a seed save made by `make_seed_save.py` has them all at 0.
+2. **When to write the pointers.** Before the city level loads, or right after, followed by one
+   forced reload. In the DLL this could run before the first server tick.
+3. **A live refresh** instead of a reload, if the dash entity has an "unlock changed" path.
+4. Whether a run already in progress is affected. (Fast travel and death do not count as a
+   reload.)
+5. Whether a game restart really drops the pointer (expected: it is level data in memory).
+
+### 11f. Locking every other activity: the mission's `CompletedFlag` (in game, 2026-11-22)
+
+Every activity the player starts on foot (the 40 opportunities, deliveries, security hubs, side
+missions, story missions) is a **`PamProgressionMission`**: vtable `0x141C8E658`, `+0x10` name,
+`+0x40` MissionIndex, `+0x48` `CompletedFlag`, `+0x50` `AvailableFlag`, `+0xB0` MissionType. All
+152 are listed in [`data/missions.json`](../data/missions.json) (type 1 opportunity, 2 bronze:
+deliveries, security hubs and a few others, 3 side mission, 4 story, 0 completion flag
+`DebugGenerated_*`: mostly test or cut content).
+
+`<mission>_Available` means "offered now": 1 for an activity you can start, 0 once it is done.
+**The game computes it at every checkpoint reload and writes it through the `+0x50` pointer:**
+- writing `_Available` = 0 (The Vial, Exit Strategy): both read 1 again after the reload, nothing
+  hidden;
+- pointing The Vial's `+0x50` at an unused flag (0): after the reload that flag read **1**, The Vial
+  still there.
+
+**What works: make the game think the activity is done.** Point `+0x48` (`CompletedFlag`) at a flag
+that is 1. Tested with `tools/client/activity_lock_probe.py`:
+
+| activity | kind | result after a checkpoint reload |
+|---|---|---|
+| The Vial (`OW Opp DtPh2 02`) | opportunity | **off the map, cannot be started on foot**; `_Available` 0 |
+| Exit Strategy | side mission | off the map; `_Available` 0 |
+| Security Hub Downtown 1 | security hub | off the map; `_Available` 0 |
+| OWPh2Delivery01 | delivery | `_Available` 0, but the game then offered OWPh2Delivery02 in its place (see below) |
+
+- The real completion flag (`MiscCompleted_`, `SilverCompleted_`, `BronzeCompleted_`,
+  `_CompletedTime`) stayed 0 in every case, so **no check is sent by the lock**.
+- **Unlock: put the pointer back and reload.** The Vial came back and was playable.
+- **One shared lock flag** (1) serves every locked activity, since unlocking changes the pointer,
+  not the flag. The test used `Example_ExampleMission3Part1Completed` (§11e census: nothing reads it).
+- Like the dash lock: pointers live in memory and need writing at every game start; only a
+  checkpoint reload refreshes (not fast travel, not death).
+
+**Everything at once** (same day): all 22 dashes and all 92 type 1-3 activities locked, then a
+reload. **Everything was gone except 6 "Dead Drop Delivery" markers**: the countdown deliveries
+`OWPh<2-7>Delivery01`, whose `_Available` read 1.
+
+**Dead Drop Deliveries are a chain per phase (01, 02, 03) and are not locked by this:**
+- with only 01 locked, 02 became available (Available 1), so the chain moves on to the next one.
+  Repeated on all 6 phases: 6 markers still on the map, and they were the 02s (each phase's
+  `Delivery02_Available` 1, the 01s and 03s 0). The single-delivery test with the hub earlier was
+  the same thing: its marker moved to 02;
+- with all three locked, the game made 01 available again: a finished chain restarts;
+- with 01's `+0x50` pointed at a dummy and the real `…Delivery01_Available` set to 0, the dummy
+  read 1 after the reload and the markers stayed;
+- with the dummy's `MaxValue` set to 0 (it has `Clamp`), the dummy stayed 0 and the markers
+  **still** stayed (the 02/03 flags were not re-read in this run). So once a chain is finished,
+  the replayed 01 marker does not come from 01's Available pointer;
+- no delivery named challenge (`ch_dlvry_`) was loaded, so they are not dash-like either.
+
+What they do read is not found yet. Likely a level script that reads the real `BronzeCompleted_`
+or `_CompletedTime` flags by hash (which a pointer change cannot touch), or the live mission
+object found next to their flags (heap, holding `BronzeCompleted_`, `Generated_ActiveMission`,
+`Generated_AllMissionsDisabled`, the timestamps and `_Available`). Options for later: the global
+`Generated_AllMissionsDisabled`, or a DLL hook on the delivery start point
+(`PamMissionStartPointEntityData`, `+0x48` Mission).
+
+Not yet checked: on foot for the side mission and the hub (only the map, and the flags); whether
+locking a side mission's briefing blocks the mission after it; what the game does with a "done"
+activity's rewards (none seen); story missions (not tried: locking one may block the story); a
+game restart.
 
 ## 12. Verification order
 

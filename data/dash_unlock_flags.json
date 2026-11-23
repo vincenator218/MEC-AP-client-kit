@@ -1,0 +1,159 @@
+{
+ "_about": "The hard dash lock (docs/DLL.md section 11e). Each dash's PamNamedChallengeData.UnlockFlag (+0x40, null in the shipped game) is pointed at the PamProgressionFlag definition of its flag below; then the dash is off the map and cannot be started while the flag is 0, and is back once the flag is 1. Both take effect at the next checkpoint reload (fast travel and death do not refresh it). Tested in game 2026-11-22, Steam build: all 22 hidden at 0, exactly the unlocked ones back at 1, all 22 back with nothing else noticed in play. Each flag: mission index 0 (flags tied to a mission are reset by the game and did not work), value 0 in a normal playthrough, and nothing pointing at its definition besides the two lists every flag is in (a census of all 2374 flags; a read by hash alone would not show). Keyed by ap_index; never reorder.",
+ "dashes": [
+  {
+   "ap_index": 0,
+   "name": "Birdman's Dash",
+   "content_id": "6a3369ee",
+   "unlock_flag": "Unlocks_Placeholder",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 1,
+   "name": "High Roller Avenue",
+   "content_id": "3bd1e931",
+   "unlock_flag": "Unlocks_BreachDoors",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 2,
+   "name": "Backstreet Bluff",
+   "content_id": "4b788ad4",
+   "unlock_flag": "Unlocks_CombatReticle",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 3,
+   "name": "Feature Creep",
+   "content_id": "3e083a16",
+   "unlock_flag": "Unlocks_CombatScavengeLevel",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 4,
+   "name": "Concrete Canyon",
+   "content_id": "353ff992",
+   "unlock_flag": "Unlocks_Disrupter_Increase_AngleOfEffect",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 5,
+   "name": "A Handy Shortcut",
+   "content_id": "449a29b5",
+   "unlock_flag": "Unlocks_HardLandingLowDrain",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 6,
+   "name": "Nomad's Run",
+   "content_id": "407e5b73",
+   "unlock_flag": "Unlocks_LowDrainAtLowSpeed",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 7,
+   "name": "Donkey in an Oven",
+   "content_id": "30c3b6aa",
+   "unlock_flag": "Unlocks_ScavengeLevel",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 8,
+   "name": "The Allcom Shuffle",
+   "content_id": "3711854d",
+   "unlock_flag": "Unlocks_SkillMoveInvulnerabilityLevel1",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 9,
+   "name": "Take me to the Gridnode",
+   "content_id": "398bf72e",
+   "unlock_flag": "Unlocks_SkillMoveInvulnerabilityLevel2",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 10,
+   "name": "Consumer Mayhem",
+   "content_id": "3bbdf68f",
+   "unlock_flag": "ExampleBronzeMission_CompletedTimestampPart2",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 11,
+   "name": "Quite a View",
+   "content_id": "2c174568",
+   "unlock_flag": "Demo_CompletedCombat",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 12,
+   "name": "Heading Home",
+   "content_id": "2e4944c9",
+   "unlock_flag": "Demo_CompletedDash",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 13,
+   "name": "Noah's Run",
+   "content_id": "42069b61",
+   "unlock_flag": "ExampleMission3_Timer",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 14,
+   "name": "Don't Fall Down",
+   "content_id": "dc1be436",
+   "unlock_flag": "ExampleMission3_CompletedTime",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 15,
+   "name": "Too Close to the Sun",
+   "content_id": "34964aa3",
+   "unlock_flag": "ExampleMission3_CompletedTimestampPart1",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 16,
+   "name": "Caleb's Run",
+   "content_id": "36c85a80",
+   "unlock_flag": "ExampleMission3_CompletedTimestampPart2",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 17,
+   "name": "The Scenic Route",
+   "content_id": "de4de397",
+   "unlock_flag": "Demo_CompletedHack",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 18,
+   "name": "Rezoning Dash",
+   "content_id": "2f9af30c",
+   "unlock_flag": "Demo_StartTime",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 19,
+   "name": "Under Construction",
+   "content_id": "24a0a2ab",
+   "unlock_flag": "ExampleBronzeMission_Timer",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 20,
+   "name": "Out in the Open",
+   "content_id": "3210f369",
+   "unlock_flag": "ExampleBronzeMission_CompletedTime",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  },
+  {
+   "ap_index": 21,
+   "name": "Old Tunnels",
+   "content_id": "2b7f24ca",
+   "unlock_flag": "ExampleBronzeMission_CompletedTimestampPart1",
+   "tested": "2026-11-22: hidden at 0, back at 1"
+  }
+ ]
+}

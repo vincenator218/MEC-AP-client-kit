@@ -1,0 +1,924 @@
+{
+ "_about": "Every PamProgressionMission (vtable 0x141C8E658; +0x10 name, +0x40 MissionIndex, +0x48 CompletedFlag, +0x50 AvailableFlag, +0xB0 MissionType), read from memory 2026-11-22, Steam build. The game computes Available itself at each checkpoint reload (Available = offered now) and writes it through the +0x50 pointer. The activity lock (docs/DLL.md section 11f): point +0x48 at a flag that is 1 and the game treats the activity as done (Available 0, off the map), while its real completion flag is untouched. Not for the Dead Drop Deliveries (OWPh<N>Delivery01-03): the game always offers one per phase.",
+ "mission_types": {
+  "0": "CompletedFlag DebugGenerated_*: mostly test or cut content",
+  "1": "opportunity (MiscCompleted_*)",
+  "2": "bronze: deliveries, security hubs and a few others (BronzeCompleted_*)",
+  "3": "side mission (SilverCompleted_*)",
+  "4": "story (GoldCompleted_*)"
+ },
+ "missions": [
+  {
+   "name": "AmbPh3Dt01",
+   "type": 0,
+   "completed_flag": "DebugGenerated_AmbPh3Dt01",
+   "available_flag": "AmbPh3Dt01_Available"
+  },
+  {
+   "name": "AmbPh3Dt02",
+   "type": 0,
+   "completed_flag": "DebugGenerated_AmbPh3Dt02",
+   "available_flag": "AmbPh3Dt02_Available"
+  },
+  {
+   "name": "AmbPh3Dt03",
+   "type": 0,
+   "completed_flag": "DebugGenerated_AmbPh3Dt03",
+   "available_flag": "AmbPh3Dt03_Available"
+  },
+  {
+   "name": "AmbPh3Dt04",
+   "type": 0,
+   "completed_flag": "DebugGenerated_AmbPh3Dt04",
+   "available_flag": "AmbPh3Dt04_Available"
+  },
+  {
+   "name": "E3 Combat Mission",
+   "type": 0,
+   "completed_flag": "DebugGenerated_E3 Combat Mission",
+   "available_flag": "E3 Combat Mission_Available"
+  },
+  {
+   "name": "E3_IntroduceMap",
+   "type": 0,
+   "completed_flag": "DebugGenerated_E3_IntroduceMap",
+   "available_flag": "E3_IntroduceMap_Available"
+  },
+  {
+   "name": "ExampleBronzeMission",
+   "type": 0,
+   "completed_flag": "DebugGenerated_ExampleBronzeMission",
+   "available_flag": "ExampleBronzeMission_Available"
+  },
+  {
+   "name": "ExampleDeliveryMission",
+   "type": 0,
+   "completed_flag": "DebugGenerated_ExampleDeliveryMission",
+   "available_flag": "ExampleDeliveryMission_Available"
+  },
+  {
+   "name": "ExampleMission1",
+   "type": 0,
+   "completed_flag": "DebugGenerated_ExampleMission1",
+   "available_flag": "ExampleMission1_Available"
+  },
+  {
+   "name": "ExampleMission2",
+   "type": 0,
+   "completed_flag": "DebugGenerated_ExampleMission2",
+   "available_flag": "ExampleMission2_Available"
+  },
+  {
+   "name": "ExampleMission3",
+   "type": 0,
+   "completed_flag": "DebugGenerated_ExampleMission3",
+   "available_flag": "ExampleMission3_Available"
+  },
+  {
+   "name": "ExampleMission4 magrope",
+   "type": 0,
+   "completed_flag": "DebugGenerated_ExampleMission4 magrope",
+   "available_flag": "ExampleMission4 magrope_Available"
+  },
+  {
+   "name": "ExampleOpportunityMission",
+   "type": 0,
+   "completed_flag": "DebugGenerated_ExampleOpportunityMission",
+   "available_flag": "ExampleOpportunityMission_Available"
+  },
+  {
+   "name": "OPPDT_InjuredRunner",
+   "type": 0,
+   "completed_flag": "DebugGenerated_OPPDT_InjuredRunner",
+   "available_flag": "OPPDT_InjuredRunner_Available"
+  },
+  {
+   "name": "OW Opp CovertDelivery - Demo",
+   "type": 0,
+   "completed_flag": "DebugGenerated_OW Opp CovertDelivery - Demo",
+   "available_flag": "OW Opp CovertDelivery - Demo_Available"
+  },
+  {
+   "name": "OW Opp Diversion - Demo",
+   "type": 0,
+   "completed_flag": "DebugGenerated_OW Opp Diversion - Demo",
+   "available_flag": "OW Opp Diversion - Demo_Available"
+  },
+  {
+   "name": "OW Opp FragileDelivery - Demo",
+   "type": 0,
+   "completed_flag": "DebugGenerated_OW Opp FragileDelivery - Demo",
+   "available_flag": "OW Opp FragileDelivery - Demo_Available"
+  },
+  {
+   "name": "OW Opp Intervention - Demo",
+   "type": 0,
+   "completed_flag": "DebugGenerated_OW Opp Intervention - Demo",
+   "available_flag": "OW Opp Intervention - Demo_Available"
+  },
+  {
+   "name": "OWPh2OppMiss01",
+   "type": 0,
+   "completed_flag": "DebugGenerated_OWPh2OppMiss01",
+   "available_flag": "OWPh2OppMiss01_Available"
+  },
+  {
+   "name": "OWPh2OppMiss02",
+   "type": 0,
+   "completed_flag": "DebugGenerated_OWPh2OppMiss02",
+   "available_flag": "OWPh2OppMiss02_Available"
+  },
+  {
+   "name": "OWPh3OppMiss01",
+   "type": 0,
+   "completed_flag": "DebugGenerated_OWPh3OppMiss01",
+   "available_flag": "OWPh3OppMiss01_Available"
+  },
+  {
+   "name": "OWPh4OppMiss01",
+   "type": 0,
+   "completed_flag": "DebugGenerated_OWPh4OppMiss01",
+   "available_flag": "OWPh4OppMiss01_Available"
+  },
+  {
+   "name": "OWPh4OppMiss02",
+   "type": 0,
+   "completed_flag": "DebugGenerated_OWPh4OppMiss02",
+   "available_flag": "OWPh4OppMiss02_Available"
+  },
+  {
+   "name": "OW Opp AncPh4 01",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh4 01",
+   "available_flag": "OW Opp AncPh4 01_Available"
+  },
+  {
+   "name": "OW Opp AncPh4 02",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh4 02",
+   "available_flag": "OW Opp AncPh4 02_Available"
+  },
+  {
+   "name": "OW Opp AncPh4 03",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh4 03",
+   "available_flag": "OW Opp AncPh4 03_Available"
+  },
+  {
+   "name": "OW Opp AncPh4 04",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh4 04",
+   "available_flag": "OW Opp AncPh4 04_Available"
+  },
+  {
+   "name": "OW Opp AncPh4 05",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh4 05",
+   "available_flag": "OW Opp AncPh4 05_Available"
+  },
+  {
+   "name": "OW Opp AncPh4 06",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh4 06",
+   "available_flag": "OW Opp AncPh4 06_Available"
+  },
+  {
+   "name": "OW Opp AncPh4 07",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh4 07",
+   "available_flag": "OW Opp AncPh4 07_Available"
+  },
+  {
+   "name": "OW Opp AncPh4 08",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh4 08",
+   "available_flag": "OW Opp AncPh4 08_Available"
+  },
+  {
+   "name": "OW Opp AncPh5 01",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh5 01",
+   "available_flag": "OW Opp AncPh5 01_Available"
+  },
+  {
+   "name": "OW Opp AncPh5 02",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh5 02",
+   "available_flag": "OW Opp AncPh5 02_Available"
+  },
+  {
+   "name": "OW Opp AncPh5 03",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh5 03",
+   "available_flag": "OW Opp AncPh5 03_Available"
+  },
+  {
+   "name": "OW Opp AncPh5 04",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh5 04",
+   "available_flag": "OW Opp AncPh5 04_Available"
+  },
+  {
+   "name": "OW Opp AncPh5 05",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh5 05",
+   "available_flag": "OW Opp AncPh5 05_Available"
+  },
+  {
+   "name": "OW Opp AncPh5 06",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp AncPh5 06",
+   "available_flag": "OW Opp AncPh5 06_Available"
+  },
+  {
+   "name": "OW Opp CtPh6 01",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp CtPh6 01",
+   "available_flag": "OW Opp CtPh6 01_Available"
+  },
+  {
+   "name": "OW Opp CtPh6 02",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp CtPh6 02",
+   "available_flag": "OW Opp CtPh6 02_Available"
+  },
+  {
+   "name": "OW Opp CtPh6 03",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp CtPh6 03",
+   "available_flag": "OW Opp CtPh6 03_Available"
+  },
+  {
+   "name": "OW Opp CtPh6 04",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp CtPh6 04",
+   "available_flag": "OW Opp CtPh6 04_Available"
+  },
+  {
+   "name": "OW Opp CtPh6 05",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp CtPh6 05",
+   "available_flag": "OW Opp CtPh6 05_Available"
+  },
+  {
+   "name": "OW Opp CtPh6 06",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp CtPh6 06",
+   "available_flag": "OW Opp CtPh6 06_Available"
+  },
+  {
+   "name": "OW Opp DtPh2 01",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh2 01",
+   "available_flag": "OW Opp DtPh2 01_Available"
+  },
+  {
+   "name": "OW Opp DtPh2 02",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh2 02",
+   "available_flag": "OW Opp DtPh2 02_Available"
+  },
+  {
+   "name": "OW Opp DtPh2 03",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh2 03",
+   "available_flag": "OW Opp DtPh2 03_Available"
+  },
+  {
+   "name": "OW Opp DtPh2 04",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh2 04",
+   "available_flag": "OW Opp DtPh2 04_Available"
+  },
+  {
+   "name": "OW Opp DtPh2 05",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh2 05",
+   "available_flag": "OW Opp DtPh2 05_Available"
+  },
+  {
+   "name": "OW Opp DtPh2 06",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh2 06",
+   "available_flag": "OW Opp DtPh2 06_Available"
+  },
+  {
+   "name": "OW Opp DtPh3 01",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh3 01",
+   "available_flag": "OW Opp DtPh3 01_Available"
+  },
+  {
+   "name": "OW Opp DtPh3 02",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh3 02",
+   "available_flag": "OW Opp DtPh3 02_Available"
+  },
+  {
+   "name": "OW Opp DtPh3 03",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh3 03",
+   "available_flag": "OW Opp DtPh3 03_Available"
+  },
+  {
+   "name": "OW Opp DtPh3 04",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh3 04",
+   "available_flag": "OW Opp DtPh3 04_Available"
+  },
+  {
+   "name": "OW Opp DtPh3 05",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh3 05",
+   "available_flag": "OW Opp DtPh3 05_Available"
+  },
+  {
+   "name": "OW Opp DtPh3 06",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh3 06",
+   "available_flag": "OW Opp DtPh3 06_Available"
+  },
+  {
+   "name": "OW Opp DtPh3 07",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh3 07",
+   "available_flag": "OW Opp DtPh3 07_Available"
+  },
+  {
+   "name": "OW Opp DtPh3 08",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp DtPh3 08",
+   "available_flag": "OW Opp DtPh3 08_Available"
+  },
+  {
+   "name": "OW Opp VwPh7 01",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp VwPh7 01",
+   "available_flag": "OW Opp VwPh7 01_Available"
+  },
+  {
+   "name": "OW Opp VwPh7 02",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp VwPh7 02",
+   "available_flag": "OW Opp VwPh7 02_Available"
+  },
+  {
+   "name": "OW Opp VwPh7 03",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp VwPh7 03",
+   "available_flag": "OW Opp VwPh7 03_Available"
+  },
+  {
+   "name": "OW Opp VwPh7 04",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp VwPh7 04",
+   "available_flag": "OW Opp VwPh7 04_Available"
+  },
+  {
+   "name": "OW Opp VwPh7 05",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp VwPh7 05",
+   "available_flag": "OW Opp VwPh7 05_Available"
+  },
+  {
+   "name": "OW Opp VwPh7 06",
+   "type": 1,
+   "completed_flag": "MiscCompleted_OW Opp VwPh7 06",
+   "available_flag": "OW Opp VwPh7 06_Available"
+  },
+  {
+   "name": "Anc01Opportunity",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_Anc01Opportunity",
+   "available_flag": "Anc01Opportunity_Available"
+  },
+  {
+   "name": "Dt02Delivery01",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_Dt02Delivery01",
+   "available_flag": "Dt02Delivery01_Available"
+  },
+  {
+   "name": "OPPANC01Delivery",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OPPANC01Delivery",
+   "available_flag": "OPPANC01Delivery_Available"
+  },
+  {
+   "name": "OPPDT01Delivery",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OPPDT01Delivery",
+   "available_flag": "OPPDT01Delivery_Available"
+  },
+  {
+   "name": "OPPDT01OpportunityMissions",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OPPDT01OpportunityMissions",
+   "available_flag": "OPPDT01OpportunityMissions_Available"
+  },
+  {
+   "name": "OPPDT02RunnerBeatdown",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OPPDT02RunnerBeatdown",
+   "available_flag": "OPPDT02RunnerBeatdown_Available"
+  },
+  {
+   "name": "OPPDT02_Delivery",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OPPDT02_Delivery",
+   "available_flag": "OPPDT02_Delivery_Available"
+  },
+  {
+   "name": "OWPh2Delivery01",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh2Delivery01",
+   "available_flag": "OWPh2Delivery01_Available"
+  },
+  {
+   "name": "OWPh2Delivery02",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh2Delivery02",
+   "available_flag": "OWPh2Delivery02_Available"
+  },
+  {
+   "name": "OWPh2Delivery03",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh2Delivery03",
+   "available_flag": "OWPh2Delivery03_Available"
+  },
+  {
+   "name": "OWPh3Delivery01",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh3Delivery01",
+   "available_flag": "OWPh3Delivery01_Available"
+  },
+  {
+   "name": "OWPh3Delivery02",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh3Delivery02",
+   "available_flag": "OWPh3Delivery02_Available"
+  },
+  {
+   "name": "OWPh3Delivery03",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh3Delivery03",
+   "available_flag": "OWPh3Delivery03_Available"
+  },
+  {
+   "name": "OWPh3OppMiss02",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh3OppMiss02",
+   "available_flag": "OWPh3OppMiss02_Available"
+  },
+  {
+   "name": "OWPh4Delivery01",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh4Delivery01",
+   "available_flag": "OWPh4Delivery01_Available"
+  },
+  {
+   "name": "OWPh4Delivery02",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh4Delivery02",
+   "available_flag": "OWPh4Delivery02_Available"
+  },
+  {
+   "name": "OWPh4Delivery03",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh4Delivery03",
+   "available_flag": "OWPh4Delivery03_Available"
+  },
+  {
+   "name": "OWPh5Delivery01",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh5Delivery01",
+   "available_flag": "OWPh5Delivery01_Available"
+  },
+  {
+   "name": "OWPh5Delivery02",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh5Delivery02",
+   "available_flag": "OWPh5Delivery02_Available"
+  },
+  {
+   "name": "OWPh5Delivery03",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh5Delivery03",
+   "available_flag": "OWPh5Delivery03_Available"
+  },
+  {
+   "name": "OWPh6Delivery01",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh6Delivery01",
+   "available_flag": "OWPh6Delivery01_Available"
+  },
+  {
+   "name": "OWPh6Delivery02",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh6Delivery02",
+   "available_flag": "OWPh6Delivery02_Available"
+  },
+  {
+   "name": "OWPh6Delivery03",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh6Delivery03",
+   "available_flag": "OWPh6Delivery03_Available"
+  },
+  {
+   "name": "OWPh7Delivery01",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh7Delivery01",
+   "available_flag": "OWPh7Delivery01_Available"
+  },
+  {
+   "name": "OWPh7Delivery02",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh7Delivery02",
+   "available_flag": "OWPh7Delivery02_Available"
+  },
+  {
+   "name": "OWPh7Delivery03",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_OWPh7Delivery03",
+   "available_flag": "OWPh7Delivery03_Available"
+  },
+  {
+   "name": "Security Hub Anchor 2",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_Security Hub Anchor 2",
+   "available_flag": "Security Hub Anchor 2_Available"
+  },
+  {
+   "name": "Security Hub Anchor 3",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_Security Hub Anchor 3",
+   "available_flag": "Security Hub Anchor 3_Available"
+  },
+  {
+   "name": "Security Hub Downtown 1",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_Security Hub Downtown 1",
+   "available_flag": "Security Hub Downtown 1_Available"
+  },
+  {
+   "name": "Security Hub Downtown 3",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_Security Hub Downtown 3",
+   "available_flag": "Security Hub Downtown 3_Available"
+  },
+  {
+   "name": "Security Hub Downtown 4",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_Security Hub Downtown 4",
+   "available_flag": "Security Hub Downtown 4_Available"
+  },
+  {
+   "name": "Security Hub The View 1",
+   "type": 2,
+   "completed_flag": "BronzeCompleted_Security Hub The View 1",
+   "available_flag": "Security Hub The View 1_Available"
+  },
+  {
+   "name": "An Ear to the Ground",
+   "type": 3,
+   "completed_flag": "SilverCompleted_An Ear to the Ground",
+   "available_flag": "An Ear to the Ground_Available"
+  },
+  {
+   "name": "Birdman's Delivery",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Birdman's Delivery",
+   "available_flag": "Birdman's Delivery_Available"
+  },
+  {
+   "name": "Break And Entry",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Break And Entry",
+   "available_flag": "Break And Entry_Available"
+  },
+  {
+   "name": "Break And Entry Briefing",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Break And Entry Briefing",
+   "available_flag": "Break And Entry Briefing_Available"
+  },
+  {
+   "name": "Caught in the Web",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Caught in the Web",
+   "available_flag": "Caught in the Web_Available"
+  },
+  {
+   "name": "Caught in the Web Briefing",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Caught in the Web Briefing",
+   "available_flag": "Caught in the Web Briefing_Available"
+  },
+  {
+   "name": "Complete Coverage",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Complete Coverage",
+   "available_flag": "Complete Coverage_Available"
+  },
+  {
+   "name": "Drone Works",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Drone Works",
+   "available_flag": "Drone Works_Available"
+  },
+  {
+   "name": "Drone Works Briefing",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Drone Works Briefing",
+   "available_flag": "Drone Works Briefing_Available"
+  },
+  {
+   "name": "Exit Strategy",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Exit Strategy",
+   "available_flag": "Exit Strategy_Available"
+  },
+  {
+   "name": "Finger on the Pulse",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Finger on the Pulse",
+   "available_flag": "Finger on the Pulse_Available"
+  },
+  {
+   "name": "Grid Node Construction",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Grid Node Construction",
+   "available_flag": "Grid Node Construction_Available"
+  },
+  {
+   "name": "Grid Node Downtown",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Grid Node Downtown",
+   "available_flag": "Grid Node Downtown_Available"
+  },
+  {
+   "name": "Grid Node The View",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Grid Node The View",
+   "available_flag": "Grid Node The View_Available"
+  },
+  {
+   "name": "The Meta Grid",
+   "type": 3,
+   "completed_flag": "SilverCompleted_The Meta Grid",
+   "available_flag": "The Meta Grid_Available"
+  },
+  {
+   "name": "The Meta Grid Briefing",
+   "type": 3,
+   "completed_flag": "SilverCompleted_The Meta Grid Briefing",
+   "available_flag": "The Meta Grid Briefing_Available"
+  },
+  {
+   "name": "Top of the World",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Top of the World",
+   "available_flag": "Top of the World_Available"
+  },
+  {
+   "name": "Top of the World Briefing",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Top of the World Briefing",
+   "available_flag": "Top of the World Briefing_Available"
+  },
+  {
+   "name": "Two Pigeons With One Stone",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Two Pigeons With One Stone",
+   "available_flag": "Two Pigeons With One Stone_Available"
+  },
+  {
+   "name": "Two Pigeons With One Stone Chase",
+   "type": 3,
+   "completed_flag": "SilverCompleted_Two Pigeons With One Stone Chase",
+   "available_flag": "Two Pigeons With One Stone Chase_Available"
+  },
+  {
+   "name": "Back in the Game",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Back in the Game",
+   "available_flag": "Back in the Game_Available"
+  },
+  {
+   "name": "Back in the Game Briefing",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Back in the Game Briefing",
+   "available_flag": "Back in the Game Briefing_Available"
+  },
+  {
+   "name": "Back in the Game Debriefing",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Back in the Game Debriefing",
+   "available_flag": "Back in the Game Debriefing_Available"
+  },
+  {
+   "name": "Be Like Water",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Be Like Water",
+   "available_flag": "Be Like Water_Available"
+  },
+  {
+   "name": "Benefactor",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Benefactor",
+   "available_flag": "Benefactor_Available"
+  },
+  {
+   "name": "Benefactor Dogen Briefing",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Benefactor Dogen Briefing",
+   "available_flag": "Benefactor Dogen Briefing_Available"
+  },
+  {
+   "name": "Benefactor Lair Briefing",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Benefactor Lair Briefing",
+   "available_flag": "Benefactor Lair Briefing_Available"
+  },
+  {
+   "name": "Birdman's Route",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Birdman's Route",
+   "available_flag": "Birdman's Route_Available"
+  },
+  {
+   "name": "Encroachment",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Encroachment",
+   "available_flag": "Encroachment_Available"
+  },
+  {
+   "name": "Family Matters",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Family Matters",
+   "available_flag": "Family Matters_Available"
+  },
+  {
+   "name": "Family Matters Briefing",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Family Matters Briefing",
+   "available_flag": "Family Matters Briefing_Available"
+  },
+  {
+   "name": "Family Matters Debriefing",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Family Matters Debriefing",
+   "available_flag": "Family Matters Debriefing_Available"
+  },
+  {
+   "name": "Fly Trap",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Fly Trap",
+   "available_flag": "Fly Trap_Available"
+  },
+  {
+   "name": "Grid Node Anchor",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Grid Node Anchor",
+   "available_flag": "Grid Node Anchor_Available"
+  },
+  {
+   "name": "Kingdom",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Kingdom",
+   "available_flag": "Kingdom_Available"
+  },
+  {
+   "name": "Kingdom Briefing",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Kingdom Briefing",
+   "available_flag": "Kingdom Briefing_Available"
+  },
+  {
+   "name": "Kingdom Debriefing",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Kingdom Debriefing",
+   "available_flag": "Kingdom Debriefing_Available"
+  },
+  {
+   "name": "Kingdom Execution Scene",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Kingdom Execution Scene",
+   "available_flag": "Kingdom Execution Scene_Available"
+  },
+  {
+   "name": "Mischief Maker",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Mischief Maker",
+   "available_flag": "Mischief Maker_Available"
+  },
+  {
+   "name": "Old Friends",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Old Friends",
+   "available_flag": "Old Friends_Available"
+  },
+  {
+   "name": "Old Friends Briefing",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Old Friends Briefing",
+   "available_flag": "Old Friends Briefing_Available"
+  },
+  {
+   "name": "Payback",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Payback",
+   "available_flag": "Payback_Available"
+  },
+  {
+   "name": "Prisoner X",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Prisoner X",
+   "available_flag": "Prisoner X_Available"
+  },
+  {
+   "name": "Prisoner X Interrogation",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Prisoner X Interrogation",
+   "available_flag": "Prisoner X Interrogation_Available"
+  },
+  {
+   "name": "Release",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Release",
+   "available_flag": "Release_Available"
+  },
+  {
+   "name": "Reunion",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Reunion",
+   "available_flag": "Reunion_Available"
+  },
+  {
+   "name": "Sanctuary",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Sanctuary",
+   "available_flag": "Sanctuary_Available"
+  },
+  {
+   "name": "Savant Extraordinaire",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Savant Extraordinaire",
+   "available_flag": "Savant Extraordinaire_Available"
+  },
+  {
+   "name": "Savant Extraordinaire Briefing",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Savant Extraordinaire Briefing",
+   "available_flag": "Savant Extraordinaire Briefing_Available"
+  },
+  {
+   "name": "Savant Extraordinaire Getting Magrope",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Savant Extraordinaire Getting Magrope",
+   "available_flag": "Savant Extraordinaire Getting Magrope_Available"
+  },
+  {
+   "name": "Savant Extraordinaire Meeting Plastic",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Savant Extraordinaire Meeting Plastic",
+   "available_flag": "Savant Extraordinaire Meeting Plastic_Available"
+  },
+  {
+   "name": "The Shard",
+   "type": 4,
+   "completed_flag": "GoldCompleted_The Shard",
+   "available_flag": "The Shard_Available"
+  },
+  {
+   "name": "The Shard Briefing",
+   "type": 4,
+   "completed_flag": "GoldCompleted_The Shard Briefing",
+   "available_flag": "The Shard Briefing_Available"
+  },
+  {
+   "name": "Tickets, Please",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Tickets, Please",
+   "available_flag": "Tickets, Please_Available"
+  },
+  {
+   "name": "Vive La Resistance",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Vive La Resistance",
+   "available_flag": "Vive La Resistance_Available"
+  },
+  {
+   "name": "Vive La Resistance Briefing",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Vive La Resistance Briefing",
+   "available_flag": "Vive La Resistance Briefing_Available"
+  },
+  {
+   "name": "Vive La Resistance Debriefing",
+   "type": 4,
+   "completed_flag": "GoldCompleted_Vive La Resistance Debriefing",
+   "available_flag": "Vive La Resistance Debriefing_Available"
+  }
+ ]
+}
