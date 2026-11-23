@@ -46,9 +46,21 @@ the main world at build time (`tools/build_apworld.py`), so each exists once.
    - the client sending the seed name to the DLL, and the DLL keeping one journal per seed (no
      manual delete).
 3. **A hard dash lock** (Dashes world). The soft lock works (2026-11-19) but you can still run a
-   locked dash for nothing. The game has no per-dash lock to reuse ([`DLL.md`](DLL.md) §11c-d).
-   Options there, best first: a DLL hook that refuses the start for a locked ContentId (needs
-   finding which handler starts a dash), or an overlay message on `NamedChallengeStarted`.
+   locked dash for nothing. **The game's own lock was found on 2026-11-22** ([`DLL.md`](DLL.md)
+   §11e): point a dash's `UnlockFlag` at a progression flag that is 0, and after a reload the
+   dash is off the map and cannot be started; set the flag to 1 and after a reload it is back.
+   Tested on all 22 dashes with 22 flags of their own (`data/dash_unlock_flags.json`). To build
+   it: write the 22 pointers at each game start (DLL or client), make a Dash Unlock item a write
+   of its flag through the one write path, clear the 22 in the seed save, and tell the player to
+   reload a checkpoint; fast travel or a death is not enough (OPEN_QUESTIONS #23).
+   The soft lock stays as a fallback.
+3b. **Locking opportunities, security hubs and side missions** (main world). Found 2026-11-22
+   ([`DLL.md`](DLL.md) §11f): point an activity's `CompletedFlag` at a flag that is 1 and, after a
+   checkpoint reload, the game treats it as done (off the map, cannot be started) while its real
+   completion flag, the check, stays 0. This would make every on-foot activity an item-gated
+   location, not only the side missions. Same build steps as 3, with one shared lock flag.
+   Locking everything at once left only the 6 Dead Drop Deliveries: the game always offers one
+   per phase, so they need another way (DLL.md §11f).
 4. **A locked final activity** (main world). The final activity can be finished early in the
    world. With the DLL, the goal could count only a completion message that arrives after the
    unlock ([`DLL.md`](DLL.md) §1); activities other than dashes send the same messages, but only
