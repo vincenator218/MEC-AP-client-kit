@@ -2,12 +2,17 @@
 The Mirror's Edge Catalyst Dashes client: Archipelago on one side, the running game on the other.
 
 * Dashes: mec_ap.dll reports each finished run (dll_link.py). A run counts only if its Dash
-  Unlock has been received (the soft lock: nothing stops the dash in game); it then sends the
-  finish check and every star tier the time beat. A locked run is dropped and must be redone.
+  Unlock has been received (the soft lock); it then sends the finish check and every star tier
+  the time beat. A locked run is dropped and must be redone.
+* Hard dash lock (option hard_dash_lock, dash_lock.py): each dash's UnlockFlag pointer is aimed at
+  its own lock flag, which the client holds at 0 until the Dash Unlock arrives. A locked dash is
+  then off the map and cannot be started. Changes show after a checkpoint reload.
+* Hide other activities (option hide_other_activities, activity_lock.py): opportunities, hubs,
+  side missions and deliveries are made to look done, so they leave the map. Put back on close.
 * GridLeaks: polled from the progression flags, as count checks per district.
 * Items: moves are blocked or freed through a movement volume; abilities are written to the flag
   table (game.ProgressionWriter, the one write path) and applied at once through the DLL when it
-  is there, otherwise at the next respawn. Dash Unlocks change nothing in the game.
+  is there, otherwise at the next respawn. A Dash Unlock sets its lock flag to 1 (hard lock).
 * Goal: enough star checks sent.
 """
 from __future__ import annotations
@@ -20,10 +25,12 @@ from CommonClient import (ClientCommandProcessor, CommonContext, get_base_parser
                           handle_url_arg, logger, server_loop)
 from NetUtils import ClientStatus
 
-from ..data import (DASHES_BY_CONTENT_ID, DOUBLE_WALLRUN_FLAG, GAME, ITEMS, LOCATIONS_BY_ID,
-                    GRIDLEAK_CATEGORY)
+from ..data import (ACTIVITY_LOCK_FLAG, DASH_LOCKS, DASH_OF_LOCK_FLAG, DASHES_BY_CONTENT_ID, DOUBLE_WALLRUN_FLAG, GAME,
+                    ITEMS, LOCATIONS_BY_ID, GRIDLEAK_CATEGORY, dash_unlock_name)
+from .dash_lock import DashesGameSession, LockState
 from .dll_link import DllLink
-from .game import GameSession, TickResult
+from .launcher import Launcher, dll_folder, set_dll_folder
+from .game import TickResult
 from .mec_memory import djb2a
 from .plan import (build_plan, dash_checks, dash_unlocked, desired_flags, received_names,
                    stars_checked, unlocked_dashes)
@@ -66,6 +73,28 @@ class MECDCommandProcessor(ClientCommandProcessor):
         self.ctx.confirm_save()
         return True
 
+    def _cmd_launch(self) -> bool:
+        """Start the game through Steam and load mec_ap.dll into it."""
+        self.ctx.launch_game()
+        return True
+
+    def _cmd_inject(self) -> bool:
+        """Load mec_ap.dll into the running game (waits for the game if it is starting)."""
+        self.ctx.inject_dll()
+        return True
+
+    def _cmd_dll_folder(self, *folder: str) -> bool:
+        """Set or show the folder that holds mec_ap.dll and mec_ap_inject.exe."""
+        if not folder:
+            logger.info("DLL folder: %s", dll_folder() or "not set (/dll_folder <folder>)")
+            return True
+        err = set_dll_folder(" ".join(folder))
+        if err:
+            logger.warning(err)
+            return False
+        logger.info("DLL folder set to %s.", dll_folder())
+        return True
+
     def _cmd_next_volume(self) -> bool:
         """Moves that should be blocked are not: drive a different movement volume."""
         self.ctx.reject_volume = True
@@ -80,7 +109,7 @@ class MECDContext(CommonContext):
 
     def __init__(self, server_address, password):
         super().__init__(server_address, password)
-        self.session = GameSession()
+        self.session = DashesGameSession()
         self.slot_data: dict | None = None
         self.first_look_done = False
         self.save_confirmed = False
@@ -93,6 +122,39 @@ class MECDContext(CommonContext):
         self.dll = DllLink(self.on_dash_finished, self.on_dash_live, self.on_applied, self.on_dll_hello)
         self.applying: dict[int, tuple[str, int, bool]] = {}   # request id -> (flag, value, quiet)
         self.dll_reapply = False
+        self.lock_state: LockState | None = None
+        self.locks_announced = False
+        self.hide_state = None
+        self.hide_announced = False
+        self.launcher = Launcher()
+
+    # ----------------------------------------------------- game and DLL buttons
+    def launch_game(self) -> None:
+        try:
+            running = self.last.attached or self.session.mem.find_pid() is not None
+        except Exception:                                        # noqa: BLE001
+            running = False
+        self.launcher.launch_game(game_running=running, dll_connected=self.dll.connected)
+
+    def inject_dll(self) -> None:
+        self.launcher.inject(dll_connected=self.dll.connected)
+
+    def status_text(self) -> str:
+        """The short state shown next to the buttons."""
+        if not self.last.attached:
+            game = "Game: not running"
+        else:
+            game = "Game: loaded" if self.last.loaded else "Game: loading"
+        if self.dll.connected:
+            dll = f"DLL {self.dll.hello.get('dll', '')}: " + ("ok" if self.dll.hello.get("build_ok") else "inactive")
+        elif self.launcher.busy:
+            dll = "DLL: loading..."
+        else:
+            dll = "DLL: not loaded"
+        return f"{game} | {dll}"
+
+    def hard_lock(self) -> bool:
+        return bool(self.slot_data and self.slot_data.get("hard_dash_lock"))
 
     # ---------------------------------------------------------------- server
     async def server_auth(self, password_requested: bool = False):
@@ -116,11 +178,36 @@ class MECDContext(CommonContext):
         await super().disconnect(allow_autoreconnect)
 
     def make_gui(self):
-        ui = super().make_gui()
-        ui.base_title = "Archipelago Mirror's Edge Catalyst Dashes Client"
-        return ui
+        base = super().make_gui()
+        ctx = self
+
+        class MECDManager(base):
+            base_title = "Archipelago Mirror's Edge Catalyst Dashes Client"
+
+            def build(self):
+                layout = super().build()
+                from kivy.clock import Clock
+                from kivy.metrics import dp
+                from kivymd.uix.button import MDButton, MDButtonText
+                from kivymd.uix.label import MDLabel
+
+                self.mec_status = MDLabel(text=ctx.status_text(), size_hint_x=None, width=dp(230),
+                                          halign="center")
+                self.connect_layout.add_widget(self.mec_status)
+                for text, action in (("Launch game", ctx.launch_game), ("Inject DLL", ctx.inject_dll)):
+                    button = MDButton(MDButtonText(text=text), style="filled", size=(dp(120), dp(70)),
+                                      size_hint_x=None, size_hint_y=None, radius=5,
+                                      pos_hint={"center_y": 0.55},
+                                      on_press=lambda _b, a=action: a())
+                    button.height = self.server_connect_bar.height
+                    self.connect_layout.add_widget(button)
+                Clock.schedule_interval(lambda _dt: setattr(self.mec_status, "text", ctx.status_text()), 1)
+                return layout
+
+        return MECDManager
 
     async def shutdown(self):
+        self.launcher.cancel()
         await super().shutdown()
         await asyncio.to_thread(self.session.shutdown)
 
@@ -156,6 +243,8 @@ class MECDContext(CommonContext):
         if self.last.attached and not r.attached:
             logger.info("Lost the game. Waiting for it to come back...")
             self.first_look_done = False
+            self.locks_announced = False
+            self.hide_announced = False
         if r.just_loaded:
             logger.info("World loaded. Re-applying every received item.")
         self.last = r
@@ -174,8 +263,19 @@ class MECDContext(CommonContext):
                 return
         await self.send_checks(new)
 
+        self.report_locks()
         for flag in r.flags_written:
             value = r.values.get(flag, 1)
+            if flag == ACTIVITY_LOCK_FLAG:
+                continue                         # reported by report_locks
+            if flag in DASH_OF_LOCK_FLAG:
+                if value == 1:
+                    logger.info("Received %s: reload a checkpoint to see the dash on the map (fast "
+                                "travel or a death is not enough).",
+                                dash_unlock_name(DASH_OF_LOCK_FLAG[flag]))
+                else:
+                    logger.debug("Locked %s (%s = 0).", DASH_OF_LOCK_FLAG[flag], flag)
+                continue
             now = appliable(flag) and await self.request_apply(flag, value, quiet=False)
             self.log_grant(flag, r.reasons.get(flag, ""), applying=now)
         for flag in r.flags_failed:
@@ -187,6 +287,37 @@ class MECDContext(CommonContext):
                                     "yet. Retrying.")
         elif r.moves_ok:
             self.warned.discard("moves")
+
+    def report_locks(self) -> None:
+        """After a tick: say once when the dash lock pointers are in place, and warn about any
+        dash that could not be locked (its runs still do not count: the soft lock)."""
+        s = self.session.locks.state
+        if s is None or s is self.lock_state:
+            return
+        self.lock_state = s
+        if s.locked and (s.written or not self.locks_announced):
+            self.locks_announced = True
+            logger.info("Hard dash lock: %d dashes are tied to their Dash Unlock. Reload a checkpoint "
+                        "once so the dashes you do not hold leave the map.", s.locked)
+        bad = s.missing + s.foreign
+        if bad:
+            names = [d for d, (cid, _f) in DASH_LOCKS.items() if cid in bad]
+            self.warn_once("locks", f"Could not hard-lock {len(names)} dashes ({', '.join(sorted(names))}). "
+                                    "They stay on the map, but their runs still count only once "
+                                    "you hold the unlock. Retrying.")
+        else:
+            self.warned.discard("locks")
+
+        h = self.session.hide.state
+        if h is not None and h is not self.hide_state:
+            self.hide_state = h
+            if h.hidden and (h.written or not self.hide_announced):
+                self.hide_announced = True
+                logger.info("Hid %d other activities (opportunities, hubs, side missions, deliveries). "
+                            "Reload a checkpoint to clear them from the map; the 6 Dead Drop "
+                            "Deliveries stay.", h.hidden)
+            if h.missing:
+                logger.debug("Could not hide: %s", ", ".join(sorted(h.missing)))
 
     def log_grant(self, flag: str, reason: str, applying: bool = False) -> None:
         label = flag_label(flag)
@@ -286,8 +417,10 @@ class MECDContext(CommonContext):
     def on_dash_live(self, ev: dict) -> None:
         dash = self.dash_of(ev.get("content_id"))
         if dash:
-            locked = "" if self.slot_data is None or dash_unlocked(self.have(), dash) else \
-                " (locked: this run will not count)"
+            locked = ""
+            if self.slot_data is not None and not dash_unlocked(self.have(), dash):
+                locked = " (locked: this run will not count" + \
+                    ("; reload a checkpoint so it leaves the map)" if self.hard_lock() else ")")
             logger.info("Dash %s: %s%s.", ev.get("ev"), dash, locked)
 
     # --------------------------------------------------------------- commands
@@ -317,6 +450,19 @@ class MECDContext(CommonContext):
         logger.info("Stars: %d/%d. Unlocked dashes: %d/22 (/dashes lists them).",
                     stars_checked(self.checked_locations | self.sent),
                     self.slot_data.get("stars_required", 0), len(unlocked_dashes(self.have())))
+        if self.hard_lock():
+            s = self.lock_state
+            if s is None:
+                logger.info("Hard dash lock: not in place yet (needs the world loaded and items allowed).")
+            else:
+                logger.info("Hard dash lock: %d/22 dashes tied to their unlock%s. Changes show after "
+                            "a checkpoint reload.", s.locked,
+                            f", {len(s.missing) + len(s.foreign)} could not be" if s.missing or s.foreign else "")
+        else:
+            logger.info("Hard dash lock: off for this slot (a locked dash can be run, but does not count).")
+        if self.slot_data and self.slot_data.get("hide_other_activities"):
+            h = self.hide_state
+            logger.info("Other activities: %s.", f"{h.hidden} hidden" if h else "not hidden yet")
         v = self.session.moves.verified
         if v is None:
             logger.info("Moves: not verified in game yet.")

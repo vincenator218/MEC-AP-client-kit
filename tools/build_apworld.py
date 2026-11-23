@@ -40,6 +40,8 @@ WORLDS = {
         MAIN / "data" / "aliases.json": Path("data") / "aliases.json",
         MAIN / "client" / "game.py": Path("client") / "game.py",
         MAIN / "client" / "dll_link.py": Path("client") / "dll_link.py",
+        ROOT / "data" / "dash_unlock_flags.json": Path("data") / "dash_unlock_flags.json",
+        ROOT / "data" / "missions.json": Path("data") / "missions.json",
     }),
 }
 

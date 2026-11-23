@@ -43,7 +43,7 @@ game memory: 32-bit values keyed by a hash of each flag's name, saved by the gam
 | Ability at the next respawn (table write alone) | works (Coil 2026-10-29, QuickTurn 2026-11-13) |
 | Ability **immediately** | works through `mec_ap.dll` 0.2.1 (2026-11-13: Coil and FastClimb, read back; Coil worked in play at once). Proven earlier with Cheat Engine on Switch Place, a stamina tier, Double Wallrun, MAG Rope Swing and Focus, but those foreign-thread calls crashed the game twice |
 | Dashes as checks (finish + 1/2/3 stars) | works through the DLL, end to end to a server (2026-11-12) |
-| Dash Unlocks (Dashes world) | soft lock works (2026-11-19): a locked dash says so and its run does not count. No hard lock exists |
+| Dash Unlocks (Dashes world) | hard lock (`hard_dash_lock`, default on): a locked dash is off the map and cannot be started; played 2026-11-22, unlocks show after a checkpoint reload (DLL.md §11e). Soft lock as a fallback |
 | Side mission unlock | write `SilverCompleted_<mission>`; in the replay menu at the next load (checkpoint restart tested) |
 | Opportunity unlock | write its completion flag; in the Runs menu at the next load, plays from there, a real completion writes the time (one tested end to end). 32 of 40 have a menu entry |
 | Grants survive: fresh load, death, mission start, fast travel, checkpoint restart | tested |

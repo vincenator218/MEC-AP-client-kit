@@ -8,10 +8,10 @@ from __future__ import annotations
 from collections import Counter
 from typing import Callable, Iterable
 
-from ..data import (ABILITY_ITEMS, COUNT, DASH_UNLOCK, DASHES_BY_CONTENT_ID, DOUBLE_WALLRUN_FLAG,
-                    EXCLUSION, EXCLUSION_MOVES, FLAG, ITEMS, ITEMS_BY_ID, LOCATIONS_BY_ID,
-                    PROGRESSIVE_WALLRUN_NAME, LocationInfo, dash_unlock_name)
-from .game import Plan
+from ..data import (ABILITY_ITEMS, ACTIVITY_LOCK_FLAG, COUNT, DASH_LOCKS, HIDE_ACTIVITIES, DASH_UNLOCK, DASHES_BY_CONTENT_ID,
+                    DOUBLE_WALLRUN_FLAG, EXCLUSION, EXCLUSION_MOVES, FLAG, ITEMS, ITEMS_BY_ID,
+                    LOCATIONS_BY_ID, PROGRESSIVE_WALLRUN_NAME, LocationInfo, dash_unlock_name)
+from .dash_lock import DashesPlan
 
 Reader = Callable[[str], "int | None"]
 ALL_MOVES = tuple(EXCLUSION_MOVES.values())
@@ -61,7 +61,25 @@ def desired_flags(have: Counter, slot_data: dict) -> dict[str, tuple[int, str]]:
     if slot_data.get("revert_skill_tree_purchases"):
         for flag in [ITEMS[n].flag for n in ABILITY_ITEMS] + [DOUBLE_WALLRUN_FLAG]:
             out.setdefault(flag, (0, "not received yet (bought from the skill tree?)"))
+    if slot_data.get("hard_dash_lock"):
+        for dash, (_cid, flag) in DASH_LOCKS.items():
+            name = dash_unlock_name(dash)
+            out[flag] = (1, f"received {name}") if have[name] else (0, f"{dash} is locked")
+    if slot_data.get("hide_other_activities"):
+        out[ACTIVITY_LOCK_FLAG] = (1, "hide other activities")
     return out
+
+
+def hidden_activities(slot_data: dict) -> dict[str, str] | None:
+    """Activity name -> its own completion flag, when the slot hides the other activities."""
+    return dict(HIDE_ACTIVITIES) if slot_data.get("hide_other_activities") else None
+
+
+def dash_lock_pointers(slot_data: dict) -> dict[int, str] | None:
+    """ContentId -> lock flag for every dash, when the slot uses the hard lock."""
+    if not slot_data.get("hard_dash_lock"):
+        return None
+    return {cid: flag for cid, flag in DASH_LOCKS.values()}
 
 
 def blocked_moves(have: Counter) -> dict[str, bool]:
@@ -77,11 +95,14 @@ def blocked_moves(have: Counter) -> dict[str, bool]:
 
 
 def build_plan(item_ids: Iterable[int], watch: dict[int, LocationInfo], slot_data: dict,
-               writes_allowed: bool) -> Plan:
+               writes_allowed: bool) -> DashesPlan:
     have = received_names(item_ids)
-    plan = Plan(watch={lid: location_check(loc) for lid, loc in watch.items()},
-                writes_allowed=writes_allowed)
+    plan = DashesPlan(watch={lid: location_check(loc) for lid, loc in watch.items()},
+                      writes_allowed=writes_allowed)
     if writes_allowed:
         plan.flags = desired_flags(have, slot_data)
         plan.blocked = blocked_moves(have)
+        plan.dash_locks = dash_lock_pointers(slot_data)
+        plan.hide_activities = hidden_activities(slot_data)
+        plan.hide_lock_flag = ACTIVITY_LOCK_FLAG
     return plan

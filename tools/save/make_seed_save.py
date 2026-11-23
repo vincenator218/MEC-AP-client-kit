@@ -9,6 +9,8 @@ What it does, by default:
     gated at runtime by the exclusion volume's ExcludeMagrope byte now, not by the
     save -- see docs/MEMORY.md §5. Clearing it here would double-gate it.
   * XP_Gained / XP_Used -> 0                       (--keep-xp to skip)
+  * the 22 hard dash lock flags (data/dash_unlock_flags.json) -> 0, so every dash
+    starts locked for the Dashes world (they are never set in normal play)
   * every location flag in data/locations.json -> 0 (use
     --default-locations-only for just the default-on ones), the mission-collectible
     and codex counters (--keep-codex to skip), plus every
@@ -75,6 +77,11 @@ def targets(args):
     for n in names:
         if n.startswith("Unlocks_"):
             add(n, "ability")
+
+    # the Dashes world's hard dash lock: each dash's own lock flag (docs/DLL.md 11e)
+    locks = json.load(open(os.path.join(DATA, "dash_unlock_flags.json"), encoding="utf-8"))
+    for row in locks["dashes"]:
+        add(row["unlock_flag"], "dash lock")
 
     # The rope is kept by default: the client gates it live via ExcludeMagrope
     # (MEMORY.md §5), so clearing it in the save would gate it twice.

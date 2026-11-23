@@ -2,9 +2,10 @@
 
 ## What is randomized?
 
-- **Dash Unlocks**: one per dash (22). You start with a few. A dash's checks count only once you
-  hold its unlock. Nothing stops you running a locked dash, but that run does not count: run it
-  again after the unlock arrives.
+- **Dash Unlocks**: one per dash (22). You start with a few. A dash you have no unlock for is
+  taken off the map and cannot be started (option `hard_dash_lock`, on by default). When an
+  unlock arrives, **reload a checkpoint** to see the dash; fast travel or a death is not enough.
+  With `hard_dash_lock` off, every dash can be run, but a run of a locked dash does not count.
 - **Moves**: Springboard, Climb Up, Ledge Hang, Wallrun (two Progressive Wallruns: the second is
   Double Wallrun) and MAG Rope are taken away and must be found.
 - **Abilities**: every skill-tree ability. With `mec_ap.dll` loaded they work the moment you
@@ -24,4 +25,6 @@ Earn the number of dash stars set in your options (default 40 of the 66).
 ## What is not in this game?
 
 Side missions, opportunities (Runs), deliveries and the story. For those, play the
-**Mirror's Edge Catalyst** world.
+**Mirror's Edge Catalyst** world. With `hide_other_activities` (on by default) they are taken
+off the map while the client runs, so the dashes stand out; only the 6 Dead Drop Deliveries
+stay, because the game always offers one per story phase.

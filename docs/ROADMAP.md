@@ -14,7 +14,7 @@ Two playable worlds share one kit:
 | items | abilities, 5 moves, side-mission and opportunity unlocks, Data Shards | abilities, 5 moves, 22 Dash Unlocks |
 | goal | Data Shards unlock a final activity; finish it | N stars |
 | needs the DLL | only for dashes and for immediate abilities | yes (dashes) |
-| played in game | yes, first session 2026-10-29 (`apworld/README.md`) | yes, 2026-11-19 (soft lock, a dash finish) |
+| played in game | yes, first session 2026-10-29 (`apworld/README.md`) | yes, 2026-11-19 (soft lock, a dash finish); 2026-11-22 (hard lock, stars, GridLeaks, a live ability) |
 
 Both worlds use the same pieces underneath:
 
@@ -40,7 +40,8 @@ the main world at build time (`tools/build_apworld.py`), so each exists once.
 2. **One-step setup for players.** Today a player builds the DLL (or gets it), runs the injector
    after every game start, and deletes the journal before each seed. Ideas, all untried:
    - a release zip with the prebuilt `mec_ap.dll` and injector, and the client telling the player
-     what to run;
+     what to run (the Dashes client already has Launch game / Inject DLL buttons, given the DLL
+     folder once);
    - a `version.dll` proxy in the game folder so the DLL loads by itself, as MECMP does
      ([`DLL.md`](DLL.md) §3), chaining to MECMP's proxy if both are installed;
    - the client sending the seed name to the DLL, and the DLL keeping one journal per seed (no
@@ -49,18 +50,21 @@ the main world at build time (`tools/build_apworld.py`), so each exists once.
    locked dash for nothing. **The game's own lock was found on 2026-11-22** ([`DLL.md`](DLL.md)
    §11e): point a dash's `UnlockFlag` at a progression flag that is 0, and after a reload the
    dash is off the map and cannot be started; set the flag to 1 and after a reload it is back.
-   Tested on all 22 dashes with 22 flags of their own (`data/dash_unlock_flags.json`). To build
-   it: write the 22 pointers at each game start (DLL or client), make a Dash Unlock item a write
-   of its flag through the one write path, clear the 22 in the seed save, and tell the player to
-   reload a checkpoint; fast travel or a death is not enough (OPEN_QUESTIONS #23).
-   The soft lock stays as a fallback.
+   Tested on all 22 dashes with 22 flags of their own (`data/dash_unlock_flags.json`).
+   **Built** into the Dashes client (option `hard_dash_lock`, on by default,
+   `client/dash_lock.py`): it writes the 22 pointers once the world is loaded, holds each lock
+   flag at 0 until the Dash Unlock arrives (the one write path), clears them in the seed save,
+   and tells the player to reload a checkpoint. Played on 2026-11-22: locked at start, unlocks
+   received from star checks showed after a reload. The soft lock stays as a fallback. Left: writing
+   the pointers before the first load, so no reload is needed after starting (OPEN_QUESTIONS #23).
 3b. **Locking opportunities, security hubs and side missions** (main world). Found 2026-11-22
    ([`DLL.md`](DLL.md) §11f): point an activity's `CompletedFlag` at a flag that is 1 and, after a
    checkpoint reload, the game treats it as done (off the map, cannot be started) while its real
    completion flag, the check, stays 0. This would make every on-foot activity an item-gated
    location, not only the side missions. Same build steps as 3, with one shared lock flag.
    Locking everything at once left only the 6 Dead Drop Deliveries: the game always offers one
-   per phase, so they need another way (DLL.md §11f).
+   per phase, so they need another way (DLL.md §11f). Already used by the Dashes world to clear
+   its map (option `hide_other_activities`).
 4. **A locked final activity** (main world). The final activity can be finished early in the
    world. With the DLL, the goal could count only a completion message that arrives after the
    unlock ([`DLL.md`](DLL.md) §1); activities other than dashes send the same messages, but only

@@ -25,7 +25,8 @@ result it holds that matters here is restated in these docs.
 20. **Star thresholds.** Whether a time exactly on a star threshold earns the star. The client
     counts it.
 23. **The hard dash lock** ([`DLL.md`](DLL.md) §11e, works on all 22 with their own flags,
-    `data/dash_unlock_flags.json`): when to write the 22 `UnlockFlag` pointers; whether anything
+    `data/dash_unlock_flags.json`; built into the Dashes client, which writes the pointers once
+    the world is loaded and asks for one reload; played 2026-11-22): writing them before the first load instead; whether anything
     short of a checkpoint reload refreshes a dash (fast travel and death do not); a run in
     progress; the flags over a game restart.
 24. **The activity lock** ([`DLL.md`](DLL.md) §11f): works for opportunities, side missions and
@@ -95,8 +96,8 @@ result it holds that matters here is restated in these docs.
    from its server tick hook. Coil and FastClimb applied live and read back; Coil worked in play
    at once. [`DLL.md`](DLL.md) §5.
 1a. **Dashes as locations.** Done: the DLL hears `NamedChallengeFinished`, the client sends the
-    finish and star checks (tested end to end 2026-11-12). The game has no per-dash lock
-    ([`DLL.md`](DLL.md) §11c-d); the Dashes world uses a soft lock instead (`ROADMAP.md`).
+    finish and star checks (tested end to end 2026-11-12). Per-dash lock: found 2026-11-22
+    ([`DLL.md`](DLL.md) §11e) and used by the Dashes world (`hard_dash_lock`).
 3. **Reconnect / resync.** The client re-applies every received item after each load (writes
    are idempotent), and asks the DLL to re-check every ability when the DLL connects.
 4. **The game's load state.** The client waits until the flag table pointer is set and

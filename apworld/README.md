@@ -171,9 +171,21 @@ only: no side missions, no opportunities. Built 2026-11-13, first played 2026-11
   Unlocks** (1320500 + `ap_index`), filler `Gridnet Static`. `starting_dashes` (default 3) are
   given at the start, at least one of them a dash that needs no move by `requirements.csv`, so a
   seed can always start. Useful abilities that do not fit go to the start inventory.
-- **Soft lock:** the client sends a dash's checks only if you hold its unlock. A locked run is
-  logged ("does not count; run it again once the unlock arrives") and dropped; the warning also
-  shows when a locked dash starts. Seen working in game on 2026-11-19.
+- **Hard lock** (`hard_dash_lock`, on by default; `client/dash_lock.py`): the client points each
+  dash's `UnlockFlag` at its own lock flag (`data/dash_unlock_flags.json`, docs/DLL.md §11e) and
+  holds that flag at 0 until the Dash Unlock arrives, through the one write path. A locked dash is
+  off the map and cannot be started; changes show after a checkpoint reload. The pointers are
+  re-validated every tick and set back to null when the client closes. `make_seed_save.py`
+  clears the 22 flags.
+- **Hide other activities** (`hide_other_activities`, on by default; `client/activity_lock.py`):
+  the 92 opportunities, deliveries, security hubs and side missions (`data/missions.json` types
+  1-3) get their `CompletedFlag` pointed at one shared flag held at 1, so the game treats them as
+  done and takes them off the map (docs/DLL.md §11f). Their real completion flags are never
+  touched, and every pointer is put back when the client closes. The 6 Dead Drop Deliveries
+  cannot be hidden this way.
+- **Soft lock** (always, and all there is with `hard_dash_lock` off): the client sends a dash's
+  checks only if you hold its unlock. A locked run is logged ("does not count; run it again
+  once the unlock arrives") and dropped. Seen working in game on 2026-11-19.
 - **Goal:** `stars_required` (default 40, capped at what the seed has). Each star check has a
   hidden "Star" event with the same rule, so the generator proves the goal is reachable. The
   client sends the goal when enough star checks have been sent.
@@ -181,6 +193,17 @@ only: no side missions, no opportunities. Built 2026-11-13, first played 2026-11
   Two rows from play (2026-11-19): Caleb's Run needs MAG Rope; Out in the Open needs nothing.
 - **Ids:** shared things keep the main world's ids (abilities, moves, dash checks 1330000+,
   GridLeak counts), so the shared client code is identical.
-- **Client commands:** `/mec`, `/dashes`, `/confirm_save`, `/next_volume`.
-- **Not yet seen in game:** a star check, a GridLeak check, an ability applied in this world, the
-  goal.
+- **Client commands:** `/mec` (also shows the hard lock), `/dashes`, `/confirm_save`, `/next_volume`,
+  `/launch`, `/inject`, `/dll_folder`. The GUI's top bar has **Launch game** and **Inject DLL**
+  buttons and a game / DLL status (`client/launcher.py`): Launch starts Steam app 1233570 and
+  runs the injector, which waits for the game; the DLL folder is kept in Archipelago's
+  persistent storage.
+- **Seen in game, 2026-11-22** (a `hard_dash_lock` seed, local server, `mec_ap.dll` loaded): the
+  client locked all 22 dashes and after a checkpoint reload only the 3 starting ones were on the
+  map; two GridLeak bundle checks were sent; a 37.56 s Birdman's Dash sent its finish and all 3
+  star checks; the Dash Unlocks for Caleb's Run and Feature Creep arrived from them and both
+  dashes were on the map after a reload; FlowAttack from the 3-star check was applied live
+  through the DLL and read back.
+- **`hide_other_activities` seen in game, 2026-11-22:** with a new seed and the client
+  reconnected, a checkpoint reload left only the dashes held and the 6 Dead Drop Deliveries.
+- **Not yet seen in game:** the goal.

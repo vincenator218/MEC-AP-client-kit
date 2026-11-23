@@ -529,7 +529,8 @@ memory then; a flag read by its hash alone would not show.
 
 What this means:
 - **The game has a real per-dash lock, driven by an ordinary progression flag.** A Dash Unlock
-  item can be a flag write through the one write path, like an ability.
+  item can be a flag write through the one write path, like an ability. The Dashes world's
+  client does this (option `hard_dash_lock`, `client/dash_lock.py`).
 - Both directions need a **checkpoint reload**. **Neither fast travel nor a death refreshes it**
   (tested 2026-11-22). A received unlock shows at the next checkpoint reload unless a live refresh
   is found.
@@ -586,6 +587,9 @@ that is 1. Tested with `tools/client/activity_lock_probe.py`:
   not the flag. The test used `Example_ExampleMission3Part1Completed` (§11e census: nothing reads it).
 - Like the dash lock: pointers live in memory and need writing at every game start; only a
   checkpoint reload refreshes (not fast travel, not death).
+
+The Dashes world uses this to clear its map (option `hide_other_activities`,
+`client/activity_lock.py`), since none of these activities are checks there.
 
 **Everything at once** (same day): all 22 dashes and all 92 type 1-3 activities locked, then a
 reload. **Everything was gone except 6 "Dead Drop Delivery" markers**: the countdown deliveries

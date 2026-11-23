@@ -29,6 +29,22 @@ and every GridLeak, so the checks can be earned again.
 4. Before a new seed, delete `mec_ap_events.jsonl` and `mec_ap_acked.txt` next to the DLL, or
    runs from before the seed are sent to it.
 
+Locked dashes: once the client is connected and the world is loaded it says `Hard dash lock: 22
+dashes are tied to their Dash Unlock.` Reload a checkpoint once so the dashes you do not hold
+leave the map, and again each time a Dash Unlock arrives. When you close the client, every dash
+comes back on the map (the lock lives in game memory; the unlocks you hold are in your save).
+
+Other activities: the client also says `Hid 92 other activities`. The same reload clears the
+opportunities, hubs, side missions and deliveries from the map (not the 6 Dead Drop
+Deliveries). They come back when you close the client. Turn it off with
+`hide_other_activities: false`.
+
+Game and DLL buttons: the client's top bar has **Launch game** (starts the game through Steam
+and loads `mec_ap.dll` once it is up) and **Inject DLL** (loads it into a game that is already
+running), with the game and DLL state next to them. Tell the client once where the DLL is:
+`/dll_folder <folder with mec_ap.dll and mec_ap_inject.exe>`; it is remembered. The DLL has to be
+loaded again after every game start. `/launch` and `/inject` do the same as the buttons.
+
 Client commands: `/mec` (stars, unlocked dashes, moves, DLL state), `/dashes` (which dashes are
 unlocked), `/confirm_save`, `/next_volume` (a move that should be blocked still works).
 
