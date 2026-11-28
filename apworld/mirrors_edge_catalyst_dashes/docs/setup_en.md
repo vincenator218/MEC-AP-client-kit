@@ -21,8 +21,9 @@ and every GridLeak, so the checks can be earned again.
 
 ## Play
 
-1. Start the game, load in, and run `mec_ap_inject.exe`. `mec_ap.log` next to the DLL should say
-   `ready` and `apply: check passed`.
+1. Start the game and load `mec_ap.dll`: the client's **Launch game** or **Inject DLL** button
+   (below), or run `mec_ap_inject.exe` yourself. `mec_ap.log` next to the DLL should say `ready`,
+   `apply: check passed` and `reload: check passed`.
 2. In the Archipelago Launcher pick **Mirror's Edge Catalyst Dashes Client** and connect.
 3. The client says `Connected to mec_ap.dll ... Dash checks are on. Received abilities apply
    immediately.`
@@ -30,8 +31,8 @@ and every GridLeak, so the checks can be earned again.
    runs from before the seed are sent to it.
 
 Locked dashes: once the client is connected and the world is loaded it says `Hard dash lock: 22
-dashes are tied to their Dash Unlock.` Reload a checkpoint once so the dashes you do not hold
-leave the map, and again each time a Dash Unlock arrives. When you close the client, every dash
+dashes are tied to their Dash Unlock.` The dashes you do not hold leave the map at the next
+checkpoint reload, which the client does by itself (see **Automatic reload** below). When you close the client, every dash
 comes back on the map (the lock lives in game memory; the unlocks you hold are in your save).
 
 Other activities: the client also says `Hid 92 other activities`. The same reload clears the
