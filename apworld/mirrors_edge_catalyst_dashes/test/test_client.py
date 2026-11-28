@@ -705,3 +705,110 @@ class TestDashBoard(unittest.TestCase):
         self.assertEqual(race_time(4592), "45.92")
         self.assertEqual(race_time(6530), "1:05.30")
         self.assertEqual(race_time(5), "0.05")
+
+
+class TestNewSeedSave(unittest.TestCase):
+    """client/new_save.py: refuses with the game open, backs up, replaces, moves the journal."""
+
+    def setUp(self):
+        import tempfile
+        from pathlib import Path
+        from unittest import mock
+        import Utils
+        from ..client import new_save
+        self.ns = new_save
+        self.dir = Path(tempfile.mkdtemp())
+        self.addCleanup(__import__("shutil").rmtree, self.dir, True)
+        self.save = self.dir / "PROF_SAVE"
+        self.save.write_bytes(b"old save")
+        self.dll = self.dir / "dll"
+        self.dll.mkdir()
+        (self.dll / "mec_ap_events.jsonl").write_text("{}\n")
+        self.store = {}
+        for p in (mock.patch.object(Utils, "persistent_load", lambda: self.store),
+                  mock.patch.object(Utils, "persistent_store",
+                                    lambda c, k, v: self.store.setdefault(c, {}).__setitem__(k, v)),
+                  mock.patch.object(new_save, "game_running", lambda: False),
+                  mock.patch.object(new_save, "seed_save_bytes", lambda data, want: (b"new save", 5, {"location": 5})),
+                  mock.patch.object(new_save, "leftover", lambda path=None: 0)):
+            p.start()
+            self.addCleanup(p.stop)
+
+    def test_replaces_and_backs_up(self):
+        r = self.ns.make("S1", 1, str(self.dll), self.save)
+        self.assertTrue(r.ok, r.message)
+        self.assertEqual(self.save.read_bytes(), b"new save")
+        self.assertEqual((self.dir / r.backup).read_bytes(), b"old save")
+        self.assertFalse((self.dll / "mec_ap_events.jsonl").exists())     # moved aside, not deleted
+        self.assertEqual(len(list(self.dll.glob("mec_ap_events.jsonl.before_*"))), 1)
+        self.assertTrue(self.ns.prepared("S1", 1))
+        self.assertFalse(self.ns.prepared("S2", 1))
+
+    def test_refuses_while_the_game_runs(self):
+        from unittest import mock
+        with mock.patch.object(self.ns, "game_running", lambda: True):
+            r = self.ns.make("S1", 1, None, self.save)
+        self.assertFalse(r.ok)
+        self.assertEqual(self.save.read_bytes(), b"old save")
+        self.assertEqual(list(self.dir.glob("PROF_SAVE.before_*")), [])
+
+    def test_no_save(self):
+        r = self.ns.make("S1", 1, None, self.dir / "missing")
+        self.assertFalse(r.ok)
+
+    def test_real_save_if_present(self):
+        # The real clear on a copy of a real story-complete save (skipped on other machines).
+        import shutil
+        src = self.ns.documents() / "Mirrors Edge Catalyst" / "settings" / "PROF_SAVE.before_seed_20261125"
+        if not src.is_file():
+            self.skipTest("no local save to try on")
+        from importlib import reload
+        real = reload(self.ns)                       # undo the mocks of this module's functions
+        try:
+            shutil.copy2(src, self.save)
+            from unittest import mock
+            with mock.patch.object(real, "game_running", lambda: False):
+                self.assertGreater(real.leftover(self.save), 0)
+                r = real.make("S1", 1, None, self.save)
+            self.assertTrue(r.ok, r.message)
+            self.assertEqual(real.leftover(self.save), 0)
+            self.assertEqual(self.save.stat().st_size, src.stat().st_size)
+        finally:
+            reload(self.ns)
+
+
+class TestSeedSaveButton(unittest.IsolatedAsyncioTestCase):
+    """The New seed save button shows only for a new run that still needs one."""
+
+    async def asyncSetUp(self):
+        from unittest import mock
+        import Utils
+        from ..client import new_save
+        from ..client.client import MECDContext
+        self.store, self.left = {}, 102
+        for p in (mock.patch.object(Utils, "persistent_load", lambda: self.store),
+                  mock.patch.object(new_save, "leftover", lambda path=None: self.left)):
+            p.start()
+            self.addCleanup(p.stop)
+        self.ctx = MECDContext(None, None)
+        self.ctx.slot_data, self.ctx.seed_name, self.ctx.slot = {}, "S1", 1
+
+    async def asyncTearDown(self):
+        await self.ctx.shutdown()
+
+    async def test_shown_for_a_new_run(self):
+        await self.ctx.check_seed_save()
+        self.assertTrue(self.ctx.save_needed)
+
+    async def test_hidden_once_checks_exist_or_prepared_or_clean(self):
+        self.ctx.checked_locations = {1330010}
+        await self.ctx.check_seed_save()
+        self.assertFalse(self.ctx.save_needed)
+        self.ctx.checked_locations = set()
+        self.store["mec_ap"] = {"seed_saves": {"S1:1": {}}}
+        await self.ctx.check_seed_save()
+        self.assertFalse(self.ctx.save_needed)
+        self.store.clear()
+        self.left = 0                                   # already a seed save
+        await self.ctx.check_seed_save()
+        self.assertFalse(self.ctx.save_needed)

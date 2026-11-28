@@ -42,6 +42,11 @@ WORLDS = {
         MAIN / "client" / "dll_link.py": Path("client") / "dll_link.py",
         ROOT / "data" / "dash_unlock_flags.json": Path("data") / "dash_unlock_flags.json",
         ROOT / "data" / "missions.json": Path("data") / "missions.json",
+        # the seed save, made by the client (client/new_save.py)
+        ROOT / "data" / "flag_names.json": Path("data") / "flag_names.json",
+        ROOT / "tools" / "save" / "make_seed_save.py": Path("client") / "make_seed_save.py",
+        ROOT / "tools" / "save" / "save_checksum.py": Path("client") / "save_checksum.py",
+        ROOT / "tools" / "save" / "set_flag.py": Path("client") / "set_flag.py",
     }),
 }
 

@@ -38,9 +38,13 @@ import os
 import struct
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from save_checksum import recompute_checksums          # noqa: E402
-from set_flag import djb2a, find_progression_sections  # noqa: E402
+try:                                   # inside the Dashes apworld's client package (client/new_save.py)
+    from .save_checksum import recompute_checksums
+    from .set_flag import djb2a, find_progression_sections
+except ImportError:                    # run as a script from tools/save
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from save_checksum import recompute_checksums          # noqa: E402
+    from set_flag import djb2a, find_progression_sections  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "..", "..", "data")
@@ -53,10 +57,16 @@ XP = ["XP_Gained", "XP_Used", "XP"]
 MISSION_SUFFIXES = ["_CompletedTime", "_CompletedTimestampPart1", "_CompletedTimestampPart2"]
 
 
-def targets(args):
+def load_data():
+    """The three data files, read from the kit's data/ folder (the client passes its own copies)."""
+    def load(name):
+        return json.load(open(os.path.join(DATA, name), encoding="utf-8"))
+    return load("flag_names.json"), load("locations.json"), load("dash_unlock_flags.json")
+
+
+def targets(names, locs, locks, clear_magrope=False, keep_xp=False, default_locations_only=False,
+            keep_codex=False):
     """Return {name: kind} for every flag the seed should clear."""
-    names = json.load(open(os.path.join(DATA, "flag_names.json"), encoding="utf-8"))
-    locs = json.load(open(os.path.join(DATA, "locations.json"), encoding="utf-8"))
     out = {}
 
     # story state is never touched: GoldCompleted_<m> and that mission's own
@@ -79,16 +89,15 @@ def targets(args):
             add(n, "ability")
 
     # the Dashes world's hard dash lock: each dash's own lock flag (docs/DLL.md 11e)
-    locks = json.load(open(os.path.join(DATA, "dash_unlock_flags.json"), encoding="utf-8"))
     for row in locks["dashes"]:
         add(row["unlock_flag"], "dash lock")
 
     # The rope is kept by default: the client gates it live via ExcludeMagrope
     # (MEMORY.md §5), so clearing it in the save would gate it twice.
-    if args.clear_magrope:
+    if clear_magrope:
         for n in MAGROPE:
             add(n, "magrope")
-    if not args.keep_xp:
+    if not keep_xp:
         for n in XP:
             add(n, "xp")
 
@@ -103,7 +112,7 @@ def targets(args):
 
     # codex / story collectible counters (not AP locations, but a fresh seed
     # shouldn't show them as partly collected)
-    if not args.keep_codex:
+    if not keep_codex:
         for n in names:
             if n.startswith(("IntelCollectiblesWorld_", "IntelCollectiblesMission_",
                              "GreenCollectiblesStory_", "GreenCollectiblesMission_",
@@ -116,7 +125,7 @@ def targets(args):
 
     # the locations themselves (collectibles, hubs, nodes, billboards, ...)
     for loc in locs:
-        if loc["default"] or not args.default_locations_only:
+        if loc["default"] or not default_locations_only:
             flag = loc["flag"]
             add(flag, "location")
             if flag.endswith("_CompletedTime"):
@@ -124,6 +133,40 @@ def targets(args):
                 for suf in MISSION_SUFFIXES:
                     add(base + suf, "location")
     return out
+
+
+def clear(data, want, dry_run=False):
+    """Set every targeted flag that is not 0 to 0 in `data` (a bytearray of a PROF_SAVE), in every
+    ProgressionManagerData section. Returns (values changed, {kind: count}, [(section, records,
+    changed)]). Checksums are not recomputed here (see write_seed_save)."""
+    by_hash = {djb2a(n.encode("utf-8")): (n, kind) for n, kind in want.items()}
+    changed_total, per_kind, sections = 0, {}, []
+    for key, vstart, vallen in find_progression_sections(data):
+        count = struct.unpack_from("<I", data, vstart + 144)[0]
+        changed = 0
+        for i in range(count):
+            off = vstart + 148 + i * 8
+            h, v = struct.unpack_from("<II", data, off)
+            hit = by_hash.get(h)
+            if hit and v != 0:
+                if not dry_run:
+                    struct.pack_into("<I", data, off + 4, 0)
+                changed += 1
+                per_kind[hit[1]] = per_kind.get(hit[1], 0) + 1
+        sections.append((key, count, changed))
+        changed_total += changed
+    return changed_total, per_kind, sections
+
+
+def seed_save_bytes(data, want):
+    """A seed save made from `data` (bytes of a PROF_SAVE): (new bytes, values changed, per kind).
+    The size never changes and both checksums are recomputed."""
+    out = bytearray(data)
+    changed, per_kind, _ = clear(out, want)
+    recompute_checksums(out)
+    if len(out) != len(data):
+        raise ValueError("file size changed -- refusing to write")
+    return bytes(out), changed, per_kind
 
 
 def main():
@@ -141,8 +184,8 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="report what would change, write nothing")
     a = ap.parse_args()
 
-    want = targets(a)
-    by_hash = {djb2a(n.encode("utf-8")): (n, kind) for n, kind in want.items()}
+    want = targets(*load_data(), clear_magrope=a.clear_magrope, keep_xp=a.keep_xp,
+                   default_locations_only=a.default_locations_only, keep_codex=a.keep_codex)
     print(f"{len(want)} flags targeted "
           f"({sum(1 for k in want.values() if k == 'ability')} abilities, "
           f"{sum(1 for k in want.values() if k == 'location')} locations, "
@@ -153,24 +196,9 @@ def main():
 
     data = bytearray(open(a.save_file, "rb").read())
     size = len(data)
-    changed_total = 0
-    per_kind = {}
-
-    for key, vstart, vallen in find_progression_sections(data):
-        blob_off = vstart
-        count = struct.unpack_from("<I", data, blob_off + 144)[0]
-        changed = 0
-        for i in range(count):
-            off = blob_off + 148 + i * 8
-            h, v = struct.unpack_from("<II", data, off)
-            hit = by_hash.get(h)
-            if hit and v != 0:
-                if not a.dry_run:
-                    struct.pack_into("<I", data, off + 4, 0)
-                changed += 1
-                per_kind[hit[1]] = per_kind.get(hit[1], 0) + 1
+    changed_total, per_kind, sections = clear(data, want, a.dry_run)
+    for key, count, changed in sections:
         print(f"  {key}: {count} records, {changed} cleared")
-        changed_total += changed
 
     print("cleared by kind:", per_kind if per_kind else "(nothing)")
     if a.dry_run:

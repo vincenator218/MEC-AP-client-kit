@@ -193,6 +193,11 @@ only: no side missions, no opportunities. Built 2026-11-13, first played 2026-11
   Two rows from play (2026-11-19): Caleb's Run needs MAG Rope; Out in the Open needs nothing.
 - **Ids:** shared things keep the main world's ids (abilities, moves, dash checks 1330000+,
   GridLeak counts), so the shared client code is identical.
+- **Seed save:** `client/new_save.py` makes it in place (the New seed save button, shown only for
+  a new run whose save still needs it, and `/new_save`): refuses while the game runs, backs up
+  `PROF_SAVE` first, reads the result back, moves the DLL journal aside, and records the seed and
+  slot (`mec_ap` / `seed_saves`). It uses `tools/save/make_seed_save.py`, copied into the
+  package at build time with `data/flag_names.json`.
 - **Dashes tab:** `client/dash_tab.py` (Kivy) shows `plan.dash_board` (pure, tested): per dash
   unlocked, finished, stars done / star checks in this seed (from the server's checked + missing
   lists), and the next star's time; rebuilt only when that changes.

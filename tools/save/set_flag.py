@@ -20,7 +20,10 @@ import argparse
 import struct
 import sys
 
-from save_checksum import recompute_checksums
+try:                                   # inside the Dashes apworld's client package
+    from .save_checksum import recompute_checksums
+except ImportError:                    # run as a script from tools/save
+    from save_checksum import recompute_checksums
 
 
 def djb2a(data: bytes) -> int:

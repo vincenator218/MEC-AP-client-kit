@@ -10,14 +10,17 @@
 
 ## Make the seed save
 
-With the game closed, back up `Documents\Mirrors Edge Catalyst\settings\PROF_SAVE`, then:
+Connect the client to a new seed with the game **closed**. It says the save is not a seed save
+yet and shows a **New seed save** button: press it. It copies
+`Documents\Mirrors Edge Catalyst\settings\PROF_SAVE` to `PROF_SAVE.before_<seed>_<date>`, then
+turns `PROF_SAVE` into a seed save: the story stays done, and every ability, GridLeak, dash lock
+and activity completion is cleared so the checks can be earned again. It also moves
+`mec_ap.dll`'s run journal from the last seed aside. The button only shows for a new run that
+still needs it; `/new_save` does it at any time (to start over, say). It refuses while the game
+is running, since the game writes its save when it exits.
 
-```
-python tools/save/make_seed_save.py PROF_SAVE --out PROF_SAVE_seed
-```
-
-and put `PROF_SAVE_seed` in place as `PROF_SAVE`. It keeps the story and clears every ability
-and every GridLeak, so the checks can be earned again.
+Without the client, `python tools/save/make_seed_save.py PROF_SAVE --out PROF_SAVE_seed` from the
+client kit does the same, and you put `PROF_SAVE_seed` in place as `PROF_SAVE` yourself.
 
 ## Play
 
@@ -27,8 +30,6 @@ and every GridLeak, so the checks can be earned again.
 2. In the Archipelago Launcher pick **Mirror's Edge Catalyst Dashes Client** and connect.
 3. The client says `Connected to mec_ap.dll ... Dash checks are on. Received abilities apply
    immediately.`
-4. Before a new seed, delete `mec_ap_events.jsonl` and `mec_ap_acked.txt` next to the DLL, or
-   runs from before the seed are sent to it.
 
 Locked dashes: once the client is connected and the world is loaded it says `Hard dash lock: 22
 dashes are tied to their Dash Unlock.` The dashes you do not hold leave the map at the next

@@ -31,6 +31,7 @@ from ..data import (ABILITY_ITEMS, ACTIVITY_LOCK_FLAG, DASH_LOCKS, DASH_OF_LOCK_
 from .dash_lock import DashesGameSession, LockState
 from .auto_reload import AutoReload
 from .dll_link import DllLink
+from . import new_save
 from .launcher import Launcher, dll_folder, pick_dll_folder, set_dll_folder
 from .game import TickResult
 from .mec_memory import djb2a
@@ -157,6 +158,11 @@ class MECDCommandProcessor(ClientCommandProcessor):
                     f" Waiting to show: {', '.join(a.missing)}." if a.missing else "")
         return True
 
+    def _cmd_new_save(self) -> bool:
+        """Replace the game's save with a fresh seed save (game closed; the old one is backed up)."""
+        asyncio.create_task(self.ctx.make_seed_save())
+        return True
+
     def _cmd_next_volume(self) -> bool:
         """Moves that should be blocked are not: drive a different movement volume."""
         self.ctx.reject_volume = True
@@ -194,6 +200,7 @@ class MECDContext(CommonContext):
         self.launcher = Launcher()
         self.overrides: dict[str, int] = {}    # /move: move -> level, for this seed and slot
         self.touched: set[str] = set()         # moves ever overridden here (to undo on "ap")
+        self.save_needed = False               # show the New seed save button
 
     # ---------------------------------------------------------- move overrides
     def _override_key(self) -> str | None:
@@ -320,6 +327,28 @@ class MECDContext(CommonContext):
             running = False
         self.launcher.launch_game(game_running=running, dll_connected=self.dll.connected)
 
+    # -------------------------------------------------------------- seed save
+    async def check_seed_save(self) -> None:
+        """Whether this slot needs a seed save: a new run (no checks sent), never prepared here,
+        and the game's save still holds something a seed save resets."""
+        if self.slot_data is None or self.checked_locations or self.sent                 or new_save.prepared(self.seed_name, self.slot):
+            self.save_needed = False
+            return
+        left = await asyncio.to_thread(new_save.leftover)
+        self.save_needed = bool(left)
+        if self.save_needed:
+            logger.warning("This is a new seed and your save is not a seed save yet (%d values to "
+                           "reset). Close the game if it is open, then press New seed save (or "
+                           "/new_save). Your current save is backed up first.", left)
+
+    async def make_seed_save(self) -> bool:
+        r = await asyncio.to_thread(new_save.make, self.seed_name, self.slot, dll_folder())
+        (logger.info if r.ok else logger.warning)(r.message)
+        if r.ok:
+            self.save_needed = False
+            self.first_look_done = False
+        return r.ok
+
     def inject_dll(self) -> None:
         self.launcher.inject(dll_connected=self.dll.connected)
 
@@ -357,9 +386,11 @@ class MECDContext(CommonContext):
                         "looked at it. Dashes need mec_ap.dll; you need %d stars to win.",
                         self.slot_data.get("stars_required", 0))
             asyncio.create_task(self.check_goal())
+            asyncio.create_task(self.check_seed_save())
 
     async def disconnect(self, allow_autoreconnect: bool = False):
         self.slot_data = None
+        self.save_needed = False
         await super().disconnect(allow_autoreconnect)
 
     def make_gui(self):
@@ -379,14 +410,28 @@ class MECDContext(CommonContext):
                 self.mec_status = MDLabel(text=ctx.status_text(), size_hint_x=None, width=dp(230),
                                           halign="center")
                 self.connect_layout.add_widget(self.mec_status)
-                for text, action in (("Launch game", ctx.launch_game), ("Inject DLL", ctx.inject_dll)):
-                    button = MDButton(MDButtonText(text=text), style="filled", size=(dp(120), dp(70)),
+                def make_button(text, action, width=dp(120)):
+                    button = MDButton(MDButtonText(text=text), style="filled", size=(width, dp(70)),
                                       size_hint_x=None, size_hint_y=None, radius=5,
                                       pos_hint={"center_y": 0.55},
                                       on_press=lambda _b, a=action: a())
                     button.height = self.server_connect_bar.height
-                    self.connect_layout.add_widget(button)
-                Clock.schedule_interval(lambda _dt: setattr(self.mec_status, "text", ctx.status_text()), 1)
+                    return button
+
+                for text, action in (("Launch game", ctx.launch_game), ("Inject DLL", ctx.inject_dll)):
+                    self.connect_layout.add_widget(make_button(text, action))
+                # Shown only while this slot needs a seed save (ctx.save_needed); /new_save always works.
+                self.new_save_button = make_button(
+                    "New seed save", lambda: asyncio.create_task(ctx.make_seed_save()), dp(150))
+
+                def tick(_dt):
+                    self.mec_status.text = ctx.status_text()
+                    shown = self.new_save_button.parent is not None
+                    if ctx.save_needed and not shown:
+                        self.connect_layout.add_widget(self.new_save_button)
+                    elif not ctx.save_needed and shown:
+                        self.connect_layout.remove_widget(self.new_save_button)
+                Clock.schedule_interval(tick, 1)
                 from .dash_tab import DashTab
                 self.add_client_tab("Dashes", DashTab(ctx))
                 return layout
