@@ -9,6 +9,7 @@
 #include "addresses.h"
 #include "log.h"
 #include "mem.h"
+#include "research.h"
 
 namespace mecap::listener {
 namespace {
@@ -23,6 +24,7 @@ uint16_t priority(Listener*) { return 0; }
 void* const g_vtbl[2] = {reinterpret_cast<void*>(&onMessage), reinterpret_cast<void*>(&priority)};
 Listener g_client{g_vtbl}, g_server{g_vtbl};
 std::atomic<uintptr_t> g_clientManager{0}, g_serverManager{0}; // the manager each is registered with
+std::atomic<uint32_t> g_roundResets{0};
 
 std::mutex g_m;
 std::vector<Event> g_queue;
@@ -78,8 +80,17 @@ void onMessage(Listener*, const void* message) {
     const auto* m = static_cast<const uint8_t*>(message);
     uint32_t category = 0, type = 0;
     memcpy(&category, m + addr::Msg_Category, 4);
-    if (category != addr::kCategorySocialPlay) return;
     memcpy(&type, m + addr::Msg_Type, 4);
+    if (category == addr::kCategoryPamOnline) {
+        if (type == addr::kTypeBeginSocialActivity || type == addr::kTypeEndSocialActivity)
+            push({type == addr::kTypeEndSocialActivity ? Kind::ActivityEnded : Kind::ActivityBegan, 0});
+        return;
+    }
+    if (category == addr::kCategoryServerRound) {
+        if (type == addr::kTypeServerRoundReset) ++g_roundResets;
+        return;
+    }
+    if (category != addr::kCategorySocialPlay) return;
     if (type == addr::kTypeNamedChallengeFinished) onFinished(m);
     else if (type == addr::kTypeNamedChallengeStarted) onSimple(m, Kind::Started);
     else if (type == addr::kTypeNamedChallengeCancelled) onSimple(m, Kind::Cancelled);
@@ -91,15 +102,21 @@ void registerOn(uintptr_t contextVa, Listener& l, std::atomic<uintptr_t>& done, 
     const uintptr_t manager = ctx + addr::Context_MessageManager;
     if (done.load() == manager) return;                // already registered with this one
     using RegisterFn = char (*)(uintptr_t manager, uint32_t category, Listener* listener, uint32_t filter);
-    reinterpret_cast<RegisterFn>(mem::rva(addr::Fn_RegisterListener))(manager, addr::kCategorySocialPlay, &l, 0xff);
+    const auto reg = reinterpret_cast<RegisterFn>(mem::rva(addr::Fn_RegisterListener));
+    reg(manager, addr::kCategorySocialPlay, &l, 0xff);
+    if (&l == &g_server) reg(manager, addr::kCategoryServerRound, &l, 0xff); // reload.cpp's check
+    if (&l == &g_client) reg(manager, addr::kCategoryPamOnline, &l, 0xff);   // leaving a dash
     done = manager;
     LOG("listening for challenge messages on the %s message manager (%p)", which, reinterpret_cast<void*>(manager));
+    research::registerOn(manager, which);   // only with mec_ap_research.txt
 }
 
 } // namespace
 
 void registerClient() { registerOn(addr::ClientGameContext, g_client, g_clientManager, "client"); }
 void registerServer() { registerOn(addr::ServerGameContext, g_server, g_serverManager, "server"); }
+
+uint32_t roundResets() { return g_roundResets.load(); }
 
 std::vector<Event> drain() {
     std::lock_guard<std::mutex> lock(g_m);

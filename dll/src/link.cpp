@@ -15,17 +15,20 @@
 
 #include "apply.h"
 #include "listener.h"
+#include "reload.h"
 #include "log.h"
+#include "research.h"
 #include "version.h"
 
 namespace mecap::link {
 namespace {
 
 bool g_buildOk = false;
-std::string g_why, g_applyWhy;
+std::string g_why, g_applyWhy, g_reloadWhy;
 std::vector<apply::Request> g_applyRequests; // read from the client, submitted once per loop
 std::wstring g_journalPath, g_ackedPath;
 long long g_lastSeq = 0, g_acked = 0;
+uint32_t g_resetsSent = 0;   // listener::roundResets() last reported to the client
 SOCKET g_listen = INVALID_SOCKET, g_client = INVALID_SOCKET;
 std::string g_inbuf;
 
@@ -122,12 +125,13 @@ bool sendLine(const std::string& line) {
 
 void sendHello() {
     char b[768];
-    const bool canApply = apply::enabled();
+    const bool canApply = apply::enabled(), canReload = reload::enabled();
     snprintf(b, sizeof(b),
              "{\"ev\":\"hello\",\"proto\":%d,\"dll\":\"%s\",\"build_ok\":%s,\"why\":\"%s\",\"apply\":%s,"
-             "\"apply_why\":\"%s\",\"acked\":%lld,\"last\":%lld}",
+             "\"apply_why\":\"%s\",\"reload\":%s,\"reload_why\":\"%s\",\"activity_events\":true,\"acked\":%lld,\"last\":%lld}",
              kProtocol, kVersion, g_buildOk ? "true" : "false", jsonSafe(g_why).c_str(), canApply ? "true" : "false",
-             canApply ? "" : jsonSafe(g_applyWhy).c_str(), g_acked, g_lastSeq);
+             canApply ? "" : jsonSafe(g_applyWhy).c_str(), canReload ? "true" : "false",
+             canReload ? "" : jsonSafe(g_reloadWhy).c_str(), g_acked, g_lastSeq);
     if (!sendLine(b)) return;
     for (const std::string& line : journalLines())
         if (seqOf(line) > g_acked && !sendLine(line)) return;
@@ -135,6 +139,12 @@ void sendHello() {
 
 void onEvent(const listener::Event& e) {
     using listener::Kind;
+    if (e.kind == Kind::ActivityBegan || e.kind == Kind::ActivityEnded) {
+        const bool ended = e.kind == Kind::ActivityEnded;
+        LOG("activity %s", ended ? "ended" : "began");
+        sendLine(ended ? "{\"ev\":\"activity_ended\"}" : "{\"ev\":\"activity_began\"}");
+        return;
+    }
     if (e.kind != Kind::Finished) {
         LOG("challenge %s %s", hex8(e.contentId).c_str(), e.kind == Kind::Started ? "started" : "cancelled");
         const std::string line = std::string("{\"ev\":\"") + (e.kind == Kind::Started ? "started" : "cancelled") +
@@ -169,6 +179,14 @@ void onApplied(const apply::Result& r) {
     sendLine(b);
 }
 
+void onReloaded(const reload::Result& r) {
+    LOG("reload %u: %s", r.id, r.result);
+    char b[160];
+    snprintf(b, sizeof(b), "{\"ev\":\"reloaded\",\"id\":%u,\"result\":\"%s\",\"thread\":%lu}", r.id, r.result,
+             r.thread);
+    sendLine(b);
+}
+
 void readClient() {
     char buf[512];
     for (;;) {
@@ -192,6 +210,8 @@ void readClient() {
                     g_acked = seq;
                     saveAcked();
                 }
+            } else if (cmdOf(line) == "reload") {
+                reload::request(static_cast<uint32_t>(numOf(line, "id")));
             } else if (cmdOf(line) == "apply") {
                 const long long value = numOf(line, "value", -1);
                 const uint32_t hash = hashOf(line);
@@ -246,16 +266,26 @@ DWORD WINAPI run(void*) {
             g_applyRequests.clear();
         }
         for (const apply::Result& r : apply::drainResults()) onApplied(r);
+        for (const reload::Result& r : reload::drainResults()) onReloaded(r);
+        // Every checkpoint reload, ours or the pause menu's: the client's map is fresh again.
+        if (const uint32_t n = listener::roundResets(); n != g_resetsSent) {
+            g_resetsSent = n;
+            char b[64];
+            snprintf(b, sizeof(b), "{\"ev\":\"round_reset\",\"count\":%u}", n);
+            sendLine(b);
+        }
+        research::flush();
         Sleep(100);
     }
 }
 
 } // namespace
 
-void start(bool buildOk, const std::string& why, const std::string& applyWhy) {
+void start(bool buildOk, const std::string& why, const std::string& applyWhy, const std::string& reloadWhy) {
     g_buildOk = buildOk;
     g_why = why;
     g_applyWhy = applyWhy;
+    g_reloadWhy = reloadWhy;
     g_journalPath = mecap::log::dllFolder() + L"mec_ap_events.jsonl";
     g_ackedPath = mecap::log::dllFolder() + L"mec_ap_acked.txt";
     loadState();

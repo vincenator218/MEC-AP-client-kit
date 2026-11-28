@@ -372,7 +372,7 @@ in-game count. The list is in [`data/named_challenges.json`](../data/named_chall
   billboards changed between scans. Dashes appear to load city-wide; billboards stream in and out
   with position.
 - By stat code: Anchor 6, Downtown 6, Rezoning 4, The View 5, plus `ch_rrt_bm1` Birdman's Route.
-  Birdman's Dash is probably the story dash (there is a
+  Birdman's Route is probably the story dash (there is a
   `CriticalPathProgression_HasCompletedBirdmanRunnersRoute` flag). Whether it is a location is a
   design choice.
 - **Display names:**
@@ -380,7 +380,9 @@ in-game count. The list is in [`data/named_challenges.json`](../data/named_chall
     a few seconds after the timer began, and mecmp logged the ContentId with its name. Every
     ContentId matched the memory scan, and every name matched the tester's in-game list of 22.
   - The one difference: the game's own text for `ID_NC_BIRDMANS_ROUTE` is "BIRDMAN'S ROUTE",
-    while the dash list shows "Birdman's Dash". Both are kept in the file (`localized`, `name`).
+    while the tester's list said "Birdman's Dash". The map shows "BIRDMAN'S ROUTE" too (player
+    screenshot, 2026-11-25), so the AP name is Birdman's Route since 2026-11-27. Its location and
+    item ids did not change.
   - Three Sids would have been misleading guesses:
     - `ID_NC_CONSTR03` is Rezoning Dash, not a "construction" one;
     - `ID_NC_ANCHOR04` is Quite a View;
@@ -508,7 +510,7 @@ matched. (`PamProgressionFlag`: `+0x10` NameHash, `+0x18` Name, `+0x20` MaxValue
 **Then on all 22 dashes, each with its own flag** (same day, `tools/client/dash_unlock_probe.py`,
 the table in [`data/dash_unlock_flags.json`](../data/dash_unlock_flags.json)):
 - all 22 pointers written, flags 0, reload: **all 22 gone from the map**;
-- 3 flags set to 1, reload: only Birdman's Dash and Old Tunnels came back. Consumer Mayhem's flag,
+- 3 flags set to 1, reload: only Birdman's Route and Old Tunnels came back. Consumer Mayhem's flag,
   `ExampleMission3_Objective1`, read 0 again: **the game resets flags that belong to a mission**
   (`PamProgressionFlag` `+0x14` MissionIndex not 0). The 5 mission flags in the first pick were
   replaced;
@@ -619,6 +621,175 @@ Not yet checked: on foot for the side mission and the hub (only the map, and the
 locking a side mission's briefing blocks the mission after it; what the game does with a "done"
 activity's rewards (none seen); story missions (not tried: locking one may block the story); a
 game restart.
+
+### 11g. Finding the checkpoint reload's message (research mode, mec_ap 0.2.2 and 0.2.3)
+
+Goal: reload the checkpoint from the DLL after a dash ends, but only when a Dash Unlock arrived,
+so the player never has to reload by hand (§11e: only a checkpoint reload refreshes the map).
+Nothing in the kit says yet how the pause menu's reload is carried out.
+
+**What is known (read 2026-11-25):**
+- Both ids in a message header are djb2a hashes of names: the category is the class name's
+  prefix, the type the whole class name. Checked: `PamSocialPlay` = 0x54776FC6, `ServerPlayer` =
+  0xF3C93DD3, `PamSocialPlayNamedChallengeFinishedMessage` = 0xD71D027F (MECMP runs.cpp).
+- The exe holds 675 `*Message` class names (`tools/client/gen_message_names.py`). Ones that
+  could be a reload: `ServerGameManagerRestartLevelRequestMessage`, `ServerLoadGameMessage`,
+  `LoadGameBeginLoadMessage`, `PamplonaRestartGameMessage`, `ServerPlayerRespawnMessage`,
+  `ServerGameplayCheckpointActivatedMessage` / `...TriggeredMessage`,
+  `PamTelemetryStoryCheckpointMessage`, `CoreReadSaveGameMessage`.
+
+**Research mode** (`dll/src/research.cpp`): with a file `mec_ap_research.txt` next to the DLL, it
+registers one more listener on every candidate category (963: every CamelCase prefix of a class
+name) on both message managers, and writes `mec_ap_messages.log`: time, manager (C/S), category,
+type and the first 0x80 bytes. A type is logged in full for its first 8 messages, then once a
+second at most (with a count of the skipped ones). It sends nothing and calls nothing else.
+
+**The session:** reload a checkpoint by hand a few times, with a death and a fast travel in
+between as controls (neither refreshes the map). The message that shows only at the reloads is
+the candidate. Then: whether posting it (on the game thread) reloads, and whether a reload right
+after a dash's results screen is safe.
+
+**First session (2026-11-25, 0.2.2, `mec_ap_messages.log`):** research mode ran without trouble
+(963 categories on both managers, no stutter reported). Two checkpoint reloads (00:32:20,
+00:33:01) and one death (00:32:45) were logged. **A checkpoint reload is a full level reload**,
+the same path as loading the city from the main menu (00:30:52):
+
+| time after the confirm | manager | message |
+|---|---|---|
+| 0 | C, then S | `NetworkPamUINotificationResponseMessage` (the confirm dialog's answer) |
+| +0.0 | C, S | `PamplonaGamePausedMessage` (unpause) |
+| +0.6 s | S | `ServerRoundResetMessage` (0x4BB8DE5C) |
+| +1.2 s | S | type 0xF8429A0E = **`ServerLoadLevelMessageBase`** (not in the exe's strings; named through its vtable `0x141B42F10`, slot 0 = getType, TypeInfo `0x142804478`) |
+| +1.2 s | S | `ServerUnloadLevelMessage`, then `ServerPeerLoadLevelMessage`, `ClientLoadLevelMessage` |
+| +7 s / +16 s | S, C | `ServerLevelLoadedMessage` / `NetworkOnPlayerSpawnedMessage` |
+
+The death has none of these (`PamTelemetryDeathMessage`, `ClientPlayerKilledMessage`, then a
+spawn). No fast travel was logged. A message's vtable slot 0 is its getType (`lea rax,[TypeInfo];
+ret`), which names any message the string table misses.
+
+Building a `ServerLoadLevelMessageBase` by hand is not an option: its payload holds pointers and
+counters whose meaning is unknown. Next: capture the call stack when `ServerRoundResetMessage`
+and `ServerLoadLevelMessageBase` are dispatched, to find the function the pause menu's reload
+calls (if dispatch is immediate; a queued message only shows the dispatch loop).
+
+**Second session (2026-11-25, 0.2.3):** research mode also logs the call stack (up to 48 return
+addresses from `RtlCaptureStackBackTrace`, as image VAs) and the thread id of the reload
+messages. Two checkpoint reloads (14:41:38/39, 14:42:00/02) were logged; the stacks were the same
+both times:
+
+- Two threads: the client manager dispatches on one (the UI thread, tid 4476), the server
+  manager on another (tid 26420). A client message reaches the server manager through a
+  network-receive path (`0x14347C5AB … 0x14349ACF1`, then the server pump `0x14334460B` /
+  `0x143345275` under `0x142A305B4 … 0x142C7895B`).
+- The confirm answer (`NetworkPamUINotificationResponseMessage`) is sent from UI code in
+  `fn 0x1431A2B50` (return `0x1431A2D2B`), through `fn 0x142A397A0`, and is dispatched at once.
+- **`ServerRoundResetMessage` is dispatched synchronously** (no queue) on the server thread,
+  about 0.5 s after the confirm, from `fn 0x1439E07E0` ← `fn 0x143A74BF0` ← `fn 0x14314E4A0` ←
+  `fn 0x143364BA0` (a listener) ← the dispatcher `fn 0x142A394A0` ← the network-receive path. So
+  it is a reaction to some client-to-server message that none of the 963 candidate categories
+  heard (not the confirm answer: that one arrived 0.5 s earlier). `fn 0x143A74BF0` /
+  `fn 0x1439E07E0` are the candidates for "restart from the checkpoint".
+- `ServerLoadLevelMessageBase` and `ServerUnloadLevelMessage` come straight from the server pump
+  (`fn 0x143345090`, `fn 0x143344D90`): the level reload is a later step the round reset starts.
+- The first `ServerRoundResetMessage` of the session (the load from the main menu, 14:41:06)
+  came by another path (`fn 0x14338A790` ← `fn 0x143383090` ← `fn 0x14314A5D0` …).
+
+The exe on disk is packed: its code section (`.sbss`, 0x14292A000) is encrypted and only
+decrypted in memory. The functions were disassembled (capstone) from a read-only copy of the
+running game's code (`ReadProcessMemory` through `mec_memory`, 2026-11-25), with function bounds
+from the exe's `.pdata`.
+
+**The reload chain (disassembled 2026-11-25, our build; nothing called yet):**
+
+1. `fn 0x143364BA0` is a server listener for `EventSyncReachedClientMessage` (type 0x458F8B20,
+   checked against research_names.h): an entity event raised on the client, replayed on the
+   server. It finds the target entity in a map keyed by the message's +0x50 / +0x48 / +0x60 and
+   fires the event there (`0x14314E8A0`, event id 0x0B87DF4B = djb2a("Out")). That message is
+   frequent, so the rate limit hid the one that mattered in the log.
+2. The event reaches slot 4 (+0x20, the event handler) of the vtable `0x141C7ADD0`, whose slot 0
+   returns the TypeInfo `0x142864380` = **`PamServerMissionManagerEntity`** (read live). The
+   handler `fn 0x143A74BF0` switches on the event id at `[event+8]`. Event ids are not in the
+   exe's strings, so they stay unnamed:
+   - **0xC6551D27 → `0x1439E0590()`**: the reload taken by both checkpoint reloads.
+   - 0x37BB9BFC → `0x1439E07E0(nullptr)` unless `0x1439D9510(...)` says no.
+   - 0x41EE0DA7 → `0x1439E0720(...)`.
+3. **`fn 0x1439E0590` (reload from the checkpoint) takes no arguments**: rcx is never read. It
+   gets a lazily created global (`[0x14257CB98]`) and looks up the current checkpoint in the
+   progression flag table (`[0x14257C9D8]`, FlagTable in addresses.h; `0x1439DA880`). It then
+   finds the `PamServerMissionStartPointEntity` (TypeInfo `0x142863D40`) with that id in the
+   server world (`[0x1425469E0]`) and tail-calls `0x1439E07E0([entry+0x18])`, or else
+   `0x1439E0720(...)`, which ends in `0x1439E07E0` too.
+4. **`fn 0x1439E07E0(const char* name)` does the restart**. It returns at once if
+   `0x143343260([0x14253D670])` gives null. Otherwise it builds a `ServerRoundResetMessage`
+   (`0x144676180`) and dispatches it at once on the server message manager (`[0x14253D670]+0x10`,
+   the global in addresses.h, through `0x142A39770` → dispatcher `0x142A394A0`). Then it calls
+   `0x143341D40(level info copied from +0x118, 1, 0)`, which starts the level unload and load. A
+   null `name` uses an empty string. Its only callers are `0x1439E0590` (jmp), `0x1439E0720`
+   (jmp) and the handler above.
+
+So "reload the checkpoint" from the DLL is one call to `0x1439E0590()` on the server thread,
+the thread both reloads ran on (tid 26420). It skips the pause menu's fade and confirm; the level
+still unloads and loads, with the usual loading screen.
+
+**`/reload` (mec_ap 0.3.0, `dll/src/reload.cpp`).** The client sends
+`{"cmd":"reload","id":N}`. The DLL then:
+- **Build check at startup.** It checks the mission manager's vtable slot 0 (getType) against
+  that TypeInfo and its name, slot +0x20 against the handler, and the first bytes of both
+  functions. On a mismatch `/reload` stays off and the hello says why.
+- **The call.** It makes the call in the tick hook, after the game's own postUpdate, only for the
+  main server world (`world == [0x1425469E0]`), and inside `__try`. An exception turns reload off
+  for the session.
+- **Pointer checks first.** Right before the call, it checks with safe reads the pointers the
+  function reads before its first check: the global, its three pointers, the flag table and the
+  server context. If one is missing the answer is `no_checkpoint` and nothing is called. No main
+  world within 5 s gives `not_in_level`.
+- **The answer.** `started` only when a `ServerRoundResetMessage` was dispatched during the call;
+  the listener counts them on category `ServerRound`, and the dispatch is synchronous. Otherwise
+  the answer is `nothing`. A second reload within 20 s is `busy`. The log line gives the thread
+  id, to compare with the 26420 seen in the research log.
+
+**First try (2026-11-25 18:26, mec_ap.log and mec_ap_messages.log):** build check passed;
+one `/reload` in the city answered `started`. The call ran on thread 23244, the thread every
+server-manager message of that session was dispatched on. The research log shows the same
+sequence as the pause menu's reload: `ServerRoundResetMessage` (from `0x1439E08A0`, called from
+mec_ap.dll's tick hook), `ServerLoadLevelMessageBase` +0.6 s, `ServerUnloadLevelMessage`,
+`ServerLevelLoadedMessage` +5.9 s, `NetworkOnPlayerSpawnedMessage` +11.9 s. The game kept running.
+
+Tried the same day: at the main menu it answered `not_in_level`, as intended; 5 s after
+cancelling a dash (Ramp, 18:29:00) it answered `started`, and the level was loaded 6 s later and
+Faith spawned at +12 s.
+
+**Automatic reload (client `auto_reload.py`, DLL 0.3.1).** The client remembers what only a reload
+shows: each Dash Unlock written, and the first hard lock and activity hiding. When the player
+leaves a dash (2 s after a cancel, 6 s after a finish, unless a new dash starts), it sends one
+`reload`. Every `ServerRoundResetMessage` clears the list; the DLL reports each one as
+`{"ev":"round_reset"}`, the pause menu's too. A finish replayed from the journal (older than
+30 s) never triggers it. First try (2026-11-25 18:41): no reload, because the unlock earned by
+the dash (Quite a View's 1 Star) arrived 0.6 s after the finish, when the list was still empty.
+Now an unlock noted within 20 s of leaving a dash schedules the reload too. At a game launch the
+hard lock and the activity hiding are written after the level loads (about 45 s after "World
+loaded" in the 18:37 client log), so they too need a reload: the client now does one 3 s after
+they are written, at most once per DLL hello. 2026-11-27: the dashes stream into memory over
+about a minute after a launch (the client found 5 at 20:15:15, 14 at 20:16:01, 22 at 20:16:31);
+the reload followed the first partial write and 17 dashes stayed on the map. The launch reload
+now waits until the lock and the hiding are complete (or 90 s, then once more on completion).
+
+**Leaving a dash (DLL 0.3.2).** The 6 s timer after a finish reloaded while the results screen
+(restart or leave) was still up (18:53:25 finish, reset at 18:53:31.99). The research logs of
+2026-11-25 show the pattern, client message manager:
+- teleport to a dash: `ServerInputDeactivateInputRestrictionMessage`,
+  `PamOnlineBeginSocialActivityMessage` (0x20EC5D8C), `PamTelemetryTeleportMessage`, then Started;
+- a retry: input restriction and teleport, then Started; no Begin / End;
+- finish: Finished, `PamTelemetryEndSocialFeatureMessage`, `PamUISystemCameraChangedMessage` (the
+  results camera);
+- leaving the results (18:41:40, 9 s after that finish): a second camera change, input
+  restriction, **`PamOnlineEndSocialActivityMessage`** (0x64B0D004, the only one that session),
+  teleport.
+The DLL listens on category `PamOnline` (0x39191416) and sends `activity_began` /
+`activity_ended`; hello says `"activity_events": true`. After a finish the client waits for
+`activity_ended`, then reloads 1 s later; a retry starts the dash again and cancels it. Seen
+once; whether a cancel also sends End is not known (a cancel keeps its 2 s timer). Not yet tried in game: the reload 6 s after a finish, while the results
+screen is up.
 
 ## 12. Verification order
 

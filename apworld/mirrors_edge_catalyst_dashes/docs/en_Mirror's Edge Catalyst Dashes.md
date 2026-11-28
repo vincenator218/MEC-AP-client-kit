@@ -5,6 +5,7 @@
 - **Dash Unlocks**: one per dash (22). You start with a few. A dash you have no unlock for is
   taken off the map and cannot be started (option `hard_dash_lock`, on by default). When an
   unlock arrives, **reload a checkpoint** to see the dash; fast travel or a death is not enough.
+  With `mec_ap.dll` 0.3.0+ the client reloads by itself when you next leave a dash (`/auto_reload`).
   With `hard_dash_lock` off, every dash can be run, but a run of a locked dash does not count.
 - **Moves**: Springboard, Climb Up, Ledge Hang, Wallrun (two Progressive Wallruns: the second is
   Double Wallrun) and MAG Rope are taken away and must be found.

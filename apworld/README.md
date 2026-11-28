@@ -193,14 +193,32 @@ only: no side missions, no opportunities. Built 2026-11-13, first played 2026-11
   Two rows from play (2026-11-19): Caleb's Run needs MAG Rope; Out in the Open needs nothing.
 - **Ids:** shared things keep the main world's ids (abilities, moves, dash checks 1330000+,
   GridLeak counts), so the shared client code is identical.
+- **Dashes tab:** `client/dash_tab.py` (Kivy) shows `plan.dash_board` (pure, tested): per dash
+  unlocked, finished, stars done / star checks in this seed (from the server's checked + missing
+  lists), and the next star's time; rebuilt only when that changes.
 - **Client commands:** `/mec` (also shows the hard lock), `/dashes`, `/confirm_save`, `/next_volume`,
-  `/launch`, `/inject`, `/dll_folder`. The GUI's top bar has **Launch game** and **Inject DLL**
+  `/launch`, `/inject`, `/dll_folder`, `/move`, `/moves`, `/reload`. `/reload` asks mec_ap.dll
+  (0.3.0+, hello `"reload": true`) to call the game's own checkpoint reload; the answer says what
+  the game did (`started` only when it sent its round reset). Worked in the city 2026-11-25.
+  `client/auto_reload.py` reloads by itself when the player leaves a dash (cancel: 2 s, finish:
+  6 s; also when an unlock arrives within 20 s of leaving, which is how an unlock earned by the
+  dash just finished arrives; not for a finish replayed from the journal; cancelled by a new
+  dash) if something was
+  written that only a reload shows: a Dash Unlock, the first hard lock, the activity hiding. Any
+  checkpoint reload clears that list (DLL 0.3.1 sends `round_reset` for each). At a game launch,
+  writing the hard lock / activity hiding reloads once by itself, 3 s after both are complete
+  (the dashes stream in over about a minute; 90 s fallback if they never are; once per DLL hello). `/auto_reload
+  on|off`, kept in persistent storage (`mec_ap` / `auto_reload`). After a finish: not tried in game.
+  `/move <move> on|off|ap` overrides
+  one move or ability by hand (`plan.desired_flags` / `blocked_moves` take the overrides; the
+  writes still go through `ProgressionWriter` and the movement volume). Overrides are kept per
+  seed and slot in persistent storage (`mec_ap` / `move_overrides`). Not tried in game yet. The GUI's top bar has **Launch game** and **Inject DLL**
   buttons and a game / DLL status (`client/launcher.py`): Launch starts Steam app 1233570 and
   runs the injector, which waits for the game; the DLL folder is kept in Archipelago's
   persistent storage.
 - **Seen in game, 2026-11-22** (a `hard_dash_lock` seed, local server, `mec_ap.dll` loaded): the
   client locked all 22 dashes and after a checkpoint reload only the 3 starting ones were on the
-  map; two GridLeak bundle checks were sent; a 37.56 s Birdman's Dash sent its finish and all 3
+  map; two GridLeak bundle checks were sent; a 37.56 s Birdman's Route sent its finish and all 3
   star checks; the Dash Unlocks for Caleb's Run and Feature Creep arrived from them and both
   dashes were on the map after a reload; FlowAttack from the 3-star check was applied live
   through the DLL and read back.

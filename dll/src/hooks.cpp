@@ -10,6 +10,7 @@
 #include "listener.h"
 #include "log.h"
 #include "mem.h"
+#include "reload.h"
 
 // The method is MECMP's (src/game/hooks.cpp, MIT): read the slot, store what it holds, swap one
 // pointer, call the stored function first from the hook. No game code is patched.
@@ -33,6 +34,7 @@ void postUpdate(void* world, void* updateInfo) {
     g_origPostUpdate(world, updateInfo);
     if (g_ticks.fetch_add(1) % 30 == 0) listener::registerServer(); // about once a second
     apply::onServerTick(); // the flag-check entities are server entities: this is their thread
+    reload::onServerTick(world); // the pause menu's reload runs on this thread too
 }
 
 // Client thread, per frame (one call per updater object).

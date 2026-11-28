@@ -94,3 +94,71 @@ class TestApplyLink(unittest.TestCase):
             dll_link.PORT = old
             server.close()
             await server.wait_closed()
+
+
+class TestReloadLink(unittest.TestCase):
+    """DllLink.reload against a fake DLL: sent only when the hello offers it; the answer is passed on."""
+
+    def test_round_trip(self):
+        asyncio.run(self._run(reload_ok=True))
+
+    def test_not_offered(self):
+        asyncio.run(self._run(reload_ok=False))
+
+    async def _run(self, reload_ok: bool):
+        got = []
+
+        async def serve(reader, writer):
+            hello = {"ev": "hello", "proto": 1, "dll": "test", "build_ok": True, "apply": True,
+                     "reload": reload_ok, "reload_why": "" if reload_ok else "check failed",
+                     "acked": 0, "last": 0}
+            writer.write((json.dumps(hello) + "\n").encode())
+            await writer.drain()
+            while True:
+                line = await reader.readline()
+                if not line:
+                    return
+                cmd = json.loads(line)
+                got.append(cmd)
+                if cmd.get("cmd") == "reload":
+                    reply = {"ev": "reloaded", "id": cmd["id"], "result": "started", "thread": 1}
+                    writer.write((json.dumps(reply) + "\n").encode())
+                    await writer.drain()
+
+        server = await asyncio.start_server(serve, "127.0.0.1", 0)
+        port = server.sockets[0].getsockname()[1]
+        results = []
+
+        async def on_finished(ev):
+            return True
+
+        old = dll_link.PORT
+        dll_link.PORT = port
+        stop = asyncio.Event()
+        link = dll_link.DllLink(on_finished, on_reloaded=results.append)
+        task = asyncio.create_task(link.run(stop))
+        try:
+            for _ in range(50):
+                await asyncio.sleep(0.05)
+                if link.connected:
+                    break
+            self.assertTrue(link.connected)
+            self.assertEqual(link.can_reload, reload_ok)
+            req = await link.reload()
+            if not reload_ok:
+                self.assertIsNone(req)
+                await asyncio.sleep(0.2)
+                self.assertEqual(got, [])
+                return
+            for _ in range(50):
+                await asyncio.sleep(0.05)
+                if results:
+                    break
+            self.assertEqual(got, [{"cmd": "reload", "id": req}])
+            self.assertEqual(results, [{"ev": "reloaded", "id": req, "result": "started", "thread": 1}])
+        finally:
+            stop.set()
+            await asyncio.wait_for(task, 5)
+            dll_link.PORT = old
+            server.close()
+            await server.wait_closed()

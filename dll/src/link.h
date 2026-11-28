@@ -10,6 +10,15 @@
 //                   "targets":1,"live":true}
 //   client -> DLL  {"cmd":"ack","seq":7}
 //                  {"cmd":"apply","id":3,"hash":"67800619","value":1}
+//                  {"cmd":"reload","id":4}
+//   DLL -> client  {"ev":"reloaded","id":4,"result":"started","thread":26420}
+//                  {"ev":"activity_began"} {"ev":"activity_ended"}   (0.3.2+: the player entered /
+//                   left an activity such as a dash; ended comes after the results screen)
+//                  {"ev":"round_reset","count":3}   (0.3.1+: any ServerRoundResetMessage, the
+//                   pause menu's reload or ours; live only)
+//
+// hello also carries "reload" / "reload_why", and (0.3.2+) "activity_events": true. A reload result is one of: started (the game
+// dispatched ServerRoundResetMessage), nothing, not_in_level, no_checkpoint, busy, disabled, fault.
 //
 // hello also carries "apply" (true when abilities can be applied now) and "apply_why". An apply
 // result is one of: applied, already, no_flag, table_mismatch, no_entity, unsafe, failed, fault,
@@ -28,6 +37,6 @@ constexpr unsigned short kPort = 47910; // 127.0.0.1 only
 constexpr int kProtocol = 1;
 
 // Starts the link thread. `buildOk` / `why` and whether applying is on are reported in every hello.
-void start(bool buildOk, const std::string& why, const std::string& applyWhy);
+void start(bool buildOk, const std::string& why, const std::string& applyWhy, const std::string& reloadWhy);
 
 } // namespace mecap::link

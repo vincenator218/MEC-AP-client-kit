@@ -12,6 +12,14 @@ It also carries ability applies: after the client writes an ability flag it send
 server game thread and answers {"ev":"applied","id":N,"result":...} with what the game shows.
 Only when the hello says "apply": true. Applies are live only; after a reconnect the client asks
 again.
+
+And checkpoint reloads (DLL 0.3.0+): {"cmd":"reload","id":N} makes the DLL call the game's own
+"reload checkpoint" on the server game thread; it answers {"ev":"reloaded","id":N,"result":...},
+"started" only when the game dispatched its round reset. Only when the hello says "reload": true.
+DLL 0.3.1+ also sends {"ev":"round_reset"} after every checkpoint reload (ours or the pause
+menu's). DLL 0.3.2+ (hello "activity_events": true) sends activity_began / activity_ended when
+the player enters / leaves an activity such as a dash (ended: after the results screen); they go
+to on_live like started / cancelled.
 """
 from __future__ import annotations
 
@@ -32,11 +40,15 @@ EventHandler = Callable[[dict], None]
 
 class DllLink:
     def __init__(self, on_finished: FinishedHandler, on_live: EventHandler | None = None,
-                 on_applied: EventHandler | None = None, on_hello: EventHandler | None = None) -> None:
+                 on_applied: EventHandler | None = None, on_hello: EventHandler | None = None,
+                 on_reloaded: EventHandler | None = None,
+                 on_round_reset: EventHandler | None = None) -> None:
         self.on_finished = on_finished
         self.on_live = on_live or (lambda ev: None)
         self.on_applied = on_applied or (lambda ev: None)
         self.on_hello = on_hello or (lambda ev: None)
+        self.on_reloaded = on_reloaded or (lambda ev: None)
+        self.on_round_reset = on_round_reset or (lambda ev: None)
         self._next_id = 0
         self.hello: dict | None = None             # the DLL's last hello, None while not connected
         self.pending: dict[int, dict] = {}         # seq -> finish not yet acknowledged
@@ -52,6 +64,20 @@ class DllLink:
         """The DLL is active and says it can apply abilities on this build."""
         h = self.hello
         return bool(h and h.get("build_ok") and h.get("apply"))
+
+    @property
+    def can_reload(self) -> bool:
+        """The DLL is active and says it can reload the checkpoint on this build."""
+        h = self.hello
+        return bool(h and h.get("build_ok") and h.get("reload"))
+
+    async def reload(self) -> int | None:
+        """Ask the DLL to reload the last checkpoint. The request id, or None."""
+        if not self.can_reload or self._writer is None:
+            return None
+        self._next_id += 1
+        await self._send({"cmd": "reload", "id": self._next_id})
+        return self._next_id
 
     async def apply(self, flag_hash: int, value: int) -> int | None:
         """Ask the DLL to apply a flag the client has written. The request id, or None."""
@@ -118,10 +144,14 @@ class DllLink:
         elif kind == "finished" and isinstance(ev.get("seq"), int):
             self.pending[ev["seq"]] = ev
             await self.flush()
-        elif kind in ("started", "cancelled"):
+        elif kind in ("started", "cancelled", "activity_began", "activity_ended"):
             self.on_live(ev)
         elif kind == "applied":
             self.on_applied(ev)
+        elif kind == "reloaded":
+            self.on_reloaded(ev)
+        elif kind == "round_reset":
+            self.on_round_reset(ev)
         if kind == "hello":
             self.on_hello(ev)
 

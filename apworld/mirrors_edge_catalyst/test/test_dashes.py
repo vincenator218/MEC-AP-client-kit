@@ -16,7 +16,7 @@ class TestDashData(unittest.TestCase):
     def test_counts_and_ids(self):
         self.assertEqual(len(DASHES), 22 * 4)
         self.assertEqual(len(DASHES_BY_CONTENT_ID), 22)
-        finish = LOCATIONS[dash_location_name("Birdman's Dash")]
+        finish = LOCATIONS[dash_location_name("Birdman's Route")]
         self.assertEqual(finish.id, 1330000)                     # ap_index 0
         self.assertEqual(LOCATIONS[dash_location_name("Old Tunnels", 3)].id, 1330213)
         self.assertEqual(LOCATIONS[dash_location_name("Concrete Canyon", 2)].max_cs, 3800)

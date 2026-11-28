@@ -25,15 +25,18 @@ from CommonClient import (ClientCommandProcessor, CommonContext, get_base_parser
                           handle_url_arg, logger, server_loop)
 from NetUtils import ClientStatus
 
-from ..data import (ACTIVITY_LOCK_FLAG, DASH_LOCKS, DASH_OF_LOCK_FLAG, DASHES_BY_CONTENT_ID, DOUBLE_WALLRUN_FLAG, GAME,
-                    ITEMS, LOCATIONS_BY_ID, GRIDLEAK_CATEGORY, dash_unlock_name)
+from ..data import (ABILITY_ITEMS, ACTIVITY_LOCK_FLAG, DASH_LOCKS, DASH_OF_LOCK_FLAG, DASHES_BY_CONTENT_ID,
+                    DOUBLE_WALLRUN_FLAG, FLAG, GAME, ITEMS, LOCATIONS_BY_ID, GRIDLEAK_CATEGORY,
+                    TRAVERSAL_ITEMS, dash_unlock_name)
 from .dash_lock import DashesGameSession, LockState
+from .auto_reload import AutoReload
 from .dll_link import DllLink
-from .launcher import Launcher, dll_folder, set_dll_folder
+from .launcher import Launcher, dll_folder, pick_dll_folder, set_dll_folder
 from .game import TickResult
 from .mec_memory import djb2a
-from .plan import (build_plan, dash_checks, dash_unlocked, desired_flags, received_names,
-                   stars_checked, unlocked_dashes)
+from .plan import (OVERRIDABLE, build_plan, dash_checks, dash_unlocked, desired_flags, find_move,
+                   level_text, max_level, override_flags, received_names, stars_checked,
+                   unlocked_dashes)
 
 TICK_SEC = 1.0
 IDLE_SEC = 3.0
@@ -42,6 +45,8 @@ IDLE_SEC = 3.0
 FIRST_LOOK_LIMIT = 10
 
 APPLY_METHODS = ("live_entity", "persistent_entity")
+OVERRIDE_CATEGORY, OVERRIDE_STORE = "mec_ap", "move_overrides"     # Utils.persistent_store
+REMOVED_OVERRIDE = "not received (manual override removed)"        # plan.desired_flags
 
 
 def flag_label(flag: str) -> str:
@@ -55,8 +60,27 @@ def appliable(flag: str) -> bool:
     return any(i.flag == flag and i.grant_method in APPLY_METHODS for i in ITEMS.values())
 
 
+RELOAD_RESULTS = {
+    "started": "The game is reloading the last checkpoint (it sent its round reset).",
+    "nothing": "The game's reload ran but did not restart the level (no checkpoint to go back to?).",
+    "not_in_level": "Not reloaded: no level is loaded (main menu or a loading screen).",
+    "no_checkpoint": "Not reloaded: the game has no checkpoint set up yet. Nothing was called.",
+    "busy": "Not reloaded: a reload started less than 20 seconds ago.",
+    "disabled": "Not reloaded: reloading is off in mec_ap.dll (see mec_ap.log).",
+    "fault": "mec_ap.dll hit an error inside the game's reload and turned /reload off until the game restarts.",
+}
+
+
 class MECDCommandProcessor(ClientCommandProcessor):
     ctx: "MECDContext"
+
+    def __call__(self, raw: str):
+        # The base class splits with shlex, which eats the backslashes of a Windows path
+        # ("C:\not garbage\..." came out as "C:not garbage..."): take /dll_folder's text as typed.
+        head, _sep, rest = (raw or "").strip().partition(" ")
+        if head.lower() == "/dll_folder":
+            return self._cmd_dll_folder(rest) if rest.strip() else self._cmd_dll_folder()
+        return super().__call__(raw)
 
     def _cmd_mec(self) -> bool:
         """Show the game connection, stars, unlocked dashes, moves and anything on hold."""
@@ -84,15 +108,53 @@ class MECDCommandProcessor(ClientCommandProcessor):
         return True
 
     def _cmd_dll_folder(self, *folder: str) -> bool:
-        """Set or show the folder that holds mec_ap.dll and mec_ap_inject.exe."""
+        """Pick mec_ap.dll in a file dialog, or /dll_folder <folder> to type it."""
         if not folder:
-            logger.info("DLL folder: %s", dll_folder() or "not set (/dll_folder <folder>)")
-            return True
+            logger.info("DLL folder now: %s. Pick mec_ap.dll in the dialog to change it.",
+                        dll_folder() or "not set")
+            return pick_dll_folder() is not None
         err = set_dll_folder(" ".join(folder))
         if err:
             logger.warning(err)
             return False
         logger.info("DLL folder set to %s.", dll_folder())
+        return True
+
+    def _cmd_move(self, *args: str) -> bool:
+        """Turn a move on or off by hand: /move <move> on|off|ap (Wallrun: 0|1|2). "ap" gives it
+        back to the server. /move reset puts every move back. /moves lists them."""
+        if not args:
+            logger.info("Usage: /move <move> on|off|ap (Progressive Wallrun: 0, 1 or 2). "
+                        "/move reset, /moves.")
+            return False
+        if len(args) == 1 and args[0].lower() == "reset":
+            return self.ctx.reset_overrides()
+        if len(args) < 2:
+            logger.info("Say what to do with it: /move %s on|off|ap.", args[0])
+            return False
+        return self.ctx.set_override(" ".join(args[:-1]), args[-1])
+
+    def _cmd_moves(self) -> bool:
+        """List every move and ability: received from the server, and any /move override."""
+        self.ctx.report_moves()
+        return True
+
+    def _cmd_reload(self) -> bool:
+        """Reload the last checkpoint through mec_ap.dll (the pause menu's reload, without the menu)."""
+        asyncio.create_task(self.ctx.request_reload())
+        return True
+
+    def _cmd_auto_reload(self, state: str = "") -> bool:
+        """/auto_reload on|off: reload the checkpoint by itself when you leave a dash and a Dash
+        Unlock arrived since the last reload (so it shows on the map)."""
+        a = self.ctx.auto_reload
+        if state.lower() in ("on", "off"):
+            a.set_enabled(state.lower() == "on")
+        elif state:
+            logger.info("Usage: /auto_reload on|off.")
+            return False
+        logger.info("Automatic checkpoint reload after a dash: %s.%s", "on" if a.enabled else "off",
+                    f" Waiting to show: {', '.join(a.missing)}." if a.missing else "")
         return True
 
     def _cmd_next_volume(self) -> bool:
@@ -119,7 +181,10 @@ class MECDContext(CommonContext):
         self.warned: set[str] = set()
         self.last: TickResult = TickResult()
         self.sent: set[int] = set()       # checks sent this session (before the server echoes them)
-        self.dll = DllLink(self.on_dash_finished, self.on_dash_live, self.on_applied, self.on_dll_hello)
+        self.dll = DllLink(self.on_dash_finished, self.on_dash_live, self.on_applied, self.on_dll_hello,
+                           self.on_reloaded, lambda ev: self.auto_reload.on_round_reset())
+        self.auto_reload = AutoReload(self.request_reload, lambda: self.dll.can_reload,
+                                      lambda: bool((self.dll.hello or {}).get("activity_events")))
         self.applying: dict[int, tuple[str, int, bool]] = {}   # request id -> (flag, value, quiet)
         self.dll_reapply = False
         self.lock_state: LockState | None = None
@@ -127,6 +192,125 @@ class MECDContext(CommonContext):
         self.hide_state = None
         self.hide_announced = False
         self.launcher = Launcher()
+        self.overrides: dict[str, int] = {}    # /move: move -> level, for this seed and slot
+        self.touched: set[str] = set()         # moves ever overridden here (to undo on "ap")
+
+    # ---------------------------------------------------------- move overrides
+    def _override_key(self) -> str | None:
+        return f"{self.seed_name}:{self.slot}" if self.seed_name and self.slot is not None else None
+
+    def load_overrides(self) -> None:
+        key = self._override_key()
+        saved = (Utils.persistent_load().get(OVERRIDE_CATEGORY, {}).get(OVERRIDE_STORE, {}) or {}).get(key, {}) \
+            if key else {}
+        self.overrides = {n: int(v) for n, v in saved.get("levels", {}).items() if n in OVERRIDABLE}
+        self.touched = {n for n in saved.get("touched", []) if n in OVERRIDABLE} | set(self.overrides)
+        if self.overrides:
+            logger.warning("Manual move overrides from earlier are on for this slot: %s. "
+                           "/move reset gives them back to the server.", self.overrides_text())
+
+    def save_overrides(self) -> None:
+        key = self._override_key()
+        if key is None:
+            return
+        store = dict(Utils.persistent_load().get(OVERRIDE_CATEGORY, {}).get(OVERRIDE_STORE, {}) or {})
+        if self.overrides or self.touched:
+            store[key] = {"levels": dict(self.overrides), "touched": sorted(self.touched)}
+        else:
+            store.pop(key, None)
+        Utils.persistent_store(OVERRIDE_CATEGORY, OVERRIDE_STORE, store)
+
+    def overrides_text(self) -> str:
+        return ", ".join(f"{n} {level_text(n, v)}" for n, v in sorted(self.overrides.items())) or "none"
+
+    def set_override(self, text: str, state: str) -> bool:
+        if self.slot_data is None:
+            logger.info("Connect to your slot first: overrides are kept per slot.")
+            return False
+        name, candidates = find_move(text)
+        if name is None:
+            logger.info("%s: %s", text, f"which one? {', '.join(candidates)}" if candidates
+                        else "not a move or ability (/moves lists them).")
+            return False
+        top, state = max_level(name), state.lower()
+        if state == "ap":
+            prior = self.overrides.pop(name, None)
+            if prior is None:
+                logger.info("%s already follows the server.", name)
+                return True
+            self.settle_removed(name, prior)
+        else:
+            level = {"on": top, "off": 0}.get(state)
+            if level is None and state.isdigit() and int(state) <= top:
+                level = int(state)
+            if level is None:
+                logger.info("%s can be set to %s, or ap.", name,
+                            "0, 1 or 2" if top > 1 else "on or off")
+                return False
+            self.overrides[name] = level
+            self.touched.add(name)
+        self.save_overrides()
+        got = self.have()[name]
+        if name in self.overrides:
+            logger.info("Override: %s is %s by hand (the server gave you %s). %s", name,
+                        level_text(name, self.overrides[name]), level_text(name, min(got, top)),
+                        self.override_effect(name))
+        else:
+            logger.info("%s follows the server again: %s. %s", name, level_text(name, min(got, top)),
+                        self.override_effect(name))
+        if not self.writes_allowed():
+            logger.info("Nothing is written to the game yet (no save loaded or checked); it applies "
+                        "once it is.")
+        return True
+
+    def settle_removed(self, name: str, prior: int) -> None:
+        """An override is removed. Its flags only need writing back to 0 if it raised one the
+        slot does not hold; otherwise there is nothing to undo."""
+        have = self.have()[name]
+        if all(prior < need or have >= need for _f, need in override_flags(name)):
+            self.touched.discard(name)
+
+    def forget_touched(self, flag: str, reason: str) -> None:
+        """An override that was removed has been written back: stop holding that flag at 0."""
+        if reason != REMOVED_OVERRIDE:
+            return
+        done = {n for n in self.touched - set(self.overrides) if any(f == flag for f, _ in override_flags(n))}
+        if done:
+            self.touched -= done
+            self.save_overrides()
+
+    def override_effect(self, name: str) -> str:
+        if ITEMS[name].kind == FLAG:
+            return "Applied now through mec_ap.dll if it is connected, otherwise at your next respawn."
+        return "Takes effect within a second (movement volume)."
+
+    def reset_overrides(self) -> bool:
+        if not self.overrides:
+            logger.info("No move overrides are on.")
+            return True
+        names, old, self.overrides = sorted(self.overrides), self.overrides, {}
+        for n, prior in old.items():
+            self.settle_removed(n, prior)
+        self.save_overrides()
+        logger.info("Every move follows the server again (%s).", ", ".join(names))
+        return True
+
+    def report_moves(self) -> None:
+        if self.slot_data is None:
+            logger.info("Not connected to a slot.")
+            return
+        have = self.have()
+        for title, names in (("Traversal moves", TRAVERSAL_ITEMS), ("Abilities", ABILITY_ITEMS)):
+            parts = []
+            for n in names:
+                got = level_text(n, min(have[n], max_level(n)))
+                if n in self.overrides:
+                    parts.append(f"{n}: {level_text(n, self.overrides[n])} [override, server {got}]")
+                else:
+                    parts.append(f"{n}: {got}")
+            logger.info("%s: %s", title, "; ".join(parts))
+        logger.info("Overrides: %s. Change with /move <move> on|off|ap, /move reset.",
+                    self.overrides_text())
 
     # ----------------------------------------------------- game and DLL buttons
     def launch_game(self) -> None:
@@ -168,6 +352,7 @@ class MECDContext(CommonContext):
             self.slot_data = args.get("slot_data") or {}
             self.goal_sent = self.finished_game
             self.first_look_done = False
+            self.load_overrides()
             logger.info("Load your seed save in the game. Items are applied once the client has "
                         "looked at it. Dashes need mec_ap.dll; you need %d stars to win.",
                         self.slot_data.get("stars_required", 0))
@@ -202,12 +387,15 @@ class MECDContext(CommonContext):
                     button.height = self.server_connect_bar.height
                     self.connect_layout.add_widget(button)
                 Clock.schedule_interval(lambda _dt: setattr(self.mec_status, "text", ctx.status_text()), 1)
+                from .dash_tab import DashTab
+                self.add_client_tab("Dashes", DashTab(ctx))
                 return layout
 
         return MECDManager
 
     async def shutdown(self):
         self.launcher.cancel()
+        self.auto_reload.cancel()
         await super().shutdown()
         await asyncio.to_thread(self.session.shutdown)
 
@@ -225,7 +413,7 @@ class MECDContext(CommonContext):
         watch = {lid: LOCATIONS_BY_ID[lid] for lid in self.missing_locations - self.held
                  if lid in LOCATIONS_BY_ID and LOCATIONS_BY_ID[lid].category == GRIDLEAK_CATEGORY}
         plan = build_plan([i.item for i in self.items_received], watch, self.slot_data,
-                          self.writes_allowed())
+                          self.writes_allowed(), self.overrides, self.touched)
         plan.reject_volume, self.reject_volume = self.reject_volume, False
         return plan
 
@@ -270,14 +458,20 @@ class MECDContext(CommonContext):
                 continue                         # reported by report_locks
             if flag in DASH_OF_LOCK_FLAG:
                 if value == 1:
-                    logger.info("Received %s: reload a checkpoint to see the dash on the map (fast "
-                                "travel or a death is not enough).",
-                                dash_unlock_name(DASH_OF_LOCK_FLAG[flag]))
+                    self.auto_reload.note(DASH_OF_LOCK_FLAG[flag])
+                    logger.info("Received %s: %s", dash_unlock_name(DASH_OF_LOCK_FLAG[flag]),
+                                self.refresh_hint("the dash appears on the map"))
                 else:
                     logger.debug("Locked %s (%s = 0).", DASH_OF_LOCK_FLAG[flag], flag)
                 continue
+            reason = r.reasons.get(flag, "")
             now = appliable(flag) and await self.request_apply(flag, value, quiet=False)
-            self.log_grant(flag, r.reasons.get(flag, ""), applying=now)
+            if reason.startswith("/move") or reason == REMOVED_OVERRIDE:
+                self.forget_touched(flag, reason)
+                logger.info("%s set to %d in the save (%s)%s.", flag_label(flag), value, reason,
+                            "; applying now through mec_ap.dll" if now else "")
+                continue
+            self.log_grant(flag, reason, applying=now)
         for flag in r.flags_failed:
             self.warn_once(f"flag:{flag}", f"Could not set {flag}; will keep trying.")
         if self.dll_reapply and self.dll.can_apply and self.writes_allowed():
@@ -297,8 +491,10 @@ class MECDContext(CommonContext):
         self.lock_state = s
         if s.locked and (s.written or not self.locks_announced):
             self.locks_announced = True
-            logger.info("Hard dash lock: %d dashes are tied to their Dash Unlock. Reload a checkpoint "
-                        "once so the dashes you do not hold leave the map.", s.locked)
+            if s.written:
+                self.auto_reload.note_setup("the hard dash lock", self.setup_complete())
+            logger.info("Hard dash lock: %d dashes are tied to their Dash Unlock. %s", s.locked,
+                        self.refresh_hint("the dashes you do not hold leave the map", now=True))
         bad = s.missing + s.foreign
         if bad:
             names = [d for d, (cid, _f) in DASH_LOCKS.items() if cid in bad]
@@ -313,11 +509,32 @@ class MECDContext(CommonContext):
             self.hide_state = h
             if h.hidden and (h.written or not self.hide_announced):
                 self.hide_announced = True
+                if h.written:
+                    self.auto_reload.note_setup("the hidden activities", self.setup_complete())
                 logger.info("Hid %d other activities (opportunities, hubs, side missions, deliveries). "
-                            "Reload a checkpoint to clear them from the map; the 6 Dead Drop "
-                            "Deliveries stay.", h.hidden)
+                            "%s The 6 Dead Drop Deliveries stay.", h.hidden,
+                            self.refresh_hint("they leave the map", now=True))
             if h.missing:
                 logger.debug("Could not hide: %s", ", ".join(sorted(h.missing)))
+
+    def setup_complete(self) -> bool:
+        """The hard lock and the activity hiding (each when its option is on) cover everything."""
+        s, h = self.session.locks.state, self.session.hide.state
+        if self.hard_lock() and (s is None or s.missing or s.foreign):
+            return False
+        if self.slot_data and self.slot_data.get("hide_other_activities") and (h is None or h.missing):
+            return False
+        return True
+
+    def refresh_hint(self, what: str, now: bool = False) -> str:
+        """How the player gets the map refreshed: by itself (now, or after the next dash), or by hand."""
+        if self.auto_reload.enabled and self.dll.can_reload:
+            if now and self.auto_reload.task is not None and not self.auto_reload.task.done():
+                return (f"{what[0].upper()}{what[1:]} after the checkpoint reload the client does "
+                        + ("in a few seconds." if self.setup_complete() else "once every dash is found."))
+            return (f"{what[0].upper()}{what[1:]} after the checkpoint reload the client does when "
+                    "you next leave a dash (or reload a checkpoint now).")
+        return f"Reload a checkpoint and {what} (fast travel or a death is not enough)."
 
     def log_grant(self, flag: str, reason: str, applying: bool = False) -> None:
         label = flag_label(flag)
@@ -358,12 +575,14 @@ class MECDContext(CommonContext):
         """The DLL connected after the flags were written: ask for every ability flag the slot
         holds; it answers "already" for the ones that are fine, and only real changes are logged."""
         self.dll_reapply = False
-        for flag, (value, _reason) in desired_flags(self.have(), self.slot_data or {}).items():
+        for flag, (value, _reason) in desired_flags(self.have(), self.slot_data or {}, self.overrides,
+                                                    self.touched).items():
             if appliable(flag):
                 await self.request_apply(flag, value, quiet=True)
 
     def on_dll_hello(self, ev: dict) -> None:
         self.applying.clear()
+        self.auto_reload.on_game_connected()
         self.dll_reapply = bool(ev.get("build_ok") and ev.get("apply"))
 
     def on_applied(self, ev: dict) -> None:
@@ -388,6 +607,28 @@ class MECDContext(CommonContext):
             logger.info("%s takes effect at your next death or checkpoint restart (mec_ap.dll: %s).",
                         label, result)
 
+    # ---------------------------------------------------------- checkpoint reload
+    async def request_reload(self) -> bool:
+        if not self.dll.connected:
+            logger.info("/reload needs mec_ap.dll: it is not connected.")
+            return False
+        if not self.dll.can_reload:
+            h = self.dll.hello or {}
+            logger.info("mec_ap.dll %s cannot reload the checkpoint: %s.", h.get("dll"),
+                        h.get("reload_why") or ("it is inactive" if not h.get("build_ok") else "needs 0.3.0 or later"))
+            return False
+        if await self.dll.reload() is None:
+            return False
+        logger.info("Asking the game to reload the last checkpoint...")
+        return True
+
+    def on_reloaded(self, ev: dict) -> None:
+        result = ev.get("result")
+        text = RELOAD_RESULTS.get(result, f"mec_ap.dll answered {result!r}.")
+        (logger.warning if result == "fault" else logger.info)(text)
+        if result == "started":
+            self.auto_reload.on_round_reset()     # also for a DLL without round_reset events (0.3.0)
+
     # ----------------------------------------------------------------- dashes
     @staticmethod
     def dash_of(content_id: str) -> str | None:
@@ -405,6 +646,7 @@ class MECDContext(CommonContext):
         if dash is None:
             return True                       # a delivery, billboard...: not a check here
         run = int(ev.get("run_cs", 0))
+        self.auto_reload.on_dash_left(finished=True, finish_time=ev.get("time"))
         if not dash_unlocked(self.have(), dash):
             logger.info("Dash finished: %s in %d.%02d s, but you do not hold its Dash Unlock yet. "
                         "This run does not count; run it again once the unlock arrives.",
@@ -415,8 +657,17 @@ class MECDContext(CommonContext):
         return True
 
     def on_dash_live(self, ev: dict) -> None:
+        if ev.get("ev") == "activity_ended":
+            self.auto_reload.on_activity_ended()
+            return
+        if ev.get("ev") == "activity_began":
+            return
         dash = self.dash_of(ev.get("content_id"))
         if dash:
+            if ev.get("ev") == "started":
+                self.auto_reload.on_dash_started()
+            else:
+                self.auto_reload.on_dash_left(finished=False)
             locked = ""
             if self.slot_data is not None and not dash_unlocked(self.have(), dash):
                 locked = " (locked: this run will not count" + \
@@ -480,6 +731,8 @@ class MECDContext(CommonContext):
             logger.info("%d finished runs from the DLL are waiting to be sent.", len(self.dll.pending))
         if self.held:
             logger.info("%d checks on hold until /confirm_save.", len(self.held))
+        if self.overrides:
+            logger.info("Manual move overrides: %s (/moves).", self.overrides_text())
 
 
 async def game_loop(ctx: MECDContext) -> None:
