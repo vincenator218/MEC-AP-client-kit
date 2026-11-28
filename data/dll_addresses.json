@@ -452,6 +452,64 @@
    "verified": true,
    "origin": "mec-ap",
    "observed_bytes_2026_11_12": "48 89 5C 24 10 57 48 83 EC 20 8B 41 18 41 0F B6"
+  },
+  {
+   "name": "VT_MISSION_MANAGER",
+   "kind": "vtable",
+   "use": "PamServerMissionManagerEntity; +0x20 = its event handler",
+   "va": "0x141C7ADD0",
+   "class_name": "PamServerMissionManagerEntity",
+   "source": "docs/DLL.md §11g (this kit; disassembled from the running game 2026-11-25)",
+   "verified": true,
+   "origin": "mec-ap"
+  },
+  {
+   "name": "MISSION_MANAGER_TYPEINFO",
+   "kind": "typeinfo",
+   "use": "PamServerMissionManagerEntity",
+   "va": "0x142864380",
+   "class_name": "PamServerMissionManagerEntity",
+   "source": "docs/DLL.md §11g (this kit; disassembled from the running game 2026-11-25)",
+   "verified": true,
+   "origin": "mec-ap"
+  },
+  {
+   "name": "MISSION_MANAGER_ON_EVENT",
+   "kind": "function",
+   "use": "event handler; event 0xC6551D27 calls RELOAD_CHECKPOINT",
+   "va": "0x143A74BF0",
+   "source": "docs/DLL.md §11g (this kit; disassembled from the running game 2026-11-25)",
+   "verified": true,
+   "origin": "mec-ap"
+  },
+  {
+   "name": "RELOAD_CHECKPOINT",
+   "kind": "function",
+   "use": "void ReloadCheckpoint(): server game thread only",
+   "va": "0x1439E0590",
+   "source": "docs/DLL.md §11g (this kit; disassembled from the running game 2026-11-25)",
+   "verified": false,
+   "origin": "mec-ap",
+   "observed_bytes_2026_11_25": "48 89 5C 24 08 57 48 83 EC 30 48 8B 1D F7 C5 B9 FE 48 85 DB 75 1D 48 8B"
+  },
+  {
+   "name": "RESTART_LEVEL",
+   "kind": "function",
+   "use": "void RestartLevel(const char* startPoint): dispatches ServerRoundResetMessage, starts the reload",
+   "va": "0x1439E07E0",
+   "source": "docs/DLL.md §11g (this kit; disassembled from the running game 2026-11-25)",
+   "verified": false,
+   "origin": "mec-ap",
+   "observed_bytes_2026_11_25": "53 48 81 EC 80 00 00 00 48 C7 44 24 20 FE FF FF"
+  },
+  {
+   "name": "RELOAD_GLOBAL",
+   "kind": "global",
+   "use": "ReloadCheckpoint's first read ([g+0x20]->+0x28->+0x20)",
+   "va": "0x14257CB98",
+   "source": "docs/DLL.md §11g (this kit; disassembled from the running game 2026-11-25)",
+   "verified": false,
+   "origin": "mec-ap"
   }
  ]
 }

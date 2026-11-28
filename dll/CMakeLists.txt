@@ -21,6 +21,8 @@ add_library(mec_ap SHARED
   src/build_check.cpp
   src/hooks.cpp
   src/listener.cpp
+  src/research.cpp
+  src/reload.cpp
   src/link.cpp
   src/log.cpp)
 target_link_libraries(mec_ap PRIVATE ws2_32)

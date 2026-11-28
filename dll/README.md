@@ -1,13 +1,21 @@
 # mec_ap.dll: dash checks and immediate abilities, from inside the game
 
-A small DLL loaded into Mirror's Edge Catalyst (version 0.2.1). It does two things for the
+A small DLL loaded into Mirror's Edge Catalyst (version 0.3.2). It does three things for the
 Archipelago clients of both worlds:
 - tells them when a **dash** (or any other named challenge) is started, cancelled or finished,
   with the run's time. Dashes have no progression flag to read (docs/DLL.md §11), so this is the
   only way to detect them. The client turns a finish into checks: the finish itself, and each
   star tier the time beats;
 - **applies a received ability at once**, by calling the game's own `apply` on its game thread.
-  Without the DLL, an ability only takes effect at the next death or checkpoint restart.
+  Without the DLL, an ability only takes effect at the next death or checkpoint restart;
+- **reloads the last checkpoint** when the client asks (`/reload`, since 0.3.0), with the game's
+  own function, the one the pause menu's reload ends in (docs/DLL.md §11g). Off unless its own
+  build check passes (the mission manager's vtable and class, the two functions' first bytes).
+  Worked in the city on 2026-11-25 (docs/DLL.md §11g). Since 0.3.1 it also tells the client about
+  every checkpoint reload (`round_reset`), so the client's automatic reload after a dash knows
+  when the map is already fresh. Since 0.3.2 it also says when the player enters and leaves a
+  dash (`activity_began` / `activity_ended`: after a finish, ended comes when the player leaves
+  the results screen), so that reload never interrupts the results screen.
 
 **First run: 2026-11-12, Steam build, with MECMP 0.9.0-beta.3.1 loaded first.** It compiled cleanly with MSVC 19.44. In the game it passed its build check, found
 both hook slots already taken by MECMP and chained in front of them, and registered on both
@@ -26,6 +34,11 @@ with the address `node+0x10` instead of the pointer stored there.)
 
 **2026-11-19:** run with the Dashes world's client; its soft lock reported a locked dash on start
 as intended.
+
+**Research mode (0.2.2; call stacks for the reload messages since 0.2.3):** with a file named
+`mec_ap_research.txt` next to the DLL, it also logs every engine message it can hear to
+`mec_ap_messages.log` (docs/DLL.md §11g). Delete the file to
+turn it off; without it the DLL behaves exactly like 0.2.1.
 
 ## What it does, and what it does not
 

@@ -62,4 +62,28 @@ constexpr uint32_t kEntEnabled = 0x8, kEntLive = 0x2000;
 // void apply(entity, int value, bool force); always force = 0 (MEMORY.md §3).
 constexpr uintptr_t Fn_Apply = 0x143A75790;
 
+// --- reloading the checkpoint (docs/DLL.md §11g; disassembled from our build 2026-11-25) ---------
+// PamServerMissionManagerEntity: vtable, its TypeInfo (read through slot 0), the event handler
+// at +0x20 (event 0xC6551D27 = the pause menu's reload).
+constexpr uintptr_t VT_MissionManagerEntity = 0x141C7ADD0;
+constexpr uintptr_t TI_PamServerMissionManagerEntity = 0x142864380;
+constexpr size_t VT_EventSlot = 0x20;
+constexpr uintptr_t Fn_MissionManagerOnEvent = 0x143A74BF0;
+// void ReloadCheckpoint(): no argument; finds the current checkpoint's start point, then calls
+// RestartLevel(const char* startPoint), which dispatches ServerRoundResetMessage and starts the
+// level reload.
+constexpr uintptr_t Fn_ReloadCheckpoint = 0x1439E0590;
+constexpr uintptr_t Fn_RestartLevel = 0x1439E07E0;
+constexpr uintptr_t ReloadGlobal = 0x14257CB98;   // ReloadCheckpoint's first read: [g+0x20]->+0x28->+0x20
+constexpr uintptr_t ServerGameWorld = 0x1425469E0; // ServerGameWorld*, null between levels (MECMP)
+constexpr uint32_t kCategoryServerRound = 0xD93DD7C2;     // djb2a("ServerRound")
+constexpr uint32_t kTypeServerRoundReset = 0x4BB8DE5C;    // djb2a("ServerRoundResetMessage")
+
+// Entering and leaving an activity such as a dash (docs/DLL.md §11g, research log 2026-11-25):
+// Begin when the player teleports to a dash's start, End when they leave it (after the results
+// screen). Not sent on a retry. Client message manager.
+constexpr uint32_t kCategoryPamOnline = 0x39191416;             // djb2a("PamOnline")
+constexpr uint32_t kTypeBeginSocialActivity = 0x20EC5D8C;       // PamOnlineBeginSocialActivityMessage
+constexpr uint32_t kTypeEndSocialActivity = 0x64B0D004;         // PamOnlineEndSocialActivityMessage
+
 } // namespace mecap::addr

@@ -4,7 +4,8 @@ buttons, and /launch, /inject, /dll_folder).
 
 The DLL and its injector are built by the player (dll/README.md), so the client needs to know
 where they are: the folder holding mec_ap.dll and mec_ap_inject.exe is remembered in
-Archipelago's persistent storage once given with /dll_folder.
+Archipelago's persistent storage once picked (a file dialog for mec_ap.dll opens the first time
+Launch game / Inject DLL needs it, or on /dll_folder) or typed (/dll_folder <folder>).
 
 The injector waits for the game by itself (it also waits out the EA activation window), so
 "Launch game" starts the game through Steam and runs the injector straight away.
@@ -47,6 +48,27 @@ def set_dll_folder(folder: str) -> str | None:
     return None
 
 
+def pick_dll_folder() -> str | None:
+    """Ask for mec_ap.dll with a file dialog and remember its folder. Returns the folder, or None
+    (cancelled, or the folder lacks the injector)."""
+    try:
+        import Utils
+        path = Utils.open_filename("Select mec_ap.dll (next to mec_ap_inject.exe)",
+                                   (("mec_ap.dll", (".dll",)),), suggest=dll_folder() or "")
+    except Exception as e:                                       # noqa: BLE001
+        log.warning("Could not open a file dialog (%s). Type /dll_folder <folder> instead.", e)
+        return None
+    if not path:
+        log.info("No file picked; the DLL folder is unchanged.")
+        return None
+    err = set_dll_folder(path)
+    if err:
+        log.warning(err)
+        return None
+    log.info("DLL folder set to %s.", dll_folder())
+    return dll_folder()
+
+
 class Launcher:
     def __init__(self) -> None:
         self.task: asyncio.Task | None = None
@@ -74,10 +96,10 @@ class Launcher:
         if self.busy:
             log.info("Already waiting for the game to load mec_ap.dll.")
             return
-        folder = dll_folder()
+        folder = dll_folder() or pick_dll_folder()
         if folder is None:
-            log.warning("Tell the client where mec_ap.dll and mec_ap_inject.exe are first: "
-                        "/dll_folder <folder> (for example the kit's dll\\build folder).")
+            log.warning("The client needs to know where mec_ap.dll and mec_ap_inject.exe are: "
+                        "press Inject DLL again to pick mec_ap.dll, or /dll_folder <folder>.")
             return
         self.task = asyncio.create_task(self._run(folder), name="mec_ap inject")
 

@@ -1,7 +1,7 @@
 {
- "_about": "Named challenges read from game memory (PamServerNamedChallengeEntity, vtable 0x141C7EC70, +0x80 -> data: +0x10 Sid, +0x58 stat code, +0x98 ContentId), read-only, 2026-11-12, Steam build. Dashes: all 22, the in-game count; the same 22 were loaded in two districts, so they appear to load city-wide. Billboards: only the ones loaded near the player in two scans, NOT the full list. Deliveries and grid nodes never appeared in a scan. ContentId is stable across a game restart (tested on Concrete Canyon). district is parsed from the stat code. Display names: all 22 dashes localized in game by mecmp (localized = the game text, name = the dash list spelling). See docs/DLL.md section 11. star_thresholds_cs: time limits for 1/2/3 stars in hundredths of a second, and cancel_after_cs (PamNamedChallengeData +0x18..+0x24, read live 2026-11-12). Dashes have no UnlockFlag and no generated progression flag; billboards have one (progression_flag). ap_index: the dash's position in the in-game dash list (0 = Birdman's Dash); the Archipelago location ids are 1330000 + 10 * ap_index + tier (0 finish, 1-3 stars), so never renumber it.",
+ "_about": "Named challenges read from game memory (PamServerNamedChallengeEntity, vtable 0x141C7EC70, +0x80 -> data: +0x10 Sid, +0x58 stat code, +0x98 ContentId), read-only, 2026-11-12, Steam build. Dashes: all 22, the in-game count; the same 22 were loaded in two districts, so they appear to load city-wide. Billboards: only the ones loaded near the player in two scans, NOT the full list. Deliveries and grid nodes never appeared in a scan. ContentId is stable across a game restart (tested on Concrete Canyon). district is parsed from the stat code. Display names: all 22 dashes localized in game by mecmp (localized = the game text, name = the dash list spelling). See docs/DLL.md section 11. star_thresholds_cs: time limits for 1/2/3 stars in hundredths of a second, and cancel_after_cs (PamNamedChallengeData +0x18..+0x24, read live 2026-11-12). Dashes have no UnlockFlag and no generated progression flag; billboards have one (progression_flag). ap_index: the dash's position in the in-game dash list (0 = Birdman's Route); the Archipelago location ids are 1330000 + 10 * ap_index + tier (0 finish, 1-3 stars), so never renumber it.",
  "display_names_in_game": [
-  "Birdman's Dash",
+  "Birdman's Route",
   "High Roller Avenue",
   "Backstreet Bluff",
   "Feature Creep",
@@ -207,8 +207,8 @@
    "sid": "ID_NC_BIRDMANS_ROUTE",
    "stat_code": "ch_rrt_bm1_time",
    "district": "Birdman's Route",
-   "name": "Birdman's Dash",
-   "name_source": "confirmed: mecmp localized this Sid in game as BIRDMAN'S ROUTE (mecmp.log, 2026-11-12); the in-game dash list calls it Birdman's Dash",
+   "name": "Birdman's Route",
+   "name_source": "confirmed: mecmp localized this Sid in game as BIRDMAN'S ROUTE (mecmp.log, 2026-11-12), and the map shows BIRDMAN'S ROUTE (player screenshot, 2026-11-25). Called Birdman's Dash, after an outside dash list, until 2026-11-27; the ids did not change",
    "localized": "BIRDMAN'S ROUTE",
    "star_thresholds_cs": {
     "1": 5600,

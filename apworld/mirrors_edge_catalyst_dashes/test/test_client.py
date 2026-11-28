@@ -1,4 +1,5 @@
 """Client rules that run without the game or a server."""
+import asyncio
 import struct
 import unittest
 
@@ -201,7 +202,7 @@ class TestDashLockDriver(unittest.TestCase):
 
     def test_moved_data_is_not_written(self):
         self.driver.ensure(self.wanted)
-        cid = DASH_LOCKS["Birdman's Dash"][0]
+        cid = DASH_LOCKS["Birdman's Route"][0]
         self.mem._put(self.mem.data[cid] + D_CONTENT_ID, struct.pack("<I", 0x1234))   # recycled
         s = self.driver.ensure(self.wanted)
         self.assertIn(cid, s.missing)
@@ -289,3 +290,418 @@ class TestLauncher(unittest.TestCase):
             err = set_dll_folder(d)
             self.assertIn("mec_ap_inject.exe", err)
             self.assertIn("mec_ap.dll", err)
+
+
+# ------------------------------------------------------------------ /move overrides
+class TestMoveOverrides(unittest.TestCase):
+    def test_find_move(self):
+        from ..client.plan import find_move
+        self.assertEqual(find_move("springboard"), ("Springboard", []))
+        self.assertEqual(find_move("mag rope"), ("MAG Rope", []))
+        self.assertEqual(find_move("wallrun"), (PROGRESSIVE_WALLRUN_NAME, []))
+        self.assertEqual(find_move("coil"), ("Coil", []))
+        name, cands = find_move("Focus")
+        self.assertEqual(name, "Focus")                      # exact beats the Focus_* prefixes
+        name, cands = find_move("IncreasedHealth")
+        self.assertIsNone(name)
+        self.assertEqual(len(cands), 5)
+        self.assertEqual(find_move(dash_unlock_name("Quite a View")), (None, []))   # not a move
+
+    def test_on_gives_a_move_not_received(self):
+        plan = build_plan([], {}, {}, True, {"Coil": 1, "Springboard": 1})
+        self.assertEqual(plan.flags["Unlocks_Coil"], (1, "/move Coil on"))
+        self.assertFalse(plan.blocked["springboard"])
+        self.assertTrue(plan.blocked["climb_up"])
+
+    def test_off_takes_a_received_move_away(self):
+        plan = build_plan(ids("Coil", "Springboard"), {}, {}, True, {"Coil": 0, "Springboard": 0})
+        self.assertEqual(plan.flags["Unlocks_Coil"], (0, "/move Coil off"))
+        self.assertTrue(plan.blocked["springboard"])
+
+    def test_wallrun_levels(self):
+        one = build_plan([], {}, {}, True, {PROGRESSIVE_WALLRUN_NAME: 1})
+        self.assertFalse(one.blocked["wallrun"])
+        self.assertEqual(one.flags[DOUBLE_WALLRUN_FLAG][0], 0)
+        two = build_plan([], {}, {}, True, {PROGRESSIVE_WALLRUN_NAME: 2})
+        self.assertEqual(two.flags[DOUBLE_WALLRUN_FLAG][0], 1)
+        none = build_plan(ids(PROGRESSIVE_WALLRUN_NAME, PROGRESSIVE_WALLRUN_NAME), {}, {}, True,
+                          {PROGRESSIVE_WALLRUN_NAME: 0})
+        self.assertTrue(none.blocked["wallrun"])
+        self.assertEqual(none.flags[DOUBLE_WALLRUN_FLAG][0], 0)
+
+    def test_removed_override_writes_the_flag_back(self):
+        flags = desired_flags(received_names([]), {}, {}, touched={"Coil"})
+        self.assertEqual(flags["Unlocks_Coil"][0], 0)
+        held = desired_flags(received_names(ids("Coil")), {}, {}, touched={"Coil"})
+        self.assertEqual(held["Unlocks_Coil"], (1, "received Coil"))
+
+    def test_no_writes_before_the_save_is_checked(self):
+        plan = build_plan([], {}, {}, False, {"Coil": 1})
+        self.assertEqual(plan.flags, {})
+        self.assertIsNone(plan.blocked)
+
+    def test_overrides_never_touch_dash_locks(self):
+        slot = {"hard_dash_lock": True}
+        plan = build_plan([], {}, slot, True, {"Coil": 1})
+        self.assertTrue(all(plan.flags[f][0] == 0 for f in DASH_OF_LOCK_FLAG))
+
+
+class TestMoveCommands(unittest.IsolatedAsyncioTestCase):
+    """The client's /move handling, with Archipelago's persistent storage faked."""
+
+    async def asyncSetUp(self):
+        from unittest import mock
+        import Utils
+        from ..client.client import MECDContext
+        self.store = {}
+        patches = [mock.patch.object(Utils, "persistent_load", lambda: self.store),
+                   mock.patch.object(Utils, "persistent_store",
+                                     lambda c, k, v: self.store.setdefault(c, {}).__setitem__(k, v))]
+        for p in patches:
+            p.start()
+            self.addCleanup(p.stop)
+        self.ctx = MECDContext(None, None)
+        self.ctx.slot_data, self.ctx.seed_name, self.ctx.slot = {}, "S1", 1
+
+    async def asyncTearDown(self):
+        await self.ctx.shutdown()
+
+    def test_set_saved_and_reset(self):
+        c = self.ctx
+        self.assertTrue(c.set_override("coil", "on"))
+        self.assertTrue(c.set_override("wallrun", "2"))
+        self.assertFalse(c.set_override("springboard", "2"))           # only on/off
+        self.assertFalse(c.set_override("nothing at all", "on"))
+        self.assertEqual(c.overrides, {"Coil": 1, PROGRESSIVE_WALLRUN_NAME: 2})
+        saved = self.store["mec_ap"]["move_overrides"]["S1:1"]
+        self.assertEqual(saved["levels"], {"Coil": 1, PROGRESSIVE_WALLRUN_NAME: 2})
+        c.overrides = {}
+        c.load_overrides()                                               # a client restart
+        self.assertEqual(c.overrides, {"Coil": 1, PROGRESSIVE_WALLRUN_NAME: 2})
+        self.assertTrue(c.reset_overrides())
+        self.assertEqual(c.overrides, {})
+        # Coil and the double wallrun were raised and are not held: hold them at 0 until written
+        self.assertEqual(c.touched, {"Coil", PROGRESSIVE_WALLRUN_NAME})
+        c.forget_touched("Unlocks_Coil", "not received (manual override removed)")
+        self.assertEqual(c.touched, {PROGRESSIVE_WALLRUN_NAME})
+
+    def test_off_then_ap_leaves_nothing_to_undo(self):
+        c = self.ctx
+        c.set_override("Springboard", "off")
+        c.set_override("Coil", "off")
+        c.set_override("Springboard", "ap")
+        c.set_override("Coil", "ap")
+        self.assertEqual((c.overrides, c.touched), ({}, set()))
+        self.assertNotIn("S1:1", self.store["mec_ap"]["move_overrides"])
+
+    def test_kept_per_slot(self):
+        c = self.ctx
+        c.set_override("Coil", "on")
+        c.slot = 2
+        c.load_overrides()
+        self.assertEqual(c.overrides, {})
+
+    def test_needs_a_slot(self):
+        self.ctx.slot_data = None
+        self.assertFalse(self.ctx.set_override("Coil", "on"))
+
+
+class TestDllFolderCommand(unittest.IsolatedAsyncioTestCase):
+    async def test_backslashes_and_spaces_survive(self):
+        import os
+        import tempfile
+        from unittest import mock
+        import Utils
+        from ..client.client import MECDContext
+        store = {}
+        with mock.patch.object(Utils, "persistent_load", lambda: store), \
+                mock.patch.object(Utils, "persistent_store",
+                                  lambda c, k, v: store.setdefault(c, {}).__setitem__(k, v)):
+            ctx = MECDContext(None, None)
+            try:
+                with tempfile.TemporaryDirectory(prefix="with space ") as d:
+                    for n in ("mec_ap.dll", "mec_ap_inject.exe"):
+                        open(os.path.join(d, n), "wb").close()
+                    win = d.replace("/", "\\")
+                    self.assertTrue(ctx.command_processor(ctx)(f"/dll_folder {win}"))
+                    self.assertEqual(os.path.normcase(store["mec_ap"]["dll_folder"]), os.path.normcase(win))
+                    self.assertTrue(ctx.command_processor(ctx)(f'/dll_folder "{win}"'))
+            finally:
+                await ctx.shutdown()
+
+    def test_picker_remembers_the_folder_of_the_picked_dll(self):
+        import os
+        import tempfile
+        from unittest import mock
+        import Utils
+        from ..client.launcher import pick_dll_folder
+        store = {}
+        with tempfile.TemporaryDirectory() as d:
+            for n in ("mec_ap.dll", "mec_ap_inject.exe"):
+                open(os.path.join(d, n), "wb").close()
+            with mock.patch.object(Utils, "persistent_load", lambda: store), \
+                    mock.patch.object(Utils, "persistent_store",
+                                      lambda c, k, v: store.setdefault(c, {}).__setitem__(k, v)), \
+                    mock.patch.object(Utils, "open_filename", lambda *a, **k: os.path.join(d, "mec_ap.dll")):
+                self.assertEqual(os.path.normcase(pick_dll_folder()), os.path.normcase(d))
+            with mock.patch.object(Utils, "persistent_load", lambda: {}), \
+                    mock.patch.object(Utils, "open_filename", lambda *a, **k: None):
+                self.assertIsNone(pick_dll_folder())                   # cancelled
+
+
+class TestReloadCommand(unittest.IsolatedAsyncioTestCase):
+    """/reload: refused without a DLL that offers it; every DLL answer gets a message."""
+
+    async def asyncSetUp(self):
+        from ..client.client import MECDContext
+        self.ctx = MECDContext(None, None)
+
+    async def asyncTearDown(self):
+        await self.ctx.shutdown()
+
+    async def test_needs_the_dll(self):
+        self.assertFalse(await self.ctx.request_reload())            # not connected
+        self.ctx.dll.hello = {"build_ok": True, "dll": "0.2.3"}      # an older DLL: no "reload"
+        with self.assertLogs("Client", "INFO") as logs:
+            self.assertFalse(await self.ctx.request_reload())
+        self.assertIn("needs 0.3.0", "\n".join(logs.output))
+
+    async def test_sends_when_offered(self):
+        sent = []
+
+        async def fake_reload():
+            sent.append(1)
+            return 7
+        self.ctx.dll.hello = {"build_ok": True, "reload": True}
+        self.ctx.dll.reload = fake_reload
+        self.assertTrue(await self.ctx.request_reload())
+        self.assertEqual(sent, [1])
+
+    def test_every_result_has_a_message(self):
+        from ..client.client import RELOAD_RESULTS
+        # reload.h's list of results
+        for r in ("started", "nothing", "not_in_level", "no_checkpoint", "busy", "disabled", "fault"):
+            self.assertIn(r, RELOAD_RESULTS)
+        with self.assertLogs("Client", "INFO") as logs:
+            self.ctx.on_reloaded({"ev": "reloaded", "id": 1, "result": "started"})
+            self.ctx.on_reloaded({"ev": "reloaded", "id": 2, "result": "something new"})
+        self.assertIn("reloading", logs.output[0])
+        self.assertIn("something new", logs.output[1])
+
+
+class TestAutoReload(unittest.IsolatedAsyncioTestCase):
+    """Reload once when leaving a dash, only when the map is missing something."""
+
+    async def asyncSetUp(self):
+        from unittest import mock
+        import Utils
+        from ..client import auto_reload
+        self.store = {}
+        for p in (mock.patch.object(Utils, "persistent_load", lambda: self.store),
+                  mock.patch.object(Utils, "persistent_store",
+                                    lambda c, k, v: self.store.setdefault(c, {}).__setitem__(k, v)),
+                  mock.patch.object(auto_reload, "AFTER_CANCEL_SEC", 0.01),
+                  mock.patch.object(auto_reload, "AFTER_FINISH_SEC", 0.02),
+                  mock.patch.object(auto_reload, "SETUP_DELAY_SEC", 0.01)):
+            p.start()
+            self.addCleanup(p.stop)
+        self.calls = []
+        self.can = True
+
+        async def reload():
+            self.calls.append(1)
+            return True
+        self.a = auto_reload.AutoReload(reload, lambda: self.can)
+
+    async def settle(self):
+        await asyncio.sleep(0.08)
+
+    async def test_nothing_missing_no_reload(self):
+        self.a.on_dash_left(finished=False)
+        await self.settle()
+        self.assertEqual(self.calls, [])
+
+    async def test_cancel_and_finish_reload_once(self):
+        import time
+        self.a.note("Ramp Up")
+        self.a.on_dash_left(finished=False)
+        await self.settle()
+        self.assertEqual(self.calls, [1])
+        self.a.on_round_reset()                       # the reload happened: nothing missing
+        self.a.on_dash_left(finished=True, finish_time=time.time())
+        await self.settle()
+        self.assertEqual(self.calls, [1])
+        self.a.note("Clockwork")
+        self.a.on_dash_left(finished=True, finish_time=time.time())
+        await self.settle()
+        self.assertEqual(self.calls, [1, 1])
+
+    async def test_old_finish_from_the_journal_is_ignored(self):
+        self.a.note("Ramp Up")
+        self.a.on_dash_left(finished=True, finish_time=1.0)
+        await self.settle()
+        self.assertEqual(self.calls, [])
+
+    async def test_new_dash_cancels_and_off_stays_off(self):
+        self.a.note("Ramp Up")
+        self.a.on_dash_left(finished=True, finish_time=None)
+        self.a.on_dash_started()                       # straight into another dash
+        await self.settle()
+        self.assertEqual(self.calls, [])
+        self.a.set_enabled(False)
+        self.assertFalse(self.store["mec_ap"]["auto_reload"])
+        self.a.on_dash_left(finished=False)
+        self.can = True
+        await self.settle()
+        self.assertEqual(self.calls, [])
+
+    async def test_unlock_from_the_finished_dash_still_reloads(self):
+        # Seen in game: the finish arrives first, the unlock it earned 0.6 s later.
+        import time
+        self.a.on_dash_left(finished=True, finish_time=time.time())
+        await asyncio.sleep(0.005)
+        self.a.note("Birdman's Route")
+        await self.settle()
+        self.assertEqual(self.calls, [1])
+
+    async def test_late_unlock_long_after_no_reload_until_next_exit(self):
+        from unittest import mock
+        from ..client import auto_reload
+        self.a.on_dash_left(finished=False)
+        with mock.patch.object(auto_reload, "LATE_UNLOCK_SEC", 0.0):
+            await asyncio.sleep(0.01)
+            self.a.note("Ramp Up")
+        await self.settle()
+        self.assertEqual(self.calls, [])
+        self.a.on_dash_started()
+        self.a.on_dash_left(finished=False)
+        await self.settle()
+        self.assertEqual(self.calls, [1])
+
+    async def test_launch_setup_reloads_once_per_game(self):
+        self.a.note_setup("the hard dash lock")
+        self.a.note_setup("the hidden activities")      # same tick: the one reload covers both
+        await self.settle()
+        self.assertEqual(self.calls, [1])
+        self.a.on_round_reset()
+        self.a.note_setup("the hard dash lock")          # written again after that reload: no loop
+        await self.settle()
+        self.assertEqual(self.calls, [1])
+        self.a.on_game_connected()                       # the next game launch
+        self.a.note_setup("the hard dash lock")
+        await self.settle()
+        self.assertEqual(self.calls, [1, 1])
+
+    async def test_launch_waits_for_every_dash(self):
+        # Seen 2026-11-27: 5, then 14, then 22 dashes found; the reload must follow the last.
+        from unittest import mock
+        from ..client import auto_reload
+        with mock.patch.object(auto_reload, "SETUP_PARTIAL_WAIT_SEC", 0.2):
+            self.a.note_setup("the hard dash lock", complete=False)
+            self.a.note_setup("the hidden activities", complete=False)
+            await asyncio.sleep(0.05)
+            self.assertEqual(self.calls, [])                   # still waiting for the rest
+            self.a.note_setup("the hard dash lock", complete=True)
+            await self.settle()
+            self.assertEqual(self.calls, [1])                  # once complete, at once
+            await asyncio.sleep(0.25)
+            self.assertEqual(self.calls, [1])                  # the fallback was replaced
+
+    async def test_launch_fallback_then_complete(self):
+        from unittest import mock
+        from ..client import auto_reload
+        with mock.patch.object(auto_reload, "SETUP_PARTIAL_WAIT_SEC", 0.01):
+            self.a.note_setup("the hard dash lock", complete=False)
+            await self.settle()
+            self.assertEqual(self.calls, [1])                  # never completed: reload anyway
+            self.a.on_round_reset()
+            self.a.note_setup("the hard dash lock", complete=False)
+            await self.settle()
+            self.assertEqual(self.calls, [1])                  # one fallback per launch
+            self.a.note_setup("the hard dash lock", complete=True)
+            await self.settle()
+            self.assertEqual(self.calls, [1, 1])               # completed later: once more
+            self.a.on_round_reset()
+            self.a.note_setup("the hard dash lock", complete=True)
+            await self.settle()
+            self.assertEqual(self.calls, [1, 1])               # and never again this launch
+
+    async def test_launch_setup_waits_for_the_dash(self):
+        self.a.on_dash_started()
+        self.a.note_setup("the hard dash lock")
+        await self.settle()
+        self.assertEqual(self.calls, [])
+        self.a.on_dash_left(finished=False)              # leaving the dash reloads instead
+        await self.settle()
+        self.assertEqual(self.calls, [1])
+
+    async def test_waits_for_the_results_screen_to_close(self):
+        # DLL 0.3.2+: no reload while the results are up; one when the player leaves them.
+        import time
+        self.a._exit_events = lambda: True
+        self.a.on_dash_left(finished=True, finish_time=time.time())
+        self.a.note("Birdman's Route")                   # earned by that run, 0.6 s later
+        await self.settle()
+        self.assertEqual(self.calls, [])
+        self.a.on_activity_ended()
+        await asyncio.sleep(0.03)
+        self.assertEqual(self.calls, [])                 # AFTER_EXIT_SEC is 1 s
+        self.a.task.cancel()
+        self.a.awaiting_exit = True
+        from unittest import mock
+        from ..client import auto_reload
+        with mock.patch.object(auto_reload, "AFTER_EXIT_SEC", 0.01):
+            self.a.on_activity_ended()
+            await self.settle()
+        self.assertEqual(self.calls, [1])
+
+    async def test_retry_from_the_results_screen_does_not_reload(self):
+        import time
+        self.a._exit_events = lambda: True
+        self.a.note("Ramp Up")
+        self.a.on_dash_left(finished=True, finish_time=time.time())
+        self.a.on_dash_started()                          # retry: no activity_ended comes
+        self.a.on_activity_ended()                        # (and a stray one is ignored)
+        await self.settle()
+        self.assertEqual(self.calls, [])
+
+    async def test_needs_a_dll_that_can_reload(self):
+        self.can = False
+        self.a.note("Ramp Up")
+        self.a.on_dash_left(finished=False)
+        await self.settle()
+        self.assertEqual(self.calls, [])
+
+
+class TestDashBoard(unittest.TestCase):
+    """The Dashes tab's rows."""
+
+    def test_rows(self):
+        from collections import Counter
+        from ..client.plan import dash_board, race_time
+        from ..data import DASH_NAMES, DASHES, dash_location_name, dash_unlock_name
+        d = "Concrete Canyon"
+        lid = lambda t: DASHES[dash_location_name(d, t)].id
+        have = Counter({dash_unlock_name(d): 1})
+        # a seed with 2 star tiers: the finish and 1 star done, 2 stars to do
+        rows = {r.dash: r for r in dash_board(have, {lid(0), lid(1)}, {lid(2)})}
+        self.assertEqual(len(rows), len(DASH_NAMES))
+        r = rows[d]
+        self.assertTrue(r.unlocked)
+        self.assertTrue(r.finished)
+        self.assertEqual((r.stars, r.star_checks), (1, 2))
+        self.assertEqual(r.next_star_cs, DASHES[dash_location_name(d, 2)].max_cs)
+        self.assertFalse(r.done)
+        other = rows["High Roller Avenue"]
+        self.assertFalse(other.unlocked)
+        self.assertIsNone(other.finished)            # not in this seed's location lists
+        self.assertEqual(other.star_checks, 0)
+        done = {r.dash: r for r in dash_board(have, {lid(0), lid(1), lid(2)}, set())}[d]
+        self.assertTrue(done.done)
+        self.assertIsNone(done.next_star_cs)
+
+    def test_race_time(self):
+        from ..client.plan import race_time
+        self.assertEqual(race_time(4592), "45.92")
+        self.assertEqual(race_time(6530), "1:05.30")
+        self.assertEqual(race_time(5), "0.05")

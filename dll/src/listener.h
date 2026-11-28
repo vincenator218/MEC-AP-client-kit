@@ -10,7 +10,7 @@
 
 namespace mecap::listener {
 
-enum class Kind : uint8_t { Started, Cancelled, Finished };
+enum class Kind : uint8_t { Started, Cancelled, Finished, ActivityBegan, ActivityEnded };
 
 struct Event {
     Kind kind;
@@ -29,5 +29,9 @@ void registerServer();
 
 // Everything queued since the last call (called from link.cpp's thread).
 std::vector<Event> drain();
+
+// ServerRoundResetMessage dispatches seen on the server manager (reload.cpp compares it around
+// its call: the dispatch is synchronous).
+uint32_t roundResets();
 
 } // namespace mecap::listener

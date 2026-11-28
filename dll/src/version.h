@@ -1,4 +1,4 @@
 #pragma once
 namespace mecap {
-constexpr const char* kVersion = "0.2.1";
+constexpr const char* kVersion = "0.3.2";
 }

@@ -4,8 +4,9 @@
 //   * tells it when a dash or any other named challenge is started, cancelled or finished;
 //   * when asked, applies an ability flag the client has just written, on the server game thread
 //     (apply.cpp), so a received ability works now instead of at the next respawn.
-// It writes no progression flags, calls no game functions except MessageManager_registerListener
-// and the flag entity's apply, and changes game memory in exactly two places: the tick and
+//   * when asked (/reload), reloads the last checkpoint with the game's own function (reload.cpp).
+// It writes no progression flags, calls no game functions except MessageManager_registerListener,
+// the flag entity's apply and the checkpoint reload, and changes game memory in exactly two places: the tick and
 // client-updater vtable slots (hooks.cpp).
 //
 // Startup, on a thread of its own (never inside DllMain: loader lock):
@@ -24,6 +25,8 @@
 #include "hooks.h"
 #include "link.h"
 #include "log.h"
+#include "reload.h"
+#include "research.h"
 #include "version.h"
 
 namespace {
@@ -31,6 +34,7 @@ namespace {
 DWORD WINAPI start(void* module) {
     mecap::log::init(module); // fully qualified: a bare `log` could also mean the C math function
     LOG("mec_ap %s loaded", mecap::kVersion);
+    mecap::research::init();
     std::string why;
     bool ok = mecap::build::waitForEngine();
     if (!ok) why = "the engine's type list never filled";
@@ -43,7 +47,9 @@ DWORD WINAPI start(void* module) {
     if (!ok) LOG("inactive: %s. Nothing in the game was changed.", why.c_str());
     else LOG("ready. Dashes and other challenges are reported to the Archipelago client.");
     if (ok && !mecap::apply::check(applyWhy)) LOG("apply: off: %s. Abilities apply at the next respawn.", applyWhy.c_str());
-    mecap::link::start(ok, why, applyWhy);
+    std::string reloadWhy = "the DLL is inactive";
+    if (ok && !mecap::reload::check(reloadWhy)) LOG("reload: off: %s.", reloadWhy.c_str());
+    mecap::link::start(ok, why, applyWhy, reloadWhy);
     return 0;
 }
 
